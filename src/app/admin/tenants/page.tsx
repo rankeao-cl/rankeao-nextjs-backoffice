@@ -4,8 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Avatar,
   Button,
+  Card,
+  CardContent,
   Chip,
+  Description,
+  Fieldset,
+  Form,
   Input,
+  Label,
   Modal,
   ModalBody,
   ModalDialog,
@@ -18,6 +24,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  TextField,
 } from "@heroui/react";
 import {
   getTenants,
@@ -213,38 +220,57 @@ export default function TenantsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
-            Tenants
+            Tiendas
           </h1>
           <p className="text-sm text-zinc-500 mt-1">Gestion de tiendas registradas</p>
         </div>
-        <Input
-          placeholder="Buscar por nombre, slug o ciudad..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-72"
-        />
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="lg" color="current" />
-        </div>
-      ) : (
-        <Table>
-          <Table.Content aria-label="Tenants table">
-            <TableHeader columns={TABLE_COLUMNS}>
-              {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-            </TableHeader>
-            <TableBody items={filteredTenants}>
-              {(tenant) => (
-                <TableRow key={tenant.id}>
-                  {(column) => <TableCell>{renderCell(tenant, getTableColumnKey(column))}</TableCell>}
-                </TableRow>
-              )}
-            </TableBody>
-          </Table.Content>
-        </Table>
-      )}
+      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+        <CardContent className="p-5">
+          <Form>
+            <Fieldset className="space-y-3">
+              <Fieldset.Legend className="text-zinc-200 font-semibold">Filtro</Fieldset.Legend>
+              <Description className="text-xs text-zinc-500">Busca por nombre, slug o ciudad.</Description>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Busqueda</Label>
+                  <Input
+                    placeholder="texto"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </TextField>
+              </div>
+            </Fieldset>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+        <CardContent className="p-5">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Spinner size="lg" color="current" />
+            </div>
+          ) : (
+            <Table>
+              <Table.Content aria-label="Tenants table">
+                <TableHeader columns={TABLE_COLUMNS}>
+                  {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                </TableHeader>
+                <TableBody items={filteredTenants}>
+                  {(tenant) => (
+                    <TableRow key={tenant.id}>
+                      {(column) => <TableCell>{renderCell(tenant, getTableColumnKey(column))}</TableCell>}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table.Content>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       <Modal
         isOpen={isOpen}

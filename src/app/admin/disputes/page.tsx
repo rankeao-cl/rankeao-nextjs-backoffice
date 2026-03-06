@@ -3,8 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
+  Card,
+  CardContent,
   Chip,
+  Description,
+  Fieldset,
+  Form,
   Input,
+  Label,
   Modal,
   ModalBody,
   ModalDialog,
@@ -17,6 +23,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  TextField,
   TextArea,
 } from "@heroui/react";
 import { assignDispute, getDisputes, resolveDispute, type ListMeta } from "@/lib/api-admin";
@@ -235,99 +242,120 @@ export default function DisputesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
-          Disputes
+          Disputas
         </h1>
         <p className="text-sm text-zinc-500 mt-1">Gestion de disputas del marketplace</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-        <Input
-          placeholder="Buscar ID (local)"
-          value={idSearch}
-          onChange={(e) => setIdSearch(e.target.value)}
-        />
-        <Input
-          placeholder="status (OPEN, RESOLVED...)"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        />
-        <Input
-          placeholder="reason"
-          value={reasonFilter}
-          onChange={(e) => setReasonFilter(e.target.value)}
-        />
-        <Input
-          placeholder="assigned_moderator_id"
-          value={assignedModeratorFilter}
-          onChange={(e) => setAssignedModeratorFilter(e.target.value)}
-        />
-      </div>
+      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+        <CardContent className="p-5">
+          <Form>
+            <Fieldset className="space-y-4">
+              <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
+              <Description className="text-xs text-zinc-500">
+                Filtra por ID, estado, razon y moderador para encontrar casos rapidamente.
+              </Description>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          className="w-28"
-          type="number"
-          min={1}
-          value={perPageInput}
-          onChange={(e) => setPerPageInput(e.target.value)}
-          placeholder="per_page"
-        />
-        <Button
-          size="sm"
-          variant={unassignedOnly ? "primary" : "ghost"}
-          onPress={() => setUnassignedOnly((prev) => !prev)}
-        >
-          Solo sin asignar
-        </Button>
-        <Button size="sm" onPress={applyFilters}>
-          Aplicar filtros
-        </Button>
-        <Button size="sm" variant="ghost" onPress={clearFilters}>
-          Limpiar
-        </Button>
-      </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">ID (local)</Label>
+                  <Input value={idSearch} onChange={(e) => setIdSearch(e.target.value)} />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Estado</Label>
+                  <Input placeholder="OPEN, RESOLVED..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Razon</Label>
+                  <Input value={reasonFilter} onChange={(e) => setReasonFilter(e.target.value)} />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Moderador ID</Label>
+                  <Input value={assignedModeratorFilter} onChange={(e) => setAssignedModeratorFilter(e.target.value)} />
+                </TextField>
+              </div>
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="lg" />
-        </div>
-      ) : (
-        <Table>
-          <Table.Content aria-label="Disputes">
-            <TableHeader columns={TABLE_COLUMNS}>
-              {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-            </TableHeader>
-            <TableBody items={filteredDisputes}>
-              {(dispute) => (
-                <TableRow key={String(dispute.id)}>
-                  {(column) => <TableCell>{renderCell(dispute, getTableColumnKey(column))}</TableCell>}
-                </TableRow>
-              )}
-            </TableBody>
-          </Table.Content>
-        </Table>
-      )}
+              <Fieldset.Actions className="flex flex-wrap items-center gap-2">
+                <Input
+                  className="w-28"
+                  type="number"
+                  min={1}
+                  value={perPageInput}
+                  onChange={(e) => setPerPageInput(e.target.value)}
+                  placeholder="per_page"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={unassignedOnly ? "primary" : "ghost"}
+                  onPress={() => setUnassignedOnly((prev) => !prev)}
+                >
+                  Solo sin asignar
+                </Button>
+                <Button type="button" size="sm" onPress={applyFilters}>
+                  Aplicar filtros
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onPress={clearFilters}>
+                  Limpiar
+                </Button>
+              </Fieldset.Actions>
+            </Fieldset>
+          </Form>
+        </CardContent>
+      </Card>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
-        <span>
-          Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
-        </span>
-        <div className="flex gap-2">
-          <Button size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
-            Anterior
-          </Button>
-          <Button size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
-            Siguiente
-          </Button>
-        </div>
-      </div>
+      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+        <CardContent className="p-5 space-y-4">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Spinner size="lg" />
+            </div>
+          ) : (
+            <Table>
+              <Table.Content aria-label="Disputes">
+                <TableHeader columns={TABLE_COLUMNS}>
+                  {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                </TableHeader>
+                <TableBody items={filteredDisputes}>
+                  {(dispute) => (
+                    <TableRow key={String(dispute.id)}>
+                      {(column) => <TableCell>{renderCell(dispute, getTableColumnKey(column))}</TableCell>}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table.Content>
+            </Table>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
+            <span>
+              Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+            </span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+                Anterior
+              </Button>
+              <Button type="button" size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Modal isOpen={assignModal.isOpen} onOpenChange={(isOpen) => !isOpen && assignModal.onClose()}>
         <ModalDialog>
           <ModalHeader>Asignar Moderador</ModalHeader>
           <ModalBody className="gap-4">
-            <p className="text-xs text-zinc-500">Disputa: {String(selectedDispute?.id || "")}</p>
-            <Input value={moderatorId} onChange={(e) => setModeratorId(e.target.value)} placeholder="moderator_id" />
+            <Form className="w-full">
+              <Fieldset className="space-y-4 w-full">
+                <Description className="text-xs text-zinc-500">Disputa: {String(selectedDispute?.id || "")}</Description>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Moderador ID</Label>
+                  <Input value={moderatorId} onChange={(e) => setModeratorId(e.target.value)} />
+                </TextField>
+              </Fieldset>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={assignModal.onClose}>
@@ -349,32 +377,44 @@ export default function DisputesPage() {
             </div>
           </ModalHeader>
           <ModalBody className="gap-4">
-            <Input
-              value={resolution.outcome}
-              onChange={(e) => setResolution((prev) => ({ ...prev, outcome: e.target.value }))}
-              placeholder="outcome"
-            />
-            <Input
-              type="number"
-              value={String(resolution.refund_amount)}
-              onChange={(e) =>
-                setResolution((prev) => ({
-                  ...prev,
-                  refund_amount: Number.parseFloat(e.target.value) || 0,
-                }))
-              }
-              placeholder="refund_amount"
-            />
-            <TextArea
-              value={resolution.notes}
-              onChange={(e) => setResolution((prev) => ({ ...prev, notes: e.target.value }))}
-              placeholder="notes"
-            />
-            <Input
-              value={resolution.sanction}
-              onChange={(e) => setResolution((prev) => ({ ...prev, sanction: e.target.value }))}
-              placeholder="sanction"
-            />
+            <Form className="w-full">
+              <Fieldset className="space-y-4 w-full">
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Outcome</Label>
+                  <Input
+                    value={resolution.outcome}
+                    onChange={(e) => setResolution((prev) => ({ ...prev, outcome: e.target.value }))}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Refund amount</Label>
+                  <Input
+                    type="number"
+                    value={String(resolution.refund_amount)}
+                    onChange={(e) =>
+                      setResolution((prev) => ({
+                        ...prev,
+                        refund_amount: Number.parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Notas</Label>
+                  <TextArea
+                    value={resolution.notes}
+                    onChange={(e) => setResolution((prev) => ({ ...prev, notes: e.target.value }))}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Sancion</Label>
+                  <Input
+                    value={resolution.sanction}
+                    onChange={(e) => setResolution((prev) => ({ ...prev, sanction: e.target.value }))}
+                  />
+                </TextField>
+              </Fieldset>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={resolveModal.onClose}>

@@ -3,8 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   Button,
+  Card,
+  CardContent,
   Chip,
+  Description,
+  Fieldset,
+  Form,
   Input,
+  Label,
   Modal,
   ModalBody,
   ModalDialog,
@@ -17,6 +23,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  TextField,
   TextArea,
 } from "@heroui/react";
 import {
@@ -194,7 +201,7 @@ export default function BadgesPage() {
         }
 
         await bulkGrantBadge(String(grantTarget.id), { user_ids: ids });
-        toast.success("Bulk grant ejecutado");
+        toast.success("Otorgamiento masivo ejecutado");
       } else {
         if (!grantUserId) {
           toast.error("Ingresa el User ID");
@@ -350,31 +357,65 @@ export default function BadgesPage() {
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
             Badges
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">Crear, editar y otorgar badges a usuarios</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" onPress={categoryModal.onOpen} size="sm">
-            Categoria
-          </Button>
-          <Button
-           
-            onPress={openCreate}
-            className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
-          >
-            Nuevo Badge
-          </Button>
+          <p className="text-sm text-zinc-500 mt-1">Crear, editar y otorgar insignias a usuarios</p>
         </div>
       </div>
 
-      <div className="space-y-6 pt-4">
-        <div className="space-y-4">
-          <Input
-            placeholder="Buscar badge..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-xs"
-          />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Card className="xl:col-span-2 bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5">
+            <Form>
+              <Fieldset className="space-y-4">
+                <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros y acciones</Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Busca insignias y accede a creacion o gestion de categorias sin dejar la tabla.
+                </Description>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Buscar insignia</Label>
+                    <Input
+                      placeholder="nombre o slug"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </TextField>
+                </div>
+
+                <Fieldset.Actions className="flex flex-wrap gap-2 pt-1">
+                  <Button type="button" variant="ghost" onPress={categoryModal.onOpen} size="sm">
+                    Categoria
+                  </Button>
+                  <Button
+                    type="button"
+                    onPress={openCreate}
+                    className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
+                  >
+                    Nueva insignia
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5">
+            <Form>
+              <Fieldset className="space-y-3">
+                <Fieldset.Legend className="text-zinc-200 font-semibold">Ayuda categorias</Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Si ingresas un <code>category_id</code>, actualizas una categoria existente. Si lo dejas vacio,
+                  creas una nueva.
+                </Description>
+              </Fieldset>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+        <CardContent className="p-5">
           {loading ? (
             <div className="flex justify-center py-20">
               <Spinner size="lg" color="current" />
@@ -395,15 +436,8 @@ export default function BadgesPage() {
               </Table.Content>
             </Table>
           )}
-        </div>
-
-        <div>
-          <p className="text-zinc-500 text-sm">
-            Si ingresas un `category_id`, se actualiza la categoria existente. Si lo dejas vacio,
-            se crea una nueva.
-          </p>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <Modal
         isOpen={createModal.isOpen}
@@ -412,52 +446,66 @@ export default function BadgesPage() {
         <ModalDialog>
           <ModalHeader>{editTarget ? "Editar Badge" : "Crear Badge"}</ModalHeader>
           <ModalBody className="gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-               
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              />
-              <Input
-               
-                value={formData.slug}
-                onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                disabled={Boolean(editTarget)}
-              />
-            </div>
+            <Form className="w-full">
+              <Fieldset className="space-y-4 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Nombre</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Slug</Label>
+                    <Input
+                      value={formData.slug}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
+                      disabled={Boolean(editTarget)}
+                    />
+                  </TextField>
+                </div>
 
-            <TextArea
-             
-              value={formData.description}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-            />
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Descripcion</Label>
+                  <TextArea
+                    value={formData.description}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                  />
+                </TextField>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-               
-                value={formData.icon_url}
-                onChange={(e) => setFormData((prev) => ({ ...prev, icon_url: e.target.value }))}
-              />
-              <Input
-               
-                value={formData.rarity}
-                onChange={(e) => setFormData((prev) => ({ ...prev, rarity: e.target.value }))}
-               
-              />
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Icon URL</Label>
+                    <Input
+                      value={formData.icon_url}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, icon_url: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Rareza</Label>
+                    <Input
+                      value={formData.rarity}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, rarity: e.target.value }))}
+                    />
+                  </TextField>
+                </div>
 
-            <Input
-             
-              value={formData.category_id}
-              onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value }))}
-            />
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Category ID</Label>
+                  <Input
+                    value={formData.category_id}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value }))}
+                  />
+                </TextField>
+              </Fieldset>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={createModal.onClose}>
               Cancelar
             </Button>
             <Button
-             
               onPress={handleSave}
               isPending={formLoading}
               className="bg-gradient-to-r from-zinc-700 to-black"
@@ -473,37 +521,46 @@ export default function BadgesPage() {
         onOpenChange={(isOpen) => !isOpen && grantModal.onClose()}
       >
         <ModalDialog>
-          <ModalHeader>{isBulk ? "Bulk Grant Badge" : "Grant Badge"} - {String(grantTarget?.name || "")}</ModalHeader>
+          <ModalHeader>{isBulk ? "Otorgamiento masivo de badge" : "Otorgar badge"} - {String(grantTarget?.name || "")}</ModalHeader>
           <ModalBody className="gap-4">
-            {isBulk ? (
-              <TextArea
-               
-                value={bulkUserIds}
-                onChange={(e) => setBulkUserIds(e.target.value)}
-                rows={4}
-              />
-            ) : (
-              <>
-                <Input
-                 
-                  value={grantUserId}
-                  onChange={(e) => setGrantUserId(e.target.value)}
-                 
-                />
-                <Input
-                 
-                  value={grantReason}
-                  onChange={(e) => setGrantReason(e.target.value)}
-                />
-              </>
-            )}
+            <Form className="w-full">
+              <Fieldset className="space-y-4 w-full">
+                {isBulk ? (
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">User IDs</Label>
+                    <TextArea
+                      value={bulkUserIds}
+                      onChange={(e) => setBulkUserIds(e.target.value)}
+                      rows={4}
+                    />
+                  </TextField>
+                ) : (
+                  <>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">User ID</Label>
+                      <Input
+                        value={grantUserId}
+                        onChange={(e) => setGrantUserId(e.target.value)}
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">Motivo</Label>
+                      <Input
+                        value={grantReason}
+                        onChange={(e) => setGrantReason(e.target.value)}
+                      />
+                    </TextField>
+                  </>
+                )}
+              </Fieldset>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={grantModal.onClose}>
               Cancelar
             </Button>
             <Button onPress={handleGrant} isPending={grantLoading}>
-              {isBulk ? "Bulk Grant" : "Grant"}
+              {isBulk ? "Otorgar masivo" : "Otorgar"}
             </Button>
           </ModalFooter>
         </ModalDialog>
@@ -516,17 +573,24 @@ export default function BadgesPage() {
         <ModalDialog>
           <ModalHeader className="text-zinc-100">Revocar Badge - {String(revokeTarget?.name || "")}</ModalHeader>
           <ModalBody className="gap-4">
-            <Input
-             
-              value={revokeUserId}
-              onChange={(e) => setRevokeUserId(e.target.value)}
-             
-            />
-            <Input
-             
-              value={revokeReason}
-              onChange={(e) => setRevokeReason(e.target.value)}
-            />
+            <Form className="w-full">
+              <Fieldset className="space-y-4 w-full">
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">User ID</Label>
+                  <Input
+                    value={revokeUserId}
+                    onChange={(e) => setRevokeUserId(e.target.value)}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Motivo</Label>
+                  <Input
+                    value={revokeReason}
+                    onChange={(e) => setRevokeReason(e.target.value)}
+                  />
+                </TextField>
+              </Fieldset>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={revokeModal.onClose}>
@@ -546,26 +610,41 @@ export default function BadgesPage() {
         <ModalDialog>
           <ModalHeader>{catId ? "Actualizar Categoria de Badge" : "Crear Categoria de Badge"}</ModalHeader>
           <ModalBody className="gap-4">
-            <Input
-              placeholder="category_id (opcional para update)"
-              value={catId}
-              onChange={(e) => setCatId(e.target.value)}
-            />
-            <Input
-              placeholder="name"
-              value={catName}
-              onChange={(e) => setCatName(e.target.value)}
-            />
-            <Input
-              placeholder="description (opcional)"
-              value={catDesc}
-              onChange={(e) => setCatDesc(e.target.value)}
-            />
-            <Input
-              placeholder="icon (opcional)"
-              value={catIcon}
-              onChange={(e) => setCatIcon(e.target.value)}
-            />
+            <Form className="w-full">
+              <Fieldset className="space-y-4 w-full">
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Category ID</Label>
+                  <Input
+                    placeholder="opcional para update"
+                    value={catId}
+                    onChange={(e) => setCatId(e.target.value)}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Nombre</Label>
+                  <Input
+                    value={catName}
+                    onChange={(e) => setCatName(e.target.value)}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Descripcion</Label>
+                  <Input
+                    placeholder="opcional"
+                    value={catDesc}
+                    onChange={(e) => setCatDesc(e.target.value)}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Icon</Label>
+                  <Input
+                    placeholder="opcional"
+                    value={catIcon}
+                    onChange={(e) => setCatIcon(e.target.value)}
+                  />
+                </TextField>
+              </Fieldset>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={categoryModal.onClose}>

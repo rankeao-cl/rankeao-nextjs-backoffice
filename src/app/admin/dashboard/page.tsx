@@ -57,7 +57,7 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
 
     const content = (
         <Card
-            className={`bg-gradient-to-br ${c.bg} border ${c.border} hover:scale-[1.03] transition-transform duration-200 cursor-pointer`}
+            className={`h-full bg-gradient-to-br ${c.bg} border ${c.border} hover:scale-[1.03] transition-transform duration-200 cursor-pointer`}
         >
             <CardContent className="flex flex-row items-center gap-4 p-5">
                 <div
@@ -75,12 +75,12 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
         </Card>
     );
 
-    return href ? <Link href={href}>{content}</Link> : content;
+    return href ? <Link href={href} className="block h-full">{content}</Link> : content;
 }
 
 function SkeletonCard() {
     return (
-        <Card className="bg-[#0f1017]/60 border border-[#2a2f4b]/30">
+        <Card className="h-full bg-[#0f1017]/60 border border-[#2a2f4b]/30">
             <CardContent className="flex flex-row items-center gap-4 p-5">
                 <div className="skeleton h-12 w-12 rounded-xl" />
                 <div className="space-y-2 flex-1">
@@ -101,8 +101,8 @@ interface QuickLinkProps {
 
 function QuickLink({ label, href, icon, description }: QuickLinkProps) {
     return (
-        <Link href={href}>
-            <Card className="bg-[#0f1017]/80 border border-white/15 hover:border-white/35 hover:bg-[#0f1017] transition-all duration-200 hover:scale-[1.02]">
+        <Link href={href} className="block h-full">
+            <Card className="h-full bg-[#0f1017]/80 border border-white/15 hover:border-white/35 hover:bg-[#0f1017] transition-all duration-200 hover:scale-[1.02]">
                 <CardContent className="flex flex-row items-center gap-4 p-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/5">
                         {icon}
@@ -161,7 +161,7 @@ export default function DashboardPage() {
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold font-[var(--font-heading)] bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-                    Dashboard
+                    Panel
                 </h1>
                 <p className="text-sm text-zinc-500 mt-1">
                     Resumen general del panel de administración
@@ -186,7 +186,7 @@ export default function DashboardPage() {
                             color="white"
                         />
                         <StatCard
-                            label="Badges Otorgados"
+                            label="Insignias Otorgadas"
                             value={gamStats?.total_badges_earned?.toLocaleString() ?? "—"}
                             icon={<Award className="h-6 w-6 text-zinc-200" />}
                             color="slate"
@@ -229,7 +229,7 @@ export default function DashboardPage() {
                         color="slate"
                     />
                     <StatCard
-                        label="Cosmetics Otorgados"
+                        label="Cosmeticos Otorgados"
                         value={gamStats?.total_cosmetics_earned?.toLocaleString() ?? "—"}
                         icon={<Sparkles className="h-6 w-6 text-white" />}
                         color="white"
@@ -255,19 +255,19 @@ export default function DashboardPage() {
                     {lastApiError ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                             <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Status</p>
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Estado</p>
                                 <p className="text-zinc-100 font-semibold">{lastApiError.status}</p>
                             </div>
                             <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Code</p>
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Codigo</p>
                                 <p className="text-zinc-100 font-semibold">{lastApiError.code || "N/A"}</p>
                             </div>
                             <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3 lg:col-span-2">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Path</p>
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Ruta</p>
                                 <code className="text-xs text-zinc-200">{lastApiError.path}</code>
                             </div>
                             <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Method</p>
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Metodo</p>
                                 <p className="text-zinc-100 font-semibold">{lastApiError.method}</p>
                             </div>
                             <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
@@ -302,16 +302,16 @@ export default function DashboardPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <QuickLink
-                        label="Gestion de Tenants"
+                        label="Gestion de Tiendas"
                         href="/admin/tenants"
                         icon={<Store className="h-5 w-5 text-white" />}
                         description="Verificar, suspender y reactivar tiendas"
                     />
                     <QuickLink
-                        label="Badges y Gamificacion"
+                        label="Insignias y Gamificacion"
                         href="/admin/gamification/badges"
                         icon={<Award className="h-5 w-5 text-zinc-200" />}
-                        description="Crear, editar y otorgar badges"
+                        description="Crear, editar y otorgar insignias"
                     />
                     <QuickLink
                         label="Disputas Marketplace"
@@ -323,22 +323,22 @@ export default function DashboardPage() {
                         label="Temporadas"
                         href="/admin/gamification/seasons"
                         icon={<Users className="h-5 w-5 text-zinc-200" />}
-                        description="Administrar seasons competitivas"
+                        description="Administrar temporadas competitivas"
                     />
                     <QuickLink
-                        label="Templates Notificacion"
+                        label="Plantillas de Notificacion"
                         href="/admin/notifications/templates"
                         icon={<Bell className="h-5 w-5 text-white" />}
-                        description="CRUD y preview de templates"
+                        description="CRUD y previsualizacion de plantillas"
                     />
                     <QuickLink
-                        label="Email Templates"
+                        label="Plantillas de Email"
                         href="/admin/notifications/email-templates"
                         icon={<Mail className="h-5 w-5 text-zinc-200" />}
-                        description="Preview de plantillas de correo"
+                        description="Previsualizacion de plantillas de correo"
                     />
                     <QuickLink
-                        label="Broadcasts"
+                        label="Difusiones"
                         href="/admin/notifications/broadcasts"
                         icon={<Users className="h-5 w-5 text-zinc-200" />}
                         description="Enviar notificaciones masivas"

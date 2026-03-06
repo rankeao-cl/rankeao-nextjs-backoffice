@@ -257,10 +257,12 @@ export default function AdminApiExplorerPage() {
             ) : (
               <div className="max-h-[34rem] overflow-auto space-y-2 pr-1">
                 {filteredOperations.map((operation) => (
-                  <button
+                  <Button
                     key={operation.operationId}
-                    onClick={() => setSelectedOperationId(operation.operationId)}
-                    className={`w-full text-left rounded-lg border p-3 transition-colors ${
+                    type="button"
+                    variant="ghost"
+                    onPress={() => setSelectedOperationId(operation.operationId)}
+                    className={`h-auto w-full justify-start rounded-lg border p-3 text-left transition-colors ${
                       selectedOperationId === operation.operationId
                         ? "border-white/30 bg-white/10"
                         : "border-white/10 bg-[#0a0b12] hover:border-white/25"
@@ -274,7 +276,7 @@ export default function AdminApiExplorerPage() {
                     </div>
                     <p className="text-[11px] text-zinc-500 mt-1 break-all">{operation.path}</p>
                     {operation.tag ? <p className="text-[11px] text-zinc-600 mt-1">{operation.tag}</p> : null}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}

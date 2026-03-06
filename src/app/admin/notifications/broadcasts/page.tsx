@@ -3,8 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
+  Card,
+  CardContent,
   Chip,
+  Description,
+  Fieldset,
+  Form,
   Input,
+  Label,
   Modal,
   ModalBody,
   ModalDialog,
@@ -17,6 +23,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  TextField,
   TextArea,
 } from "@heroui/react";
 import { createBroadcast, getBroadcasts, type ListMeta } from "@/lib/api-admin";
@@ -189,119 +196,169 @@ export default function BroadcastsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
-            Broadcasts
+            Difusiones
           </h1>
           <p className="text-sm text-zinc-500 mt-1">Notificaciones masivas a grupos de usuarios</p>
         </div>
         <Button
+          type="button"
           onPress={createModal.onOpen}
           className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
         >
-          Nuevo Broadcast
+          Nueva difusion
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-        <Input placeholder="Buscar titulo" value={queryFilter} onChange={(e) => setQueryFilter(e.target.value)} />
-        <Input placeholder="Filtrar target" value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)} />
-        <Input placeholder="Filtrar status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
-        <Input
-          type="number"
-          min={1}
-          placeholder="per_page"
-          value={perPageInput}
-          onChange={(e) => setPerPageInput(e.target.value)}
-        />
-      </div>
+      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+        <CardContent className="p-5">
+          <Form>
+            <Fieldset className="space-y-4">
+              <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
+              <Description className="text-xs text-zinc-500">
+                Filtra por titulo, target y estado; ajusta la paginacion para revisar historico de envios.
+              </Description>
 
-      <div className="flex gap-2">
-        <Button size="sm" onPress={applyPagination}>Aplicar paginacion</Button>
-        <Button size="sm" variant="ghost" onPress={clearFilters}>Limpiar filtros locales</Button>
-      </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Titulo</Label>
+                  <Input placeholder="texto" value={queryFilter} onChange={(e) => setQueryFilter(e.target.value)} />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Target</Label>
+                  <Input placeholder="ALL, SEGMENT..." value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)} />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Estado</Label>
+                  <Input placeholder="PENDING, SENT..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Per page</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={perPageInput}
+                    onChange={(e) => setPerPageInput(e.target.value)}
+                  />
+                </TextField>
+              </div>
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="lg" color="current" />
-        </div>
-      ) : (
-        <Table>
-          <Table.Content aria-label="Broadcasts">
-            <TableHeader columns={TABLE_COLUMNS}>
-              {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-            </TableHeader>
-            <TableBody items={filteredBroadcasts}>
-              {(broadcast) => (
-                <TableRow key={String(broadcast.id || String(broadcast.title || "-"))}>
-                  {(column) => <TableCell>{renderCell(broadcast, getTableColumnKey(column))}</TableCell>}
-                </TableRow>
-              )}
-            </TableBody>
-          </Table.Content>
-        </Table>
-      )}
+              <Fieldset.Actions className="flex gap-2">
+                <Button type="button" size="sm" onPress={applyPagination}>Aplicar paginacion</Button>
+                <Button type="button" size="sm" variant="ghost" onPress={clearFilters}>Limpiar filtros</Button>
+              </Fieldset.Actions>
+            </Fieldset>
+          </Form>
+        </CardContent>
+      </Card>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
-        <span>
-          Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
-        </span>
-        <div className="flex gap-2">
-          <Button size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
-            Anterior
-          </Button>
-          <Button size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
-            Siguiente
-          </Button>
-        </div>
-      </div>
+      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+        <CardContent className="p-5 space-y-4">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Spinner size="lg" color="current" />
+            </div>
+          ) : (
+            <Table>
+              <Table.Content aria-label="Broadcasts">
+                <TableHeader columns={TABLE_COLUMNS}>
+                  {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                </TableHeader>
+                <TableBody items={filteredBroadcasts}>
+                  {(broadcast) => (
+                    <TableRow key={String(broadcast.id || String(broadcast.title || "-"))}>
+                      {(column) => <TableCell>{renderCell(broadcast, getTableColumnKey(column))}</TableCell>}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table.Content>
+            </Table>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
+            <span>
+              Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+            </span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+                Anterior
+              </Button>
+              <Button type="button" size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Modal isOpen={createModal.isOpen} onOpenChange={(isOpen) => !isOpen && createModal.onClose()}>
         <ModalDialog>
           <ModalHeader>
             <div className="flex items-center gap-2">
               <Send className="h-5 w-5 text-zinc-200" />
-              Crear Broadcast
+              Crear difusion
             </div>
           </ModalHeader>
           <ModalBody className="gap-4">
-            <Input
-              placeholder="title"
-              value={formData.title}
-              onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-            />
-            <TextArea
-              placeholder="body"
-              value={formData.body}
-              onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
-              rows={3}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                placeholder="target"
-                value={formData.target}
-                onChange={(e) => setFormData((prev) => ({ ...prev, target: e.target.value }))}
-              />
-              <Input
-                placeholder="channels (IN_APP,EMAIL...)"
-                value={formData.channels}
-                onChange={(e) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                placeholder="action_url"
-                value={formData.action_url}
-                onChange={(e) => setFormData((prev) => ({ ...prev, action_url: e.target.value }))}
-              />
-              <Input
-                type="datetime-local"
-                value={formData.schedule_at}
-                onChange={(e) => setFormData((prev) => ({ ...prev, schedule_at: e.target.value }))}
-              />
-            </div>
+            <Form className="w-full">
+              <Fieldset className="space-y-4 w-full">
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Titulo</Label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                  />
+                </TextField>
+
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Mensaje</Label>
+                  <TextArea
+                    value={formData.body}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
+                    rows={3}
+                  />
+                </TextField>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Target</Label>
+                    <Input
+                      value={formData.target}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, target: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Canales</Label>
+                    <Input
+                      placeholder="IN_APP,EMAIL..."
+                      value={formData.channels}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
+                    />
+                  </TextField>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Action URL</Label>
+                    <Input
+                      value={formData.action_url}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, action_url: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Programar para</Label>
+                    <Input
+                      type="datetime-local"
+                      value={formData.schedule_at}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, schedule_at: e.target.value }))}
+                    />
+                  </TextField>
+                </div>
+              </Fieldset>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={createModal.onClose}>Cancelar</Button>
-            <Button onPress={handleCreate} isPending={formLoading}>Enviar Broadcast</Button>
+            <Button onPress={handleCreate} isPending={formLoading}>Enviar difusion</Button>
           </ModalFooter>
         </ModalDialog>
       </Modal>

@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
     TextField, Label, InputGroup, InputGroupPrefix, InputGroupSuffix, Input,
-    Button, Card, CardContent
+    Button, Card, CardContent, Form
 } from "@heroui/react";
 import { useAuth } from "@/lib/auth";
-import { Shield, Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -53,8 +54,15 @@ export default function LoginPage() {
             <Card className="w-full max-w-md bg-[#0a0b12]/90 border border-white/20 backdrop-blur-xl shadow-neon-white">
                 <CardContent className="p-8">
                     <div className="flex flex-col items-center mb-8">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-200 to-white mb-4 shadow-lg shadow-white/20">
-                            <Shield className="h-7 w-7 text-black" />
+                        <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/30 bg-gradient-to-br from-zinc-200 to-white mb-4 shadow-lg shadow-white/20">
+                            <Image
+                                src="/logo.png"
+                                alt="Rankeao"
+                                fill
+                                sizes="56px"
+                                className="object-contain p-2"
+                                priority
+                            />
                         </div>
                         <h1 className="font-[var(--font-heading)] text-2xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
                             Rankeao Admin
@@ -64,7 +72,7 @@ export default function LoginPage() {
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <Form onSubmit={handleSubmit} className="space-y-5">
                         <TextField name="email" className="space-y-1.5 flex flex-col">
                             <Label className="text-zinc-400 text-sm">Email</Label>
                             <InputGroup className={groupClasses}>
@@ -97,13 +105,16 @@ export default function LoginPage() {
                                     required
                                 />
                                 <InputGroupSuffix>
-                                    <button
+                                    <Button
                                         type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                                        isIconOnly
+                                        size="sm"
+                                        variant="ghost"
+                                        onPress={() => setShowPassword(!showPassword)}
+                                        className="text-zinc-500 hover:text-zinc-300"
                                     >
                                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
+                                    </Button>
                                 </InputGroupSuffix>
                             </InputGroup>
                         </TextField>
@@ -115,7 +126,7 @@ export default function LoginPage() {
                         >
                             Iniciar Sesión
                         </Button>
-                    </form>
+                    </Form>
 
                     <p className="mt-6 text-center text-xs text-zinc-600">
                         Panel exclusivo para administradores de Rankeao.cl

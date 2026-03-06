@@ -1,8 +1,9 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
+    Breadcrumbs,
     Dropdown,
     DropdownTrigger,
     DropdownPopover,
@@ -21,6 +22,30 @@ interface AdminNavbarProps {
 export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
     const { logout } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
+
+    const labelMap: Record<string, string> = {
+        dashboard: "Panel",
+        auth: "API de Auth",
+        perfil: "Perfil",
+        tenants: "Tiendas",
+        disputes: "Disputas",
+        notifications: "Notificaciones",
+        templates: "Plantillas",
+        broadcasts: "Difusiones",
+        "email-templates": "Plantillas de Email",
+        gamification: "Gamificacion",
+        badges: "Insignias",
+        cosmetics: "Cosmeticos",
+        titles: "Titulos",
+        seasons: "Temporadas",
+        "xp-events": "Eventos XP",
+        levels: "Niveles",
+        "api-explorer": "Explorador API",
+    };
+
+    const segments = pathname.split("/").filter(Boolean);
+    const adminSegments = segments[0] === "admin" ? segments.slice(1) : segments;
 
     return (
         <header className="flex h-14 items-center justify-between border-b border-[#2a2f4b]/40 bg-[#0a0b12]/80 backdrop-blur-md px-4 md:px-6 shrink-0">
@@ -35,8 +60,32 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
                 <Menu className="h-5 w-5" />
             </Button>
 
-            {/* Spacer for desktop */}
-            <div className="hidden md:block" />
+            <div className="hidden md:flex min-w-0 flex-1 items-center">
+                <Breadcrumbs className="gap-2 text-xs text-zinc-500" separator={<span className="text-zinc-700">/</span>}>
+                    <Breadcrumbs.Item href="/admin/dashboard" className="text-zinc-400 hover:text-zinc-200">
+                        Admin
+                    </Breadcrumbs.Item>
+                    {adminSegments.length === 0 ? (
+                        <Breadcrumbs.Item className="text-zinc-200">Panel</Breadcrumbs.Item>
+                    ) : (
+                        adminSegments.map((segment, index) => {
+                            const href = `/admin/${adminSegments.slice(0, index + 1).join("/")}`;
+                            const isLast = index === adminSegments.length - 1;
+                            const label = labelMap[segment] || segment.replace(/-/g, " ");
+
+                            return (
+                                <Breadcrumbs.Item
+                                    key={`${segment}-${index}`}
+                                    href={isLast ? undefined : href}
+                                    className={isLast ? "text-zinc-200" : "text-zinc-400 hover:text-zinc-200"}
+                                >
+                                    {label}
+                                </Breadcrumbs.Item>
+                            );
+                        })
+                    )}
+                </Breadcrumbs>
+            </div>
 
             {/* Right side — user dropdown */}
             <div className="flex items-center gap-3">

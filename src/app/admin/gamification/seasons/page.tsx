@@ -3,15 +3,24 @@
 import { useState } from "react";
 import {
   Button,
+  Calendar,
   Card,
   CardContent,
   Chip,
+  Description,
+  DateField,
+  DatePicker,
+  Fieldset,
+  Form,
   Input,
+  Label,
   Modal,
   ModalBody,
   ModalDialog,
   ModalFooter,
   ModalHeader,
+  TextField,
+  type DateValue,
 } from "@heroui/react";
 import { closeSeason, createSeason, previewSeasonClose } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
@@ -24,14 +33,26 @@ export default function SeasonsPage() {
   const previewModal = useDisclosure();
   const closeModal = useDisclosure();
 
-  const [formData, setFormData] = useState({ name: "", starts_at: "", ends_at: "" });
+  const [formData, setFormData] = useState({ name: "" });
+  const [startsAtValue, setStartsAtValue] = useState<DateValue | null>(null);
+  const [endsAtValue, setEndsAtValue] = useState<DateValue | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [selectedSeasonId, setSelectedSeasonId] = useState("");
   const [previewData, setPreviewData] = useState<unknown>(null);
   const [closeLoading, setCloseLoading] = useState(false);
 
+  const dateValueToIso = (value: DateValue | null, endOfDay = false): string => {
+    if (!value) {
+      return "";
+    }
+
+    const dateString = value.toString();
+    const time = endOfDay ? "23:59:59.999" : "00:00:00.000";
+    return new Date(`${dateString}T${time}Z`).toISOString();
+  };
+
   const handleCreate = async () => {
-    if (!formData.name || !formData.starts_at || !formData.ends_at) {
+    if (!formData.name || !startsAtValue || !endsAtValue) {
       toast.error("Completa todos los campos");
       return;
     }
@@ -40,12 +61,14 @@ export default function SeasonsPage() {
     try {
       await createSeason({
         name: formData.name,
-        starts_at: new Date(formData.starts_at).toISOString(),
-        ends_at: new Date(formData.ends_at).toISOString(),
+        starts_at: dateValueToIso(startsAtValue),
+        ends_at: dateValueToIso(endsAtValue, true),
       });
       toast.success("Season creada");
       createModal.onClose();
-      setFormData({ name: "", starts_at: "", ends_at: "" });
+      setFormData({ name: "" });
+      setStartsAtValue(null);
+      setEndsAtValue(null);
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -103,42 +126,58 @@ export default function SeasonsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-zinc-200" />
-              <h3 className="font-semibold text-zinc-200">Preview Close</h3>
-            </div>
-            <p className="text-xs text-zinc-500">
-              Previsualiza que pasaria al cerrar una season sin ejecutar cambios.
-            </p>
-            <Input
-             
-              value={selectedSeasonId}
-              onChange={(e) => setSelectedSeasonId(e.target.value)}
-            />
-            <Button variant="ghost" onPress={handlePreview}>
-              Preview
-            </Button>
+          <CardContent className="p-5">
+            <Form className="space-y-4">
+              <Fieldset className="space-y-4">
+                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-zinc-200">
+                  <Eye className="h-5 w-5 text-zinc-200" />
+                  Preview cierre
+                </Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Previsualiza que pasaria al cerrar una season sin ejecutar cambios.
+                </Description>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Season ID</Label>
+                  <Input
+                    value={selectedSeasonId}
+                    onChange={(e) => setSelectedSeasonId(e.target.value)}
+                  />
+                </TextField>
+                <Fieldset.Actions>
+                  <Button type="button" variant="ghost" onPress={handlePreview}>
+                    Preview
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           </CardContent>
         </Card>
 
         <Card className="bg-[#0f1017] border border-white/20">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-zinc-100" />
-              <h3 className="font-semibold text-zinc-200">Cerrar Season</h3>
-            </div>
-            <p className="text-xs text-zinc-500">
-              Cierra una season activa. Esto snapshot rankings y distribuye rewards.
-            </p>
-            <Input
-             
-              value={selectedSeasonId}
-              onChange={(e) => setSelectedSeasonId(e.target.value)}
-            />
-            <Button onPress={closeModal.onOpen}>
-              Cerrar Season
-            </Button>
+          <CardContent className="p-5">
+            <Form className="space-y-4">
+              <Fieldset className="space-y-4">
+                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-zinc-200">
+                  <Lock className="h-5 w-5 text-zinc-100" />
+                  Cerrar season
+                </Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Cierra una season activa. Esto snapshot rankings y distribuye rewards.
+                </Description>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Season ID</Label>
+                  <Input
+                    value={selectedSeasonId}
+                    onChange={(e) => setSelectedSeasonId(e.target.value)}
+                  />
+                </TextField>
+                <Fieldset.Actions>
+                  <Button type="button" onPress={closeModal.onOpen}>
+                    Cerrar season
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           </CardContent>
         </Card>
       </div>
@@ -153,6 +192,40 @@ export default function SeasonsPage() {
         </CardContent>
       </Card>
 
+      <Card className="bg-[#0f1017]/70 border border-[#2a2f4b]/35">
+        <CardContent className="p-5">
+          <Form>
+            <Fieldset className="space-y-4">
+              <Fieldset.Legend className="font-semibold text-zinc-200">Calendario</Fieldset.Legend>
+              <Description className="text-xs text-zinc-500">
+                Vista de referencia para planificar ventanas de temporada.
+              </Description>
+              <Calendar aria-label="Calendario de temporadas" className="w-full max-w-md">
+                <Calendar.Header>
+                  <Calendar.YearPickerTrigger>
+                    <Calendar.YearPickerTriggerHeading />
+                    <Calendar.YearPickerTriggerIndicator />
+                  </Calendar.YearPickerTrigger>
+                  <Calendar.NavButton slot="previous" />
+                  <Calendar.NavButton slot="next" />
+                </Calendar.Header>
+                <Calendar.Grid>
+                  <Calendar.GridHeader>
+                    {(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}
+                  </Calendar.GridHeader>
+                  <Calendar.GridBody>{(date) => <Calendar.Cell date={date} />}</Calendar.GridBody>
+                </Calendar.Grid>
+                <Calendar.YearPickerGrid>
+                  <Calendar.YearPickerGridBody>
+                    {({ year }) => <Calendar.YearPickerCell year={year} />}
+                  </Calendar.YearPickerGridBody>
+                </Calendar.YearPickerGrid>
+              </Calendar>
+            </Fieldset>
+          </Form>
+        </CardContent>
+      </Card>
+
       <Modal
         isOpen={createModal.isOpen}
         onOpenChange={(isOpen) => !isOpen && createModal.onClose()}
@@ -160,36 +233,79 @@ export default function SeasonsPage() {
         <ModalDialog>
           <ModalHeader>Crear Season</ModalHeader>
           <ModalBody className="gap-4">
-            <Input
-             
-              value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-             
-            />
-            <Input
-             
-              type="datetime-local"
-              value={formData.starts_at}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  starts_at: e.target.value,
-                }))
-              }
-             
-            />
-            <Input
-             
-              type="datetime-local"
-              value={formData.ends_at}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  ends_at: e.target.value,
-                }))
-              }
-             
-            />
+            <Form className="w-full space-y-4">
+              <TextField className="space-y-1 flex flex-col">
+                <Label className="text-xs text-zinc-400">Nombre</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                />
+              </TextField>
+
+              <DatePicker className="w-full" name="starts-at" value={startsAtValue} onChange={setStartsAtValue}>
+                <Label>Inicio</Label>
+                <DateField.Group fullWidth>
+                  <DateField.Input>
+                    {(segment) => <DateField.Segment segment={segment} />}
+                  </DateField.Input>
+                  <DateField.Suffix>
+                    <DatePicker.Trigger>
+                      <DatePicker.TriggerIndicator />
+                    </DatePicker.Trigger>
+                  </DateField.Suffix>
+                </DateField.Group>
+                <DatePicker.Popover>
+                  <Calendar aria-label="Fecha de inicio">
+                    <Calendar.Header>
+                      <Calendar.YearPickerTrigger>
+                        <Calendar.YearPickerTriggerHeading />
+                        <Calendar.YearPickerTriggerIndicator />
+                      </Calendar.YearPickerTrigger>
+                      <Calendar.NavButton slot="previous" />
+                      <Calendar.NavButton slot="next" />
+                    </Calendar.Header>
+                    <Calendar.Grid>
+                      <Calendar.GridHeader>
+                        {(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}
+                      </Calendar.GridHeader>
+                      <Calendar.GridBody>{(date) => <Calendar.Cell date={date} />}</Calendar.GridBody>
+                    </Calendar.Grid>
+                  </Calendar>
+                </DatePicker.Popover>
+              </DatePicker>
+
+              <DatePicker className="w-full" name="ends-at" value={endsAtValue} onChange={setEndsAtValue}>
+                <Label>Fin</Label>
+                <DateField.Group fullWidth>
+                  <DateField.Input>
+                    {(segment) => <DateField.Segment segment={segment} />}
+                  </DateField.Input>
+                  <DateField.Suffix>
+                    <DatePicker.Trigger>
+                      <DatePicker.TriggerIndicator />
+                    </DatePicker.Trigger>
+                  </DateField.Suffix>
+                </DateField.Group>
+                <DatePicker.Popover>
+                  <Calendar aria-label="Fecha de cierre">
+                    <Calendar.Header>
+                      <Calendar.YearPickerTrigger>
+                        <Calendar.YearPickerTriggerHeading />
+                        <Calendar.YearPickerTriggerIndicator />
+                      </Calendar.YearPickerTrigger>
+                      <Calendar.NavButton slot="previous" />
+                      <Calendar.NavButton slot="next" />
+                    </Calendar.Header>
+                    <Calendar.Grid>
+                      <Calendar.GridHeader>
+                        {(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}
+                      </Calendar.GridHeader>
+                      <Calendar.GridBody>{(date) => <Calendar.Cell date={date} />}</Calendar.GridBody>
+                    </Calendar.Grid>
+                  </Calendar>
+                </DatePicker.Popover>
+              </DatePicker>
+            </Form>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={createModal.onClose}>

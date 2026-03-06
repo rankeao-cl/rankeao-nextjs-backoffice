@@ -100,3 +100,93 @@ body {
   --heroui-primary: #f8fafc;
   --heroui-secondary: #d4d4d8;
 }
+
+/* Admin text fields visibility fix (HeroUI v3 slots) */
+.admin-shell [data-slot="input"],
+.admin-shell [data-slot="textarea"] {
+  background: rgba(5, 5, 7, 0.82);
+  border: 1px solid rgba(248, 250, 252, 0.45);
+  border-radius: 0.5rem;
+  color: #e4e4e7;
+  box-shadow: 0 0 0 1px rgba(248, 250, 252, 0.1), 0 0 16px rgba(248, 250, 252, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.admin-shell [data-slot="input"]::placeholder,
+.admin-shell [data-slot="textarea"]::placeholder {
+  color: #71717a;
+}
+
+.admin-shell [data-slot="input"]:focus,
+.admin-shell [data-slot="textarea"]:focus {
+  border-color: rgba(248, 250, 252, 0.95);
+  background: rgba(5, 5, 7, 0.9);
+  box-shadow: 0 0 0 1px rgba(248, 250, 252, 0.6), 0 0 24px rgba(248, 250, 252, 0.2);
+  outline: none;
+}
+
+.admin-shell [data-slot="card"] {
+  box-shadow: 0 0 0 1px rgba(248, 250, 252, 0.12), 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Admin layout consistency: card heights, table density, button rhythm */
+.admin-shell .grid > [data-slot="card"],
+.admin-shell .grid > a > [data-slot="card"] {
+  height: 100%;
+}
+
+.admin-shell [data-slot="button"] {
+  min-height: 2.25rem;
+  border: 1px solid rgba(248, 250, 252, 0.26);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.2) 0%, rgba(248, 250, 252, 0.1) 100%);
+  color: #f4f4f5;
+  box-shadow: 0 0 0 1px rgba(248, 250, 252, 0.06), 0 6px 16px rgba(0, 0, 0, 0.28);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease,
+    color 0.15s ease;
+}
+
+.admin-shell [data-slot="button"]:hover {
+  border-color: rgba(248, 250, 252, 0.45);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.28) 0%, rgba(248, 250, 252, 0.14) 100%);
+  color: #ffffff;
+}
+
+.admin-shell [data-slot="button"][data-variant="ghost"] {
+  border-color: rgba(248, 250, 252, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  color: #a1a1aa;
+  box-shadow: none;
+}
+
+.admin-shell [data-slot="button"][data-variant="ghost"]:hover {
+  border-color: rgba(248, 250, 252, 0.34);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e4e4e7;
+}
+
+.admin-shell [data-slot="button"][data-variant="danger-soft"] {
+  border-color: rgba(248, 250, 252, 0.32);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.26) 0%, rgba(248, 250, 252, 0.12) 100%);
+  color: #ffffff;
+}
+
+.admin-shell [data-slot="button"][data-disabled="true"],
+.admin-shell [data-slot="button"][aria-disabled="true"] {
+  border-color: rgba(248, 250, 252, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  color: #52525b;
+  box-shadow: none;
+}
+
+.admin-shell [data-slot="table"] {
+  font-size: 0.875rem;
+}
+
+.admin-shell [data-slot="table-column"],
+.admin-shell [data-slot="table-cell"] {
+  padding: 0.625rem 0.75rem;
+}
+
+.admin-shell [data-slot="table-row"] {
+  border-bottom: 1px solid rgba(248, 250, 252, 0.08);
+}

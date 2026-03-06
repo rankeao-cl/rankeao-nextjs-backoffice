@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/admin/Sidebar";
 import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Spinner } from "@heroui/react";
 
 export default function AdminLayout({
     children,
@@ -34,10 +35,7 @@ export default function AdminLayout({
         return (
             <div className="flex h-screen items-center justify-center bg-[#050507]">
                 <div className="flex flex-col items-center gap-4">
-                    <div
-                        className="h-9 w-9 animate-spin rounded-full border-2 border-zinc-700 border-t-white"
-                        aria-hidden="true"
-                    />
+                    <Spinner size="lg" color="current" />
                     <p className="text-zinc-500 text-sm">Cargando panel...</p>
                 </div>
             </div>
@@ -47,7 +45,7 @@ export default function AdminLayout({
     if (!isAuthenticated) return null;
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[#050507]">
+        <div className="admin-shell flex h-screen overflow-hidden bg-[#050507]">
             {/* Sidebar */}
             <Sidebar
                 collapsed={collapsed}
@@ -63,7 +61,9 @@ export default function AdminLayout({
                     onMenuToggle={() => setMobileOpen(true)}
                 />
                 <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
-                    {children}
+                    <div className="mx-auto w-full max-w-[1480px]">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>

@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, CardContent, Input, TextArea } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardContent,
+  Description,
+  Fieldset,
+  Form,
+  Input,
+  Label,
+  TextArea,
+  TextField,
+} from "@heroui/react";
 import { createCosmetic, grantCosmetic, revokeCosmetic, updateCosmetic } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { Gift, Pencil, Sparkles, Trash2 } from "lucide-react";
@@ -146,154 +157,254 @@ export default function CosmeticsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
-          Cosmetics
+          Cosmeticos
         </h1>
         <p className="text-sm text-zinc-500 mt-1">
           Operaciones admin de cosmeticos. La API no expone listado, por eso editas con Cosmetic ID.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-zinc-200" />
-              <h2 className="font-semibold text-zinc-200">Crear cosmetico</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="slug"
-                value={createForm.slug}
-                onChange={(e) => setCreateForm((prev) => ({ ...prev, slug: e.target.value }))}
-              />
-              <Input
-                placeholder="name"
-                value={createForm.name}
-                onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="type: AVATAR_FRAME | NAME_EFFECT | CARD_BACK"
-                value={createForm.type}
-                onChange={(e) => setCreateForm((prev) => ({ ...prev, type: e.target.value }))}
-              />
-              <Input
-                placeholder="rarity"
-                value={createForm.rarity}
-                onChange={(e) => setCreateForm((prev) => ({ ...prev, rarity: e.target.value }))}
-              />
-            </div>
-            <Input
-              placeholder="asset_url"
-              value={createForm.asset_url}
-              onChange={(e) => setCreateForm((prev) => ({ ...prev, asset_url: e.target.value }))}
-            />
-            <Button onPress={handleCreate} isPending={createLoading}>
-              Crear
-            </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5">
+            <Form className="space-y-4">
+              <Fieldset className="space-y-4">
+                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-zinc-200">
+                  <Sparkles className="h-5 w-5 text-zinc-200" />
+                  Crear cosmetico
+                </Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Registra un cosmetico nuevo con tipo, rareza y recurso visual.
+                </Description>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Slug</Label>
+                    <Input
+                      placeholder="slug"
+                      value={createForm.slug}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, slug: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Nombre</Label>
+                    <Input
+                      placeholder="name"
+                      value={createForm.name}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
+                    />
+                  </TextField>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Tipo</Label>
+                    <Input
+                      placeholder="AVATAR_FRAME | NAME_EFFECT | CARD_BACK"
+                      value={createForm.type}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, type: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Rareza</Label>
+                    <Input
+                      placeholder="rarity"
+                      value={createForm.rarity}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, rarity: e.target.value }))}
+                    />
+                  </TextField>
+                </div>
+
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Asset URL</Label>
+                  <Input
+                    placeholder="asset_url"
+                    value={createForm.asset_url}
+                    onChange={(e) => setCreateForm((prev) => ({ ...prev, asset_url: e.target.value }))}
+                  />
+                </TextField>
+
+                <Fieldset.Actions className="pt-1">
+                  <Button type="button" onPress={handleCreate} isPending={createLoading}>
+                    Crear
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Pencil className="h-5 w-5 text-zinc-200" />
-              <h2 className="font-semibold text-zinc-200">Actualizar cosmetico</h2>
-            </div>
-            <Input
-              placeholder="cosmetic_id"
-              value={updateForm.cosmetic_id}
-              onChange={(e) => setUpdateForm((prev) => ({ ...prev, cosmetic_id: e.target.value }))}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="name (opcional)"
-                value={updateForm.name}
-                onChange={(e) => setUpdateForm((prev) => ({ ...prev, name: e.target.value }))}
-              />
-              <Input
-                placeholder="type (opcional)"
-                value={updateForm.type}
-                onChange={(e) => setUpdateForm((prev) => ({ ...prev, type: e.target.value }))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="asset_url (opcional)"
-                value={updateForm.asset_url}
-                onChange={(e) => setUpdateForm((prev) => ({ ...prev, asset_url: e.target.value }))}
-              />
-              <Input
-                placeholder="rarity (opcional)"
-                value={updateForm.rarity}
-                onChange={(e) => setUpdateForm((prev) => ({ ...prev, rarity: e.target.value }))}
-              />
-            </div>
-            <Input
-              placeholder="is_active true|false (opcional)"
-              value={updateForm.is_active}
-              onChange={(e) => setUpdateForm((prev) => ({ ...prev, is_active: e.target.value }))}
-            />
-            <Button onPress={handleUpdate} isPending={updateLoading}>
-              Guardar cambios
-            </Button>
+        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5">
+            <Form className="space-y-4">
+              <Fieldset className="space-y-4">
+                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-zinc-200">
+                  <Pencil className="h-5 w-5 text-zinc-200" />
+                  Actualizar cosmetico
+                </Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Ajusta cualquier atributo de un cosmetico existente.
+                </Description>
+
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Cosmetic ID</Label>
+                  <Input
+                    placeholder="cosmetic_id"
+                    value={updateForm.cosmetic_id}
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, cosmetic_id: e.target.value }))}
+                  />
+                </TextField>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Nombre</Label>
+                    <Input
+                      placeholder="opcional"
+                      value={updateForm.name}
+                      onChange={(e) => setUpdateForm((prev) => ({ ...prev, name: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Tipo</Label>
+                    <Input
+                      placeholder="opcional"
+                      value={updateForm.type}
+                      onChange={(e) => setUpdateForm((prev) => ({ ...prev, type: e.target.value }))}
+                    />
+                  </TextField>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Asset URL</Label>
+                    <Input
+                      placeholder="opcional"
+                      value={updateForm.asset_url}
+                      onChange={(e) => setUpdateForm((prev) => ({ ...prev, asset_url: e.target.value }))}
+                    />
+                  </TextField>
+                  <TextField className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-zinc-400">Rareza</Label>
+                    <Input
+                      placeholder="opcional"
+                      value={updateForm.rarity}
+                      onChange={(e) => setUpdateForm((prev) => ({ ...prev, rarity: e.target.value }))}
+                    />
+                  </TextField>
+                </div>
+
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">is_active</Label>
+                  <Input
+                    placeholder="true | false (opcional)"
+                    value={updateForm.is_active}
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, is_active: e.target.value }))}
+                  />
+                </TextField>
+
+                <Fieldset.Actions className="pt-1">
+                  <Button type="button" onPress={handleUpdate} isPending={updateLoading}>
+                    Guardar cambios
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Gift className="h-5 w-5 text-zinc-200" />
-              <h2 className="font-semibold text-zinc-200">Otorgar cosmetico</h2>
-            </div>
-            <Input
-              placeholder="cosmetic_id"
-              value={grantForm.cosmetic_id}
-              onChange={(e) => setGrantForm((prev) => ({ ...prev, cosmetic_id: e.target.value }))}
-            />
-            <Input
-              placeholder="user_id"
-              value={grantForm.user_id}
-              onChange={(e) => setGrantForm((prev) => ({ ...prev, user_id: e.target.value }))}
-            />
-            <TextArea
-              placeholder="reason (opcional)"
-              value={grantForm.reason}
-              onChange={(e) => setGrantForm((prev) => ({ ...prev, reason: e.target.value }))}
-            />
-            <Button onPress={handleGrant} isPending={grantLoading}>
-              Otorgar
-            </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5">
+            <Form className="space-y-4">
+              <Fieldset className="space-y-4">
+                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-zinc-200">
+                  <Gift className="h-5 w-5 text-zinc-200" />
+                  Otorgar cosmetico
+                </Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Entrega un cosmetico a un usuario puntual.
+                </Description>
+
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Cosmetic ID</Label>
+                  <Input
+                    placeholder="cosmetic_id"
+                    value={grantForm.cosmetic_id}
+                    onChange={(e) => setGrantForm((prev) => ({ ...prev, cosmetic_id: e.target.value }))}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">User ID</Label>
+                  <Input
+                    placeholder="user_id"
+                    value={grantForm.user_id}
+                    onChange={(e) => setGrantForm((prev) => ({ ...prev, user_id: e.target.value }))}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Motivo</Label>
+                  <TextArea
+                    placeholder="opcional"
+                    value={grantForm.reason}
+                    onChange={(e) => setGrantForm((prev) => ({ ...prev, reason: e.target.value }))}
+                  />
+                </TextField>
+
+                <Fieldset.Actions className="pt-1">
+                  <Button type="button" onPress={handleGrant} isPending={grantLoading}>
+                    Otorgar
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Trash2 className="h-5 w-5 text-zinc-200" />
-              <h2 className="font-semibold text-zinc-200">Revocar cosmetico</h2>
-            </div>
-            <Input
-              placeholder="cosmetic_id"
-              value={revokeForm.cosmetic_id}
-              onChange={(e) => setRevokeForm((prev) => ({ ...prev, cosmetic_id: e.target.value }))}
-            />
-            <Input
-              placeholder="user_id"
-              value={revokeForm.user_id}
-              onChange={(e) => setRevokeForm((prev) => ({ ...prev, user_id: e.target.value }))}
-            />
-            <TextArea
-              placeholder="reason (opcional)"
-              value={revokeForm.reason}
-              onChange={(e) => setRevokeForm((prev) => ({ ...prev, reason: e.target.value }))}
-            />
-            <Button onPress={handleRevoke} isPending={revokeLoading}>
-              Revocar
-            </Button>
+        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5">
+            <Form className="space-y-4">
+              <Fieldset className="space-y-4">
+                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-zinc-200">
+                  <Trash2 className="h-5 w-5 text-zinc-200" />
+                  Revocar cosmetico
+                </Fieldset.Legend>
+                <Description className="text-xs text-zinc-500">
+                  Retira un cosmetico previamente asignado.
+                </Description>
+
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Cosmetic ID</Label>
+                  <Input
+                    placeholder="cosmetic_id"
+                    value={revokeForm.cosmetic_id}
+                    onChange={(e) => setRevokeForm((prev) => ({ ...prev, cosmetic_id: e.target.value }))}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">User ID</Label>
+                  <Input
+                    placeholder="user_id"
+                    value={revokeForm.user_id}
+                    onChange={(e) => setRevokeForm((prev) => ({ ...prev, user_id: e.target.value }))}
+                  />
+                </TextField>
+                <TextField className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-zinc-400">Motivo</Label>
+                  <TextArea
+                    placeholder="opcional"
+                    value={revokeForm.reason}
+                    onChange={(e) => setRevokeForm((prev) => ({ ...prev, reason: e.target.value }))}
+                  />
+                </TextField>
+
+                <Fieldset.Actions className="pt-1">
+                  <Button type="button" onPress={handleRevoke} isPending={revokeLoading}>
+                    Revocar
+                  </Button>
+                </Fieldset.Actions>
+              </Fieldset>
+            </Form>
           </CardContent>
         </Card>
       </div>
