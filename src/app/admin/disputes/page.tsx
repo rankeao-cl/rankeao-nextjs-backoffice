@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
   Chip,
@@ -19,7 +19,7 @@ import {
   TableRow,
   TextArea,
 } from "@heroui/react";
-import { getDisputes, assignDispute, resolveDispute } from "@/lib/api-admin";
+import { assignDispute, getDisputes, resolveDispute, type ListMeta } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
@@ -51,11 +51,25 @@ const TABLE_COLUMNS = [
   { key: "actions", label: "ACCIONES" },
 ] as const;
 
+const EMPTY_META: ListMeta = {
+  page: 1,
+  per_page: 20,
+  total: 0,
+  total_pages: 1,
+};
+
 export default function DisputesPage() {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [meta, setMeta] = useState<ListMeta>(EMPTY_META);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+
+  const [idSearch, setIdSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [reasonFilter, setReasonFilter] = useState("");
+  const [assignedModeratorFilter, setAssignedModeratorFilter] = useState("");
+  const [unassignedOnly, setUnassignedOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [perPageInput, setPerPageInput] = useState("20");
 
   const assignModal = useDisclosure();
   const resolveModal = useDisclosure();
@@ -75,26 +89,54 @@ export default function DisputesPage() {
   const fetchDisputes = useCallback(async () => {
     setLoading(true);
     try {
+      const perPage = Math.max(1, Number.parseInt(perPageInput, 10) || 20);
       const res = await getDisputes({
         status: statusFilter || undefined,
+        reason: reasonFilter || undefined,
+        assigned_moderator_id: assignedModeratorFilter || undefined,
+        unassigned: unassignedOnly ? true : undefined,
+        page,
+        per_page: perPage,
       });
       setDisputes(res.disputes || []);
+      setMeta(res.meta || EMPTY_META);
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Error al cargar disputas"));
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [assignedModeratorFilter, page, perPageInput, reasonFilter, statusFilter, unassignedOnly]);
 
   useEffect(() => {
     fetchDisputes();
   }, [fetchDisputes]);
 
-  const filtered = disputes.filter((d) => {
-    const id = String(d.id || "");
-    const reason = String(d.reason || "").toLowerCase();
-    return id.includes(search) || reason.includes(search.toLowerCase());
-  });
+  const filteredDisputes = useMemo(() => {
+    const q = idSearch.toLowerCase();
+    if (!q) {
+      return disputes;
+    }
+
+    return disputes.filter((dispute) => String(dispute.id || "").toLowerCase().includes(q));
+  }, [disputes, idSearch]);
+
+  const applyFilters = () => {
+    if (page !== 1) {
+      setPage(1);
+      return;
+    }
+    fetchDisputes();
+  };
+
+  const clearFilters = () => {
+    setStatusFilter("");
+    setReasonFilter("");
+    setAssignedModeratorFilter("");
+    setUnassignedOnly(false);
+    setIdSearch("");
+    setPerPageInput("20");
+    setPage(1);
+  };
 
   const handleAssign = async () => {
     if (!selectedDispute || !moderatorId) return;
@@ -131,22 +173,22 @@ export default function DisputesPage() {
     }
   };
 
-  const renderCell = (d: Dispute, columnKey: string) => {
+  const renderCell = (dispute: Dispute, columnKey: string) => {
     switch (columnKey) {
       case "id":
-        return <code className="text-xs text-zinc-500">{String(d.id).slice(0, 8)}...</code>;
+        return <code className="text-xs text-zinc-500">{String(dispute.id).slice(0, 8)}...</code>;
       case "reason":
-        return <span className="text-sm">{String(d.reason || "-")}</span>;
+        return <span className="text-sm">{String(dispute.reason || "-")}</span>;
       case "status":
         return (
-          <Chip size="sm" color={STATUS_COLOR[String(d.status)] || "default"} variant="soft">
-            {String(d.status)}
+          <Chip size="sm" color={STATUS_COLOR[String(dispute.status)] || "default"} variant="soft">
+            {String(dispute.status || "-")}
           </Chip>
         );
       case "moderator":
         return (
           <span className="text-xs text-zinc-500">
-            {d.moderator_id ? `${String(d.moderator_id).slice(0, 8)}...` : "Sin asignar"}
+            {dispute.moderator_id ? `${String(dispute.moderator_id).slice(0, 8)}...` : "Sin asignar"}
           </span>
         );
       case "actions":
@@ -156,7 +198,7 @@ export default function DisputesPage() {
               size="sm"
               variant="ghost"
               onPress={() => {
-                setSelectedDispute(d);
+                setSelectedDispute(dispute);
                 setModeratorId("");
                 assignModal.onOpen();
               }}
@@ -167,7 +209,7 @@ export default function DisputesPage() {
               size="sm"
               variant="ghost"
               onPress={() => {
-                setSelectedDispute(d);
+                setSelectedDispute(dispute);
                 setResolution({
                   outcome: "FULL_REFUND",
                   refund_amount: 0,
@@ -186,6 +228,9 @@ export default function DisputesPage() {
     }
   };
 
+  const canPrev = page > 1;
+  const canNext = page < Math.max(1, meta.total_pages);
+
   return (
     <div className="space-y-6">
       <div>
@@ -195,22 +240,50 @@ export default function DisputesPage() {
         <p className="text-sm text-zinc-500 mt-1">Gestion de disputas del marketplace</p>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
         <Input
-          placeholder="Buscar..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-64"
+          placeholder="Buscar ID (local)"
+          value={idSearch}
+          onChange={(e) => setIdSearch(e.target.value)}
         />
         <Input
-          placeholder="Filtrar por status..."
+          placeholder="status (OPEN, RESOLVED...)"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-56"
-         
         />
-        <Button variant="ghost" onPress={fetchDisputes}>
-          Filtrar
+        <Input
+          placeholder="reason"
+          value={reasonFilter}
+          onChange={(e) => setReasonFilter(e.target.value)}
+        />
+        <Input
+          placeholder="assigned_moderator_id"
+          value={assignedModeratorFilter}
+          onChange={(e) => setAssignedModeratorFilter(e.target.value)}
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          className="w-28"
+          type="number"
+          min={1}
+          value={perPageInput}
+          onChange={(e) => setPerPageInput(e.target.value)}
+          placeholder="per_page"
+        />
+        <Button
+          size="sm"
+          variant={unassignedOnly ? "primary" : "ghost"}
+          onPress={() => setUnassignedOnly((prev) => !prev)}
+        >
+          Solo sin asignar
+        </Button>
+        <Button size="sm" onPress={applyFilters}>
+          Aplicar filtros
+        </Button>
+        <Button size="sm" variant="ghost" onPress={clearFilters}>
+          Limpiar
         </Button>
       </div>
 
@@ -224,10 +297,10 @@ export default function DisputesPage() {
             <TableHeader columns={TABLE_COLUMNS}>
               {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
             </TableHeader>
-            <TableBody items={filtered}>
-              {(d) => (
-                <TableRow key={String(d.id)}>
-                  {(column) => <TableCell>{renderCell(d, getTableColumnKey(column))}</TableCell>}
+            <TableBody items={filteredDisputes}>
+              {(dispute) => (
+                <TableRow key={String(dispute.id)}>
+                  {(column) => <TableCell>{renderCell(dispute, getTableColumnKey(column))}</TableCell>}
                 </TableRow>
               )}
             </TableBody>
@@ -235,20 +308,26 @@ export default function DisputesPage() {
         </Table>
       )}
 
-      <Modal
-        isOpen={assignModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && assignModal.onClose()}
-      >
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
+        <span>
+          Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+        </span>
+        <div className="flex gap-2">
+          <Button size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+            Anterior
+          </Button>
+          <Button size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+            Siguiente
+          </Button>
+        </div>
+      </div>
+
+      <Modal isOpen={assignModal.isOpen} onOpenChange={(isOpen) => !isOpen && assignModal.onClose()}>
         <ModalDialog>
           <ModalHeader>Asignar Moderador</ModalHeader>
           <ModalBody className="gap-4">
             <p className="text-xs text-zinc-500">Disputa: {String(selectedDispute?.id || "")}</p>
-            <Input
-             
-              value={moderatorId}
-              onChange={(e) => setModeratorId(e.target.value)}
-             
-            />
+            <Input value={moderatorId} onChange={(e) => setModeratorId(e.target.value)} placeholder="moderator_id" />
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={assignModal.onClose}>
@@ -261,10 +340,7 @@ export default function DisputesPage() {
         </ModalDialog>
       </Modal>
 
-      <Modal
-        isOpen={resolveModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && resolveModal.onClose()}
-      >
+      <Modal isOpen={resolveModal.isOpen} onOpenChange={(isOpen) => !isOpen && resolveModal.onClose()}>
         <ModalDialog>
           <ModalHeader>
             <div className="flex items-center gap-2">
@@ -274,18 +350,11 @@ export default function DisputesPage() {
           </ModalHeader>
           <ModalBody className="gap-4">
             <Input
-             
               value={resolution.outcome}
-              onChange={(e) =>
-                setResolution((prev) => ({
-                  ...prev,
-                  outcome: e.target.value,
-                }))
-              }
-             
+              onChange={(e) => setResolution((prev) => ({ ...prev, outcome: e.target.value }))}
+              placeholder="outcome"
             />
             <Input
-             
               type="number"
               value={String(resolution.refund_amount)}
               onChange={(e) =>
@@ -294,26 +363,17 @@ export default function DisputesPage() {
                   refund_amount: Number.parseFloat(e.target.value) || 0,
                 }))
               }
+              placeholder="refund_amount"
             />
             <TextArea
-             
               value={resolution.notes}
-              onChange={(e) =>
-                setResolution((prev) => ({
-                  ...prev,
-                  notes: e.target.value,
-                }))
-              }
+              onChange={(e) => setResolution((prev) => ({ ...prev, notes: e.target.value }))}
+              placeholder="notes"
             />
             <Input
-             
               value={resolution.sanction}
-              onChange={(e) =>
-                setResolution((prev) => ({
-                  ...prev,
-                  sanction: e.target.value,
-                }))
-              }
+              onChange={(e) => setResolution((prev) => ({ ...prev, sanction: e.target.value }))}
+              placeholder="sanction"
             />
           </ModalBody>
           <ModalFooter>

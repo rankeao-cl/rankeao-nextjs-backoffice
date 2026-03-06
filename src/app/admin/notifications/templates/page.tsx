@@ -25,6 +25,7 @@ import {
   previewTemplate,
   testTemplate,
   updateTemplate,
+  type ListMeta,
 } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
@@ -33,6 +34,8 @@ import { Bell, Edit, Eye, Send } from "lucide-react";
 import { toast } from "sonner";
 
 type Template = Record<string, unknown>;
+
+type ActiveFilter = "all" | "true" | "false";
 
 const TABLE_COLUMNS = [
   { key: "key", label: "KEY" },
@@ -43,10 +46,23 @@ const TABLE_COLUMNS = [
   { key: "actions", label: "ACCIONES" },
 ] as const;
 
+const EMPTY_META: ListMeta = {
+  page: 1,
+  per_page: 20,
+  total: 0,
+  total_pages: 1,
+};
+
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [meta, setMeta] = useState<ListMeta>(EMPTY_META);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [isActive, setIsActive] = useState<ActiveFilter>("all");
+  const [page, setPage] = useState(1);
+  const [perPageInput, setPerPageInput] = useState("20");
 
   const createModal = useDisclosure();
   const [editTarget, setEditTarget] = useState<Template | null>(null);
@@ -71,18 +87,43 @@ export default function TemplatesPage() {
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getTemplates({ q: search || undefined });
+      const perPage = Math.max(1, Number.parseInt(perPageInput, 10) || 20);
+      const res = await getTemplates({
+        q: query || undefined,
+        category: category || undefined,
+        is_active: isActive === "all" ? undefined : isActive === "true",
+        page,
+        per_page: perPage,
+      });
+
       setTemplates((res.templates as Template[]) || []);
+      setMeta(res.meta || EMPTY_META);
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Error al cargar templates"));
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [category, isActive, page, perPageInput, query]);
 
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
+
+  const applyFilters = () => {
+    if (page !== 1) {
+      setPage(1);
+      return;
+    }
+    fetchTemplates();
+  };
+
+  const clearFilters = () => {
+    setQuery("");
+    setCategory("");
+    setIsActive("all");
+    setPerPageInput("20");
+    setPage(1);
+  };
 
   const openCreate = () => {
     setEditTarget(null);
@@ -117,7 +158,10 @@ export default function TemplatesPage() {
     try {
       const payload = {
         ...formData,
-        channels: formData.channels.split(",").map((value) => value.trim()),
+        channels: formData.channels
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
       };
 
       if (editTarget?.id) {
@@ -154,7 +198,9 @@ export default function TemplatesPage() {
 
     setTestLoading(true);
     try {
-      await testTemplate(Number(testTarget.id), { user_id: Number.parseInt(testUserId, 10) });
+      await testTemplate(Number(testTarget.id), {
+        user_id: Number.parseInt(testUserId, 10),
+      });
       toast.success("Test notification sent");
       testModal.onClose();
     } catch (error: unknown) {
@@ -174,11 +220,7 @@ export default function TemplatesPage() {
           </div>
         );
       case "category":
-        return (
-          <Chip size="sm" variant="soft">
-            {String(template.category || "-")}
-          </Chip>
-        );
+        return <Chip size="sm" variant="soft">{String(template.category || "-")}</Chip>;
       case "priority":
         return (
           <Chip size="sm" color="default" variant="soft">
@@ -205,12 +247,7 @@ export default function TemplatesPage() {
             <Button size="sm" variant="ghost" isIconOnly onPress={() => openEdit(template)}>
               <Edit className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              isIconOnly
-              onPress={() => handlePreview(template)}
-            >
+            <Button size="sm" variant="ghost" isIconOnly onPress={() => handlePreview(template)}>
               <Eye className="h-3.5 w-3.5" />
             </Button>
             <Button
@@ -232,6 +269,9 @@ export default function TemplatesPage() {
     }
   };
 
+  const canPrev = page > 1;
+  const canNext = page < Math.max(1, meta.total_pages);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -242,7 +282,6 @@ export default function TemplatesPage() {
           <p className="text-sm text-zinc-500 mt-1">CRUD de templates con preview y test</p>
         </div>
         <Button
-         
           onPress={openCreate}
           className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
         >
@@ -250,12 +289,50 @@ export default function TemplatesPage() {
         </Button>
       </div>
 
-      <Input
-        placeholder="Buscar..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="max-w-xs"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <Input placeholder="Buscar (q)" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <Input
+          placeholder="Categoria (system, social...)"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
+        <Input
+          className="w-full"
+          type="number"
+          min={1}
+          placeholder="per_page"
+          value={perPageInput}
+          onChange={(e) => setPerPageInput(e.target.value)}
+        />
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={isActive === "all" ? "primary" : "ghost"}
+            onPress={() => setIsActive("all")}
+          >
+            Todos
+          </Button>
+          <Button
+            size="sm"
+            variant={isActive === "true" ? "primary" : "ghost"}
+            onPress={() => setIsActive("true")}
+          >
+            Activos
+          </Button>
+          <Button
+            size="sm"
+            variant={isActive === "false" ? "primary" : "ghost"}
+            onPress={() => setIsActive("false")}
+          >
+            Inactivos
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <Button size="sm" onPress={applyFilters}>Aplicar filtros</Button>
+        <Button size="sm" variant="ghost" onPress={clearFilters}>Limpiar</Button>
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
@@ -278,55 +355,63 @@ export default function TemplatesPage() {
         </Table>
       )}
 
-      <Modal
-        isOpen={createModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && createModal.onClose()}
-      >
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
+        <span>
+          Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+        </span>
+        <div className="flex gap-2">
+          <Button size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+            Anterior
+          </Button>
+          <Button size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+            Siguiente
+          </Button>
+        </div>
+      </div>
+
+      <Modal isOpen={createModal.isOpen} onOpenChange={(isOpen) => !isOpen && createModal.onClose()}>
         <ModalDialog>
           <ModalHeader>{editTarget ? "Editar Template" : "Crear Template"}</ModalHeader>
           <ModalBody className="gap-4">
             <div className="grid grid-cols-2 gap-4">
               <Input
-               
+                placeholder="key"
                 value={formData.key}
                 onChange={(e) => setFormData((prev) => ({ ...prev, key: e.target.value }))}
                 disabled={Boolean(editTarget)}
               />
               <Input
-               
+                placeholder="category"
                 value={formData.category}
                 onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
               />
             </div>
             <Input
-             
+              placeholder="title_template"
               value={formData.title_template}
               onChange={(e) => setFormData((prev) => ({ ...prev, title_template: e.target.value }))}
             />
             <TextArea
-             
+              placeholder="body_template"
               value={formData.body_template}
               onChange={(e) => setFormData((prev) => ({ ...prev, body_template: e.target.value }))}
               rows={3}
-             
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
-               
+                placeholder="channels (IN_APP,EMAIL...)"
                 value={formData.channels}
                 onChange={(e) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
               />
               <Input
-               
+                placeholder="priority"
                 value={formData.priority}
                 onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
               />
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" onPress={createModal.onClose}>
-              Cancelar
-            </Button>
+            <Button variant="ghost" onPress={createModal.onClose}>Cancelar</Button>
             <Button onPress={handleSave} isPending={formLoading}>
               {editTarget ? "Guardar" : "Crear"}
             </Button>
@@ -334,10 +419,7 @@ export default function TemplatesPage() {
         </ModalDialog>
       </Modal>
 
-      <Modal
-        isOpen={previewModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && previewModal.onClose()}
-      >
+      <Modal isOpen={previewModal.isOpen} onOpenChange={(isOpen) => !isOpen && previewModal.onClose()}>
         <ModalDialog>
           <ModalHeader>Preview Template</ModalHeader>
           <ModalBody>
@@ -359,35 +441,25 @@ export default function TemplatesPage() {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" onPress={previewModal.onClose}>
-              Cerrar
-            </Button>
+            <Button variant="ghost" onPress={previewModal.onClose}>Cerrar</Button>
           </ModalFooter>
         </ModalDialog>
       </Modal>
 
-      <Modal
-        isOpen={testModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && testModal.onClose()}
-      >
+      <Modal isOpen={testModal.isOpen} onOpenChange={(isOpen) => !isOpen && testModal.onClose()}>
         <ModalDialog>
           <ModalHeader>Enviar Test - {String(testTarget?.key || "")}</ModalHeader>
           <ModalBody className="gap-4">
             <Input
-             
+              placeholder="user_id"
               value={testUserId}
               onChange={(e) => setTestUserId(e.target.value)}
               type="number"
-             
             />
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" onPress={testModal.onClose}>
-              Cancelar
-            </Button>
-            <Button onPress={handleTest} isPending={testLoading}>
-              Enviar Test
-            </Button>
+            <Button variant="ghost" onPress={testModal.onClose}>Cancelar</Button>
+            <Button onPress={handleTest} isPending={testLoading}>Enviar Test</Button>
           </ModalFooter>
         </ModalDialog>
       </Modal>

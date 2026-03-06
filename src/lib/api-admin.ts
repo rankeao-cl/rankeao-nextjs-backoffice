@@ -132,6 +132,87 @@ function extractList<T>(payload: unknown, keys: string[]): T[] {
   return [];
 }
 
+function toNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return undefined;
+}
+
+export interface ListMeta {
+  page: number;
+  per_page: number;
+  total: number;
+  total_pages: number;
+}
+
+function hasPaginationHints(record: Record<string, unknown>): boolean {
+  return (
+    "page" in record ||
+    "per_page" in record ||
+    "total" in record ||
+    "total_pages" in record ||
+    "count" in record ||
+    "total_count" in record
+  );
+}
+
+function extractListMeta(
+  payload: unknown,
+  fallbackTotal: number,
+  fallbackPerPage: number = 20
+): ListMeta {
+  const root = unwrapData(payload);
+
+  const candidates: unknown[] = [];
+  if (isRecord(root)) {
+    candidates.push(root.meta, root.pagination, root.page_info, root);
+  }
+
+  let source: Record<string, unknown> | null = null;
+  for (const candidate of candidates) {
+    if (isRecord(candidate) && hasPaginationHints(candidate)) {
+      source = candidate;
+      break;
+    }
+  }
+
+  const page = Math.max(1, toNumber(source?.page) ?? 1);
+  const perPage = Math.max(
+    1,
+    toNumber(source?.per_page) ??
+      toNumber(source?.limit) ??
+      toNumber(source?.page_size) ??
+      fallbackPerPage
+  );
+
+  const totalRaw =
+    toNumber(source?.total) ?? toNumber(source?.count) ?? toNumber(source?.total_count);
+  const total = Math.max(fallbackTotal, totalRaw ?? fallbackTotal);
+
+  const totalPages = Math.max(
+    1,
+    toNumber(source?.total_pages) ??
+      toNumber(source?.pages) ??
+      (total > 0 ? Math.ceil(total / perPage) : 1)
+  );
+
+  return {
+    page,
+    per_page: perPage,
+    total,
+    total_pages: totalPages,
+  };
+}
+
 function extractRecord(payload: unknown): Record<string, unknown> {
   const root = unwrapData(payload);
   return isRecord(root) ? root : {};
@@ -688,12 +769,17 @@ export async function getDisputes(filters?: {
   unassigned?: boolean;
   page?: number;
   per_page?: number;
-}): Promise<{ disputes: Record<string, unknown>[] }> {
+}): Promise<{ disputes: Record<string, unknown>[]; meta: ListMeta }> {
   const payload = await apiFetch<unknown>("/marketplace/disputes", {
     params: filters as Record<string, string | number | boolean | undefined>,
   });
 
-  return { disputes: extractList<Record<string, unknown>>(payload, ["disputes", "items"]) };
+  const disputes = extractList<Record<string, unknown>>(payload, ["disputes", "items"]);
+
+  return {
+    disputes,
+    meta: extractListMeta(payload, disputes.length, filters?.per_page ?? 20),
+  };
 }
 
 export async function assignDispute(disputeId: string, data: { moderator_id: string }) {
@@ -711,12 +797,17 @@ export async function getTemplates(params?: {
   q?: string;
   page?: number;
   per_page?: number;
-}): Promise<{ templates: Record<string, unknown>[] }> {
+}): Promise<{ templates: Record<string, unknown>[]; meta: ListMeta }> {
   const payload = await apiFetch<unknown>("/notifications/admin/templates", {
     params: params as Record<string, string | number | boolean | undefined>,
   });
 
-  return { templates: extractList<Record<string, unknown>>(payload, ["templates", "items"]) };
+  const templates = extractList<Record<string, unknown>>(payload, ["templates", "items"]);
+
+  return {
+    templates,
+    meta: extractListMeta(payload, templates.length, params?.per_page ?? 20),
+  };
 }
 
 export async function createTemplate(data: {
@@ -783,10 +874,15 @@ export async function createBroadcast(data: {
 export async function getBroadcasts(params?: {
   page?: number;
   per_page?: number;
-}): Promise<{ broadcasts: Record<string, unknown>[] }> {
+}): Promise<{ broadcasts: Record<string, unknown>[]; meta: ListMeta }> {
   const payload = await apiFetch<unknown>("/notifications/admin/broadcasts", {
     params: params as Record<string, string | number | boolean | undefined>,
   });
 
-  return { broadcasts: extractList<Record<string, unknown>>(payload, ["broadcasts", "items"]) };
+  const broadcasts = extractList<Record<string, unknown>>(payload, ["broadcasts", "items"]);
+
+  return {
+    broadcasts,
+    meta: extractListMeta(payload, broadcasts.length, params?.per_page ?? 20),
+  };
 }
