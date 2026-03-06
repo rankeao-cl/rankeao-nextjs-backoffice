@@ -361,83 +361,87 @@ export default function BadgesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Card className="xl:col-span-2 bg-[#0f1017] border border-[#2a2f4b]/40">
-          <CardContent className="p-5">
-            <Form>
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros y acciones</Fieldset.Legend>
-                <Description className="text-xs text-zinc-500">
-                  Busca insignias y accede a creacion o gestion de categorias sin dejar la tabla.
-                </Description>
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <div className="w-full lg:w-1/3 shrink-0 flex flex-col gap-6">
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5">
+              <Form>
+                <Fieldset className="space-y-4">
+                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros y acciones</Fieldset.Legend>
+                  <Description className="text-xs text-zinc-500">
+                    Busca insignias y accede a creacion o gestion de categorias sin dejar la tabla.
+                  </Description>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Buscar insignia</Label>
-                    <Input
-                      placeholder="nombre o slug"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </TextField>
+                  <div className="grid grid-cols-1 gap-3">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">Buscar insignia</Label>
+                      <Input
+                        placeholder="nombre o slug"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                    </TextField>
+                  </div>
+
+                  <Fieldset.Actions className="flex flex-wrap gap-2 pt-1">
+                    <Button type="button" variant="ghost" onPress={categoryModal.onOpen} size="sm">
+                      Categoria
+                    </Button>
+                    <Button
+                      type="button"
+                      onPress={openCreate}
+                      className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
+                    >
+                      Nueva insignia
+                    </Button>
+                  </Fieldset.Actions>
+                </Fieldset>
+              </Form>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5">
+              <Form>
+                <Fieldset className="space-y-3">
+                  <Fieldset.Legend className="text-zinc-200 font-semibold">Ayuda categorias</Fieldset.Legend>
+                  <Description className="text-xs text-zinc-500">
+                    Si ingresas un <code>category_id</code>, actualizas una categoria existente. Si lo dejas vacio,
+                    creas una nueva.
+                  </Description>
+                </Fieldset>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="w-full lg:w-2/3">
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5">
+              {loading ? (
+                <div className="flex justify-center py-20">
+                  <Spinner size="lg" color="current" />
                 </div>
-
-                <Fieldset.Actions className="flex flex-wrap gap-2 pt-1">
-                  <Button type="button" variant="ghost" onPress={categoryModal.onOpen} size="sm">
-                    Categoria
-                  </Button>
-                  <Button
-                    type="button"
-                    onPress={openCreate}
-                    className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
-                  >
-                    Nueva insignia
-                  </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-          <CardContent className="p-5">
-            <Form>
-              <Fieldset className="space-y-3">
-                <Fieldset.Legend className="text-zinc-200 font-semibold">Ayuda categorias</Fieldset.Legend>
-                <Description className="text-xs text-zinc-500">
-                  Si ingresas un <code>category_id</code>, actualizas una categoria existente. Si lo dejas vacio,
-                  creas una nueva.
-                </Description>
-              </Fieldset>
-            </Form>
-          </CardContent>
-        </Card>
+              ) : (
+                <Table>
+                  <Table.Content aria-label="Badges table">
+                    <TableHeader columns={TABLE_COLUMNS}>
+                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                    </TableHeader>
+                    <TableBody items={filteredBadges}>
+                      {(badge) => (
+                        <TableRow key={String(badge.id || badge.slug || "-")}>
+                          {(column) => <TableCell>{renderCell(badge, getTableColumnKey(column))}</TableCell>}
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table.Content>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-        <CardContent className="p-5">
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Spinner size="lg" color="current" />
-            </div>
-          ) : (
-            <Table>
-              <Table.Content aria-label="Badges table">
-                <TableHeader columns={TABLE_COLUMNS}>
-                  {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                </TableHeader>
-                <TableBody items={filteredBadges}>
-                  {(badge) => (
-                    <TableRow key={String(badge.id || badge.slug || "-")}>
-                      {(column) => <TableCell>{renderCell(badge, getTableColumnKey(column))}</TableCell>}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table.Content>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
 
       <Modal
         isOpen={createModal.isOpen}

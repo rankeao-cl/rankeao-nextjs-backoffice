@@ -176,53 +176,59 @@ export default function XPEventsPage() {
         </Button>
       </div>
 
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-        <CardContent className="p-5">
-          <Form>
-            <Fieldset className="space-y-4">
-              <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
-              <Description className="text-xs text-zinc-500">
-                Busca eventos por su <code>event_key</code> y mantén la tabla ordenada.
-              </Description>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Buscar</Label>
-                  <Input
-                    placeholder="event_key"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </TextField>
-              </div>
-            </Fieldset>
-          </Form>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <div className="w-full lg:w-1/3 shrink-0">
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5">
+              <Form>
+                <Fieldset className="space-y-4">
+                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
+                  <Description className="text-xs text-zinc-500">
+                    Busca eventos por su <code>event_key</code> y mantén la tabla ordenada.
+                  </Description>
+                  <div className="grid grid-cols-1 gap-3">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">Buscar</Label>
+                      <Input
+                        placeholder="event_key"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                    </TextField>
+                  </div>
+                </Fieldset>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
 
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-        <CardContent className="p-5">
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Spinner size="lg" color="current" />
-            </div>
-          ) : (
-            <Table>
-              <Table.Content aria-label="XP Events">
-                <TableHeader columns={TABLE_COLUMNS}>
-                  {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                </TableHeader>
-                <TableBody items={filtered}>
-                  {(event) => (
-                    <TableRow key={String(event.id || event.event_key || "-")}>
-                      {(column) => <TableCell>{renderCell(event, getTableColumnKey(column))}</TableCell>}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table.Content>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+        <div className="w-full lg:w-2/3">
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5">
+              {loading ? (
+                <div className="flex justify-center py-20">
+                  <Spinner size="lg" color="current" />
+                </div>
+              ) : (
+                <Table>
+                  <Table.Content aria-label="XP Events">
+                    <TableHeader columns={TABLE_COLUMNS}>
+                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                    </TableHeader>
+                    <TableBody items={filtered}>
+                      {(event) => (
+                        <TableRow key={String(event.id || event.event_key || "-")}>
+                          {(column) => <TableCell>{renderCell(event, getTableColumnKey(column))}</TableCell>}
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table.Content>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <Modal
         isOpen={createModal.isOpen}

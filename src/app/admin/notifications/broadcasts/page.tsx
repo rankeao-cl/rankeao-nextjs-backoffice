@@ -209,86 +209,92 @@ export default function BroadcastsPage() {
         </Button>
       </div>
 
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-        <CardContent className="p-5">
-          <Form>
-            <Fieldset className="space-y-4">
-              <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
-              <Description className="text-xs text-zinc-500">
-                Filtra por titulo, target y estado; ajusta la paginacion para revisar historico de envios.
-              </Description>
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <div className="w-full lg:w-1/3 shrink-0">
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5">
+              <Form>
+                <Fieldset className="space-y-4">
+                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
+                  <Description className="text-xs text-zinc-500">
+                    Filtra por titulo, target y estado; ajusta la paginacion para revisar historico de envios.
+                  </Description>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Titulo</Label>
-                  <Input placeholder="texto" value={queryFilter} onChange={(e) => setQueryFilter(e.target.value)} />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Target</Label>
-                  <Input placeholder="ALL, SEGMENT..." value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)} />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Estado</Label>
-                  <Input placeholder="PENDING, SENT..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Per page</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={perPageInput}
-                    onChange={(e) => setPerPageInput(e.target.value)}
-                  />
-                </TextField>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">Titulo</Label>
+                      <Input placeholder="texto" value={queryFilter} onChange={(e) => setQueryFilter(e.target.value)} />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">Target</Label>
+                      <Input placeholder="ALL, SEGMENT..." value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)} />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">Estado</Label>
+                      <Input placeholder="PENDING, SENT..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-zinc-400">Per page</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={perPageInput}
+                        onChange={(e) => setPerPageInput(e.target.value)}
+                      />
+                    </TextField>
+                  </div>
+
+                  <Fieldset.Actions className="flex gap-2">
+                    <Button type="button" size="sm" onPress={applyPagination}>Aplicar paginacion</Button>
+                    <Button type="button" size="sm" variant="ghost" onPress={clearFilters}>Limpiar filtros</Button>
+                  </Fieldset.Actions>
+                </Fieldset>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="w-full lg:w-2/3">
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5 space-y-4">
+              {loading ? (
+                <div className="flex justify-center py-20">
+                  <Spinner size="lg" color="current" />
+                </div>
+              ) : (
+                <Table>
+                  <Table.Content aria-label="Broadcasts">
+                    <TableHeader columns={TABLE_COLUMNS}>
+                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                    </TableHeader>
+                    <TableBody items={filteredBroadcasts}>
+                      {(broadcast) => (
+                        <TableRow key={String(broadcast.id || String(broadcast.title || "-"))}>
+                          {(column) => <TableCell>{renderCell(broadcast, getTableColumnKey(column))}</TableCell>}
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table.Content>
+                </Table>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
+                <span>
+                  Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+                </span>
+                <div className="flex gap-2">
+                  <Button type="button" size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+                    Anterior
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+                    Siguiente
+                  </Button>
+                </div>
               </div>
-
-              <Fieldset.Actions className="flex gap-2">
-                <Button type="button" size="sm" onPress={applyPagination}>Aplicar paginacion</Button>
-                <Button type="button" size="sm" variant="ghost" onPress={clearFilters}>Limpiar filtros</Button>
-              </Fieldset.Actions>
-            </Fieldset>
-          </Form>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-        <CardContent className="p-5 space-y-4">
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Spinner size="lg" color="current" />
-            </div>
-          ) : (
-            <Table>
-              <Table.Content aria-label="Broadcasts">
-                <TableHeader columns={TABLE_COLUMNS}>
-                  {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                </TableHeader>
-                <TableBody items={filteredBroadcasts}>
-                  {(broadcast) => (
-                    <TableRow key={String(broadcast.id || String(broadcast.title || "-"))}>
-                      {(column) => <TableCell>{renderCell(broadcast, getTableColumnKey(column))}</TableCell>}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table.Content>
-            </Table>
-          )}
-
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
-            <span>
-              Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
-            </span>
-            <div className="flex gap-2">
-              <Button type="button" size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
-                Anterior
-              </Button>
-              <Button type="button" size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
-                Siguiente
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <Modal isOpen={createModal.isOpen} onOpenChange={(isOpen) => !isOpen && createModal.onClose()}>
         <ModalDialog>
