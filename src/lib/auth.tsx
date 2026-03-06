@@ -4,7 +4,6 @@ import {
     createContext,
     useContext,
     useState,
-    useEffect,
     useCallback,
     type ReactNode,
 } from "react";
@@ -34,24 +33,29 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        // Restore user from localStorage on mount
-        const token = getToken();
-        if (token) {
-            const storedUser = localStorage.getItem("rankeao_admin_user");
-            if (storedUser) {
-                try {
-                    setUser(JSON.parse(storedUser));
-                } catch {
-                    clearTokens();
-                }
-            }
+    const [user, setUser] = useState<User | null>(() => {
+        if (typeof window === "undefined") {
+            return null;
         }
-        setIsLoading(false);
-    }, []);
+
+        const token = getToken();
+        if (!token) {
+            return null;
+        }
+
+        const storedUser = localStorage.getItem("rankeao_admin_user");
+        if (!storedUser) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(storedUser) as User;
+        } catch {
+            clearTokens();
+            return null;
+        }
+    });
+    const isLoading = false;
 
     const login = useCallback(async (email: string, password: string) => {
         const res: AuthResponse = await apiLogin(email, password);

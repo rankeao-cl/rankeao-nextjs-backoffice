@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, Spinner } from "@heroui/react";
-import { getGamificationStats, getNotificationStats } from "@/lib/api-admin";
+import { Button, Card, CardContent } from "@heroui/react";
+import {
+    LAST_API_ERROR_EVENT,
+    clearLastApiError,
+    getGamificationStats,
+    getLastApiError,
+    getNotificationStats,
+    type LastApiErrorInfo,
+} from "@/lib/api-admin";
 import {
     Award,
     Crown,
@@ -14,6 +21,11 @@ import {
     BarChart3,
     Store,
     Scale,
+    Layers,
+    Mail,
+    Bug,
+    ShieldCheck,
+    TriangleAlert,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -110,6 +122,7 @@ export default function DashboardPage() {
     const [gamStats, setGamStats] = useState<any>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [notifStats, setNotifStats] = useState<any>(null);
+    const [lastApiError, setLastApiError] = useState<LastApiErrorInfo | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -126,6 +139,21 @@ export default function DashboardPage() {
             }
         }
         load();
+    }, []);
+
+    useEffect(() => {
+        const syncLastError = () => {
+            setLastApiError(getLastApiError());
+        };
+
+        syncLastError();
+
+        if (typeof window === "undefined") {
+            return;
+        }
+
+        window.addEventListener(LAST_API_ERROR_EVENT, syncLastError);
+        return () => window.removeEventListener(LAST_API_ERROR_EVENT, syncLastError);
     }, []);
 
     return (
@@ -210,6 +238,63 @@ export default function DashboardPage() {
                 </div>
             )}
 
+            <Card className="bg-[#0f1017]/80 border border-white/15">
+                <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                            <Bug className="h-5 w-5 text-zinc-200" />
+                            <h2 className="text-base font-semibold text-zinc-200">Diagnostico API</h2>
+                        </div>
+                        {lastApiError ? (
+                            <Button size="sm" variant="ghost" onPress={clearLastApiError}>
+                                Limpiar
+                            </Button>
+                        ) : null}
+                    </div>
+
+                    {lastApiError ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Status</p>
+                                <p className="text-zinc-100 font-semibold">{lastApiError.status}</p>
+                            </div>
+                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Code</p>
+                                <p className="text-zinc-100 font-semibold">{lastApiError.code || "N/A"}</p>
+                            </div>
+                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3 lg:col-span-2">
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Path</p>
+                                <code className="text-xs text-zinc-200">{lastApiError.path}</code>
+                            </div>
+                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Method</p>
+                                <p className="text-zinc-100 font-semibold">{lastApiError.method}</p>
+                            </div>
+                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Fecha</p>
+                                <p className="text-zinc-100 font-semibold">
+                                    {new Date(lastApiError.at).toLocaleString("es-CL")}
+                                </p>
+                            </div>
+                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3 lg:col-span-2">
+                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Mensaje</p>
+                                <p className="text-sm text-zinc-300">{lastApiError.message}</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-4 flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-zinc-300" />
+                            <p className="text-sm text-zinc-400">No hay errores API recientes registrados.</p>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                        <TriangleAlert className="h-3.5 w-3.5" />
+                        Muestra el ultimo error capturado por el cliente admin para soporte rapido.
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* Quick Links */}
             <div>
                 <h2 className="text-lg font-semibold text-zinc-200 mb-4 font-[var(--font-heading)]">
@@ -247,10 +332,22 @@ export default function DashboardPage() {
                         description="CRUD y preview de templates"
                     />
                     <QuickLink
+                        label="Email Templates"
+                        href="/admin/notifications/email-templates"
+                        icon={<Mail className="h-5 w-5 text-zinc-200" />}
+                        description="Preview de plantillas de correo"
+                    />
+                    <QuickLink
                         label="Broadcasts"
                         href="/admin/notifications/broadcasts"
                         icon={<Users className="h-5 w-5 text-zinc-200" />}
                         description="Enviar notificaciones masivas"
+                    />
+                    <QuickLink
+                        label="Niveles"
+                        href="/admin/gamification/levels"
+                        icon={<Layers className="h-5 w-5 text-white" />}
+                        description="Configurar thresholds de XP"
                     />
                 </div>
             </div>

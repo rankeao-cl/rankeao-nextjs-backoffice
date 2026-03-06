@@ -27,13 +27,16 @@ import {
   grantBadge,
   revokeBadge,
   updateBadge,
+  updateBadgeCategory,
 } from "@/lib/api-admin";
+import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Award, Edit, Gift, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 
-type Badge = Record<string, any>;
+type Badge = Record<string, unknown>;
 
 type BadgeForm = {
   slug: string;
@@ -96,6 +99,7 @@ export default function BadgesPage() {
   const [revokeLoading, setRevokeLoading] = useState(false);
 
   const categoryModal = useDisclosure();
+  const [catId, setCatId] = useState("");
   const [catName, setCatName] = useState("");
   const [catDesc, setCatDesc] = useState("");
   const [catIcon, setCatIcon] = useState("");
@@ -105,14 +109,9 @@ export default function BadgesPage() {
     setLoading(true);
     try {
       const res = await getBadges();
-      const payload = res as Record<string, unknown>;
-      const list =
-        (payload.badges as Badge[]) ||
-        (payload.data as Badge[]) ||
-        (Array.isArray(res) ? (res as Badge[]) : []);
-      setBadges(list);
-    } catch {
-      toast.error("Error al cargar badges");
+      setBadges((res.badges as Badge[]) || []);
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Error al cargar badges"));
     } finally {
       setLoading(false);
     }
@@ -163,7 +162,7 @@ export default function BadgesPage() {
       createModal.onClose();
       fetchBadges();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
@@ -211,7 +210,7 @@ export default function BadgesPage() {
 
       grantModal.onClose();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setGrantLoading(false);
     }
@@ -236,29 +235,40 @@ export default function BadgesPage() {
       toast.success("Badge revocado");
       revokeModal.onClose();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setRevokeLoading(false);
     }
   };
 
-  const handleCreateCategory = async () => {
+  const handleSaveCategory = async () => {
     if (!catName) return;
 
     setCatLoading(true);
     try {
-      await createBadgeCategory({
-        name: catName,
-        description: catDesc || undefined,
-        icon: catIcon || undefined,
-      });
-      toast.success("Categoria creada");
+      if (catId) {
+        await updateBadgeCategory(catId, {
+          name: catName,
+          description: catDesc || undefined,
+          icon: catIcon || undefined,
+        });
+        toast.success("Categoria actualizada");
+      } else {
+        await createBadgeCategory({
+          name: catName,
+          description: catDesc || undefined,
+          icon: catIcon || undefined,
+        });
+        toast.success("Categoria creada");
+      }
+
       categoryModal.onClose();
+      setCatId("");
       setCatName("");
       setCatDesc("");
       setCatIcon("");
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setCatLoading(false);
     }
@@ -270,9 +280,12 @@ export default function BadgesPage() {
         return (
           <div className="flex items-center gap-3">
             {badge.icon_url ? (
-              <img
+              <Image
                 src={String(badge.icon_url)}
                 alt={String(badge.name || "Badge")}
+                width={32}
+                height={32}
+                unoptimized
                 className="h-8 w-8 rounded-lg object-cover"
               />
             ) : (
@@ -386,8 +399,8 @@ export default function BadgesPage() {
 
         <div>
           <p className="text-zinc-500 text-sm">
-            Las categorias agrupan badges por tematica. Crea nuevas con el boton
-            "Categoria".
+            Si ingresas un `category_id`, se actualiza la categoria existente. Si lo dejas vacio,
+            se crea una nueva.
           </p>
         </div>
       </div>
@@ -531,21 +544,25 @@ export default function BadgesPage() {
         onOpenChange={(isOpen) => !isOpen && categoryModal.onClose()}
       >
         <ModalDialog>
-          <ModalHeader>Crear Categoria de Badge</ModalHeader>
+          <ModalHeader>{catId ? "Actualizar Categoria de Badge" : "Crear Categoria de Badge"}</ModalHeader>
           <ModalBody className="gap-4">
             <Input
-             
-              value={catName}
-              onChange={(e) => setCatName(e.target.value)}
-             
+              placeholder="category_id (opcional para update)"
+              value={catId}
+              onChange={(e) => setCatId(e.target.value)}
             />
             <Input
-             
+              placeholder="name"
+              value={catName}
+              onChange={(e) => setCatName(e.target.value)}
+            />
+            <Input
+              placeholder="description (opcional)"
               value={catDesc}
               onChange={(e) => setCatDesc(e.target.value)}
             />
             <Input
-             
+              placeholder="icon (opcional)"
               value={catIcon}
               onChange={(e) => setCatIcon(e.target.value)}
             />
@@ -554,8 +571,8 @@ export default function BadgesPage() {
             <Button variant="ghost" onPress={categoryModal.onClose}>
               Cancelar
             </Button>
-            <Button onPress={handleCreateCategory} isPending={catLoading}>
-              Crear
+            <Button onPress={handleSaveCategory} isPending={catLoading}>
+              {catId ? "Actualizar" : "Crear"}
             </Button>
           </ModalFooter>
         </ModalDialog>

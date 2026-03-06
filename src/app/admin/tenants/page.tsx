@@ -27,6 +27,7 @@ import {
   type Tenant,
   verifyTenant,
 } from "@/lib/api-admin";
+import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Store } from "lucide-react";
@@ -66,8 +67,8 @@ export default function TenantsPage() {
     try {
       const res = await getTenants();
       setTenants(res.tenants || []);
-    } catch {
-      toast.error("Error al cargar tenants");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Error al cargar tenants"));
     } finally {
       setLoading(false);
     }
@@ -109,7 +110,7 @@ export default function TenantsPage() {
       onClose();
       fetchTenants();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }

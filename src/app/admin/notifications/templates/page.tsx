@@ -26,16 +26,13 @@ import {
   testTemplate,
   updateTemplate,
 } from "@/lib/api-admin";
+import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Bell, Edit, Eye, Send } from "lucide-react";
 import { toast } from "sonner";
 
 type Template = Record<string, unknown>;
-
-const CATEGORIES = ["tournament", "social", "marketplace", "system"];
-const CHANNELS = ["IN_APP", "EMAIL", "PUSH", "SMS"];
-const PRIORITIES = ["LOW", "NORMAL", "HIGH", "URGENT"];
 
 const TABLE_COLUMNS = [
   { key: "key", label: "KEY" },
@@ -74,14 +71,10 @@ export default function TemplatesPage() {
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
     try {
-      const res = (await getTemplates({ q: search || undefined })) as Record<string, unknown>;
-      const data =
-        (res.templates as Template[]) ||
-        (res.data as Template[]) ||
-        (Array.isArray(res) ? (res as Template[]) : []);
-      setTemplates(data);
-    } catch {
-      toast.error("Error al cargar templates");
+      const res = await getTemplates({ q: search || undefined });
+      setTemplates((res.templates as Template[]) || []);
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Error al cargar templates"));
     } finally {
       setLoading(false);
     }
@@ -138,7 +131,7 @@ export default function TemplatesPage() {
       createModal.onClose();
       fetchTemplates();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
@@ -152,7 +145,7 @@ export default function TemplatesPage() {
       setPreviewData(result as Record<string, unknown>);
       previewModal.onOpen();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -165,7 +158,7 @@ export default function TemplatesPage() {
       toast.success("Test notification sent");
       testModal.onClose();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setTestLoading(false);
     }

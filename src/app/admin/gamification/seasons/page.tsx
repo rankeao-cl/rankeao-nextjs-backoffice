@@ -14,6 +14,7 @@ import {
   ModalHeader,
 } from "@heroui/react";
 import { closeSeason, createSeason, previewSeasonClose } from "@/lib/api-admin";
+import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Eye, Lock, Trophy } from "lucide-react";
 import { toast } from "sonner";
@@ -46,7 +47,7 @@ export default function SeasonsPage() {
       createModal.onClose();
       setFormData({ name: "", starts_at: "", ends_at: "" });
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
@@ -63,7 +64,7 @@ export default function SeasonsPage() {
       setPreviewData(data);
       previewModal.onOpen();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -76,7 +77,7 @@ export default function SeasonsPage() {
       toast.success("Season cerrada exitosamente");
       closeModal.onClose();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setCloseLoading(false);
     }

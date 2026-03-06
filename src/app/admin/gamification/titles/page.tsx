@@ -1,119 +1,130 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Modal,
-  ModalBody,
-  ModalDialog,
-  ModalFooter,
-  ModalHeader,
-  TextArea,
-} from "@heroui/react";
+import { Button, Card, CardContent, Input, TextArea } from "@heroui/react";
 import { createTitle, grantTitle, revokeTitle, updateTitle } from "@/lib/api-admin";
-import { useDisclosure } from "@/hooks/use-disclosure";
-import { Crown, Edit, Gift, Trash2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/error-message";
+import { Crown, Gift, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-type Title = Record<string, string | boolean | number | undefined>;
-
 export default function TitlesPage() {
-  const [titles] = useState<Title[]>([]);
-
-  const createModal = useDisclosure();
-  const [editTarget, setEditTarget] = useState<Title | null>(null);
-  const [formData, setFormData] = useState({
+  const [createForm, setCreateForm] = useState({
     slug: "",
     name: "",
-    color: "#7c3aed",
+    color: "#d4d4d8",
     season_id: "",
   });
-  const [formLoading, setFormLoading] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
 
-  const grantModal = useDisclosure();
-  const [grantTarget, setGrantTarget] = useState<Title | null>(null);
-  const [grantUserId, setGrantUserId] = useState("");
-  const [grantReason, setGrantReason] = useState("");
+  const [updateForm, setUpdateForm] = useState({
+    title_id: "",
+    name: "",
+    color: "",
+    season_id: "",
+  });
+  const [updateLoading, setUpdateLoading] = useState(false);
+
+  const [grantForm, setGrantForm] = useState({
+    title_id: "",
+    user_id: "",
+    reason: "",
+  });
   const [grantLoading, setGrantLoading] = useState(false);
 
-  const revokeModal = useDisclosure();
-  const [revokeTarget, setRevokeTarget] = useState<Title | null>(null);
-  const [revokeUserId, setRevokeUserId] = useState("");
-  const [revokeReason, setRevokeReason] = useState("");
+  const [revokeForm, setRevokeForm] = useState({
+    title_id: "",
+    user_id: "",
+    reason: "",
+  });
   const [revokeLoading, setRevokeLoading] = useState(false);
 
-  const openCreate = () => {
-    setEditTarget(null);
-    setFormData({ slug: "", name: "", color: "#7c3aed", season_id: "" });
-    createModal.onOpen();
-  };
+  const handleCreate = async () => {
+    if (!createForm.slug || !createForm.name) {
+      toast.error("Slug y nombre son requeridos");
+      return;
+    }
 
-  const openEdit = (title: Title) => {
-    setEditTarget(title);
-    setFormData({
-      slug: String(title.slug || ""),
-      name: String(title.name || ""),
-      color: String(title.color || "#7c3aed"),
-      season_id: String(title.season_id || ""),
-    });
-    createModal.onOpen();
-  };
-
-  const handleSave = async () => {
-    setFormLoading(true);
+    setCreateLoading(true);
     try {
-      const payload = { ...formData, season_id: formData.season_id || undefined };
-
-      if (editTarget?.id) {
-        await updateTitle(String(editTarget.id), payload);
-        toast.success("Titulo actualizado");
-      } else {
-        await createTitle(payload);
-        toast.success("Titulo creado");
-      }
-
-      createModal.onClose();
+      await createTitle({
+        slug: createForm.slug,
+        name: createForm.name,
+        color: createForm.color || undefined,
+        season_id: createForm.season_id || undefined,
+      });
+      toast.success("Titulo creado");
+      setCreateForm({ slug: "", name: "", color: "#d4d4d8", season_id: "" });
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
-      setFormLoading(false);
+      setCreateLoading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!updateForm.title_id) {
+      toast.error("Ingresa el Title ID");
+      return;
+    }
+
+    const payload: Record<string, unknown> = {};
+    if (updateForm.name) payload.name = updateForm.name;
+    if (updateForm.color) payload.color = updateForm.color;
+    if (updateForm.season_id) payload.season_id = updateForm.season_id;
+
+    if (Object.keys(payload).length === 0) {
+      toast.error("Ingresa al menos un campo para actualizar");
+      return;
+    }
+
+    setUpdateLoading(true);
+    try {
+      await updateTitle(updateForm.title_id, payload);
+      toast.success("Titulo actualizado");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
   const handleGrant = async () => {
-    if (!grantTarget?.id || !grantUserId) return;
+    if (!grantForm.title_id || !grantForm.user_id) {
+      toast.error("Title ID y User ID son requeridos");
+      return;
+    }
 
     setGrantLoading(true);
     try {
-      await grantTitle(String(grantTarget.id), {
-        user_id: grantUserId,
-        reason: grantReason || undefined,
+      await grantTitle(grantForm.title_id, {
+        user_id: grantForm.user_id,
+        reason: grantForm.reason || undefined,
       });
       toast.success("Titulo otorgado");
-      grantModal.onClose();
+      setGrantForm((prev) => ({ ...prev, user_id: "", reason: "" }));
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setGrantLoading(false);
     }
   };
 
   const handleRevoke = async () => {
-    if (!revokeTarget?.id || !revokeUserId) return;
+    if (!revokeForm.title_id || !revokeForm.user_id) {
+      toast.error("Title ID y User ID son requeridos");
+      return;
+    }
 
     setRevokeLoading(true);
     try {
-      await revokeTitle(String(revokeTarget.id), {
-        user_id: revokeUserId,
-        reason: revokeReason || undefined,
+      await revokeTitle(revokeForm.title_id, {
+        user_id: revokeForm.user_id,
+        reason: revokeForm.reason || undefined,
       });
       toast.success("Titulo revocado");
-      revokeModal.onClose();
+      setRevokeForm((prev) => ({ ...prev, user_id: "", reason: "" }));
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setRevokeLoading(false);
     }
@@ -121,189 +132,140 @@ export default function TitlesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
-            Titles
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">Administrar titulos de usuario</p>
-        </div>
-        <Button
-         
-          onPress={openCreate}
-          className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
-        >
-          Nuevo Titulo
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          Titles
+        </h1>
+        <p className="text-sm text-zinc-500 mt-1">
+          Operaciones admin de titulos. La API no expone listado, por eso editas con Title ID.
+        </p>
       </div>
 
-      {titles.length === 0 ? (
-        <Card className="bg-[#0f1017]/60 border border-[#2a2f4b]/30">
-          <CardContent className="flex flex-col items-center py-16 gap-4">
-            <Crown className="h-12 w-12 text-zinc-600" />
-            <p className="text-zinc-500">No hay titulos cargados. Crea nuevos con el boton de arriba.</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-zinc-200" />
+              <h2 className="font-semibold text-zinc-200">Crear titulo</h2>
+            </div>
+            <Input
+              placeholder="slug (ej: season-1-champion)"
+              value={createForm.slug}
+              onChange={(e) => setCreateForm((prev) => ({ ...prev, slug: e.target.value }))}
+            />
+            <Input
+              placeholder="name"
+              value={createForm.name}
+              onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                placeholder="#d4d4d8"
+                value={createForm.color}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, color: e.target.value }))}
+              />
+              <Input
+                placeholder="season_id (opcional)"
+                value={createForm.season_id}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, season_id: e.target.value }))}
+              />
+            </div>
+            <Button onPress={handleCreate} isPending={createLoading}>
+              Crear
+            </Button>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {titles.map((title) => (
-            <Card key={String(title.id)} className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: `${String(title.color || "#7c3aed")}33` }}
-                  >
-                    <Crown className="h-5 w-5" style={{ color: String(title.color || "#7c3aed") }} />
-                  </div>
-                  <div>
-                    <p className="font-medium text-zinc-200">{String(title.name || "-")}</p>
-                    <p className="text-xs text-zinc-500">{String(title.slug || "-")}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" isIconOnly onPress={() => openEdit(title)}>
-                    <Edit className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                   
-                    isIconOnly
-                    onPress={() => {
-                      setGrantTarget(title);
-                      setGrantUserId("");
-                      setGrantReason("");
-                      grantModal.onOpen();
-                    }}
-                  >
-                    <Gift className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                   
-                    isIconOnly
-                    onPress={() => {
-                      setRevokeTarget(title);
-                      setRevokeUserId("");
-                      setRevokeReason("");
-                      revokeModal.onOpen();
-                    }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
 
-      <Modal
-        isOpen={createModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && createModal.onClose()}
-      >
-        <ModalDialog>
-          <ModalHeader>{editTarget ? "Editar Titulo" : "Crear Titulo"}</ModalHeader>
-          <ModalBody className="gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-               
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              />
-              <Input
-               
-                value={formData.slug}
-                onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                disabled={Boolean(editTarget)}
-              />
+        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <Pencil className="h-5 w-5 text-zinc-200" />
+              <h2 className="font-semibold text-zinc-200">Actualizar titulo</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-               
-                value={formData.color}
-                onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
-                type="color"
-              />
-              <Input
-               
-                value={formData.season_id}
-                onChange={(e) => setFormData((prev) => ({ ...prev, season_id: e.target.value }))}
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={createModal.onClose}>
-              Cancelar
-            </Button>
-            <Button onPress={handleSave} isPending={formLoading}>
-              {editTarget ? "Guardar" : "Crear"}
-            </Button>
-          </ModalFooter>
-        </ModalDialog>
-      </Modal>
-
-      <Modal
-        isOpen={grantModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && grantModal.onClose()}
-      >
-        <ModalDialog>
-          <ModalHeader>Grant Titulo - {String(grantTarget?.name || "")}</ModalHeader>
-          <ModalBody className="gap-4">
             <Input
-             
-              value={grantUserId}
-              onChange={(e) => setGrantUserId(e.target.value)}
-             
+              placeholder="title_id"
+              value={updateForm.title_id}
+              onChange={(e) => setUpdateForm((prev) => ({ ...prev, title_id: e.target.value }))}
+            />
+            <Input
+              placeholder="name (opcional)"
+              value={updateForm.name}
+              onChange={(e) => setUpdateForm((prev) => ({ ...prev, name: e.target.value }))}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                placeholder="color hex (opcional)"
+                value={updateForm.color}
+                onChange={(e) => setUpdateForm((prev) => ({ ...prev, color: e.target.value }))}
+              />
+              <Input
+                placeholder="season_id (opcional)"
+                value={updateForm.season_id}
+                onChange={(e) => setUpdateForm((prev) => ({ ...prev, season_id: e.target.value }))}
+              />
+            </div>
+            <Button onPress={handleUpdate} isPending={updateLoading}>
+              Guardar cambios
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <Gift className="h-5 w-5 text-zinc-200" />
+              <h2 className="font-semibold text-zinc-200">Otorgar titulo</h2>
+            </div>
+            <Input
+              placeholder="title_id"
+              value={grantForm.title_id}
+              onChange={(e) => setGrantForm((prev) => ({ ...prev, title_id: e.target.value }))}
+            />
+            <Input
+              placeholder="user_id"
+              value={grantForm.user_id}
+              onChange={(e) => setGrantForm((prev) => ({ ...prev, user_id: e.target.value }))}
             />
             <TextArea
-             
-              value={grantReason}
-              onChange={(e) => setGrantReason(e.target.value)}
+              placeholder="reason (opcional)"
+              value={grantForm.reason}
+              onChange={(e) => setGrantForm((prev) => ({ ...prev, reason: e.target.value }))}
             />
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={grantModal.onClose}>
-              Cancelar
-            </Button>
             <Button onPress={handleGrant} isPending={grantLoading}>
-              Grant
+              Otorgar
             </Button>
-          </ModalFooter>
-        </ModalDialog>
-      </Modal>
+          </CardContent>
+        </Card>
 
-      <Modal
-        isOpen={revokeModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && revokeModal.onClose()}
-      >
-        <ModalDialog>
-          <ModalHeader className="text-zinc-100">Revocar Titulo - {String(revokeTarget?.name || "")}</ModalHeader>
-          <ModalBody className="gap-4">
+        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-zinc-200" />
+              <h2 className="font-semibold text-zinc-200">Revocar titulo</h2>
+            </div>
             <Input
-             
-              value={revokeUserId}
-              onChange={(e) => setRevokeUserId(e.target.value)}
-             
+              placeholder="title_id"
+              value={revokeForm.title_id}
+              onChange={(e) => setRevokeForm((prev) => ({ ...prev, title_id: e.target.value }))}
+            />
+            <Input
+              placeholder="user_id"
+              value={revokeForm.user_id}
+              onChange={(e) => setRevokeForm((prev) => ({ ...prev, user_id: e.target.value }))}
             />
             <TextArea
-             
-              value={revokeReason}
-              onChange={(e) => setRevokeReason(e.target.value)}
+              placeholder="reason (opcional)"
+              value={revokeForm.reason}
+              onChange={(e) => setRevokeForm((prev) => ({ ...prev, reason: e.target.value }))}
             />
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={revokeModal.onClose}>
-              Cancelar
-            </Button>
             <Button onPress={handleRevoke} isPending={revokeLoading}>
               Revocar
             </Button>
-          </ModalFooter>
-        </ModalDialog>
-      </Modal>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

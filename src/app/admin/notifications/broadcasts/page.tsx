@@ -20,14 +20,13 @@ import {
   TextArea,
 } from "@heroui/react";
 import { createBroadcast, getBroadcasts } from "@/lib/api-admin";
+import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Radio, Send } from "lucide-react";
 import { toast } from "sonner";
 
 type Broadcast = Record<string, unknown>;
-
-const TARGETS = ["ALL", "ACTIVE_7D", "SELLERS", "JUDGES", "TENANT_OWNERS"];
 
 const TABLE_COLUMNS = [
   { key: "title", label: "TITULO" },
@@ -55,14 +54,10 @@ export default function BroadcastsPage() {
   const fetchBroadcasts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = (await getBroadcasts()) as Record<string, unknown>;
-      const data =
-        (res.broadcasts as Broadcast[]) ||
-        (res.data as Broadcast[]) ||
-        (Array.isArray(res) ? (res as Broadcast[]) : []);
-      setBroadcasts(data);
-    } catch {
-      toast.error("Error al cargar broadcasts");
+      const res = await getBroadcasts();
+      setBroadcasts((res.broadcasts as Broadcast[]) || []);
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Error al cargar broadcasts"));
     } finally {
       setLoading(false);
     }
@@ -101,7 +96,7 @@ export default function BroadcastsPage() {
         schedule_at: "",
       });
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }

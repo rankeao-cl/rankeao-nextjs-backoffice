@@ -20,6 +20,7 @@ import {
   TextArea,
 } from "@heroui/react";
 import { getDisputes, assignDispute, resolveDispute } from "@/lib/api-admin";
+import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Scale } from "lucide-react";
@@ -74,16 +75,12 @@ export default function DisputesPage() {
   const fetchDisputes = useCallback(async () => {
     setLoading(true);
     try {
-      const res = (await getDisputes({
+      const res = await getDisputes({
         status: statusFilter || undefined,
-      })) as Record<string, unknown>;
-      const data =
-        (res.disputes as Dispute[]) ||
-        (res.data as Dispute[]) ||
-        (Array.isArray(res) ? (res as Dispute[]) : []);
-      setDisputes(data);
-    } catch {
-      toast.error("Error al cargar disputas");
+      });
+      setDisputes(res.disputes || []);
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Error al cargar disputas"));
     } finally {
       setLoading(false);
     }
@@ -108,7 +105,7 @@ export default function DisputesPage() {
       assignModal.onClose();
       fetchDisputes();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setAssignLoading(false);
     }
@@ -128,7 +125,7 @@ export default function DisputesPage() {
       resolveModal.onClose();
       fetchDisputes();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setResolveLoading(false);
     }

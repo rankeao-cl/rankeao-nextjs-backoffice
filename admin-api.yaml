@@ -1,0 +1,1739 @@
+openapi: 3.0.3
+info:
+  title: Rankeao Admin API
+  description: Admin backoffice API — tenant verification, gamification management, notification templates, dispute resolution.
+  version: 1.0.0
+  contact:
+    name: Rankeao
+    url: https://rankeao.cl
+servers:
+- url: https://api.rankeao.cl
+  description: Production
+tags:
+- name: Auth
+- name: Tenants
+- name: Disputes
+- name: Gamification
+- name: Badges
+- name: Seasons
+- name: Notifications
+security: []
+paths:
+  /api/v1/admin/tenants:
+    get:
+      tags:
+      - Tenants
+      summary: List all tenants (admin)
+      description: 'List all tenants in the platform for admin review. Includes all statuses (pending, active,
+
+        suspended). Requires authentication and ADMIN grant.
+
+        '
+      operationId: adminListTenants
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Tenants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenants:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+  /api/v1/admin/tenants/{tenant_id}/reactivate:
+    post:
+      tags:
+      - Tenants
+      summary: Reactivate a tenant (admin)
+      description: 'Reactivate a previously suspended tenant, restoring access and visibility.
+
+        Requires authentication and ADMIN grant.
+
+        '
+      operationId: adminReactivateTenant
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageResponse'
+  /api/v1/admin/tenants/{tenant_id}/reject:
+    post:
+      tags:
+      - Tenants
+      summary: Reject a tenant (admin)
+      description: 'Reject a tenant''s verification request. The tenant remains in a non-verified state.
+
+        Requires authentication and ADMIN grant.
+
+        '
+      operationId: adminRejectTenant
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageResponse'
+  /api/v1/admin/tenants/{tenant_id}/suspend:
+    post:
+      tags:
+      - Tenants
+      summary: Suspend a tenant (admin)
+      description: 'Suspend an active tenant, disabling access to the store panel and hiding it from the directory.
+
+        Requires authentication and ADMIN grant.
+
+        '
+      operationId: adminSuspendTenant
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageResponse'
+  /api/v1/admin/tenants/{tenant_id}/verify:
+    post:
+      tags:
+      - Tenants
+      summary: Verify a tenant (admin)
+      description: 'Mark a tenant as verified after admin review. Verified tenants can make their store public.
+
+        Requires authentication and ADMIN grant.
+
+        '
+      operationId: adminVerifyTenant
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageResponse'
+  /api/v1/auth/forgot-password:
+    post:
+      tags:
+      - Auth
+      summary: Forgot password (not implemented)
+      description: 'Initiates a password reset flow by sending a reset link to the user''s email.
+
+        Not yet implemented — always returns 501.
+
+        '
+      operationId: forgotPassword
+      responses:
+        '501':
+          description: Not implemented
+  /api/v1/auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Log in with email and password
+      description: 'Authenticates a user with email and password, returning an access token and refresh token.
+
+        Returns 401 with INVALID_CREDENTIALS if the email or password is wrong.
+
+        No authentication required.
+
+        '
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/auth/oauth/apple/callback:
+    get:
+      tags:
+      - Auth
+      summary: Apple OAuth callback (not implemented)
+      description: 'Handles the OAuth2 callback from Apple after the user authorizes.
+
+        Creates or links an account and returns auth tokens.
+
+        Not yet implemented — always returns 501.
+
+        '
+      operationId: oauthAppleCallback
+      responses:
+        '501':
+          description: Not implemented
+  /api/v1/auth/oauth/discord/callback:
+    get:
+      tags:
+      - Auth
+      summary: Discord OAuth callback (not implemented)
+      description: 'Handles the OAuth2 callback from Discord after the user authorizes.
+
+        Creates or links an account and returns auth tokens.
+
+        Not yet implemented — always returns 501.
+
+        '
+      operationId: oauthDiscordCallback
+      responses:
+        '501':
+          description: Not implemented
+  /api/v1/auth/oauth/google/callback:
+    get:
+      tags:
+      - Auth
+      summary: Google OAuth callback (not implemented)
+      description: 'Handles the OAuth2 callback from Google after the user authorizes.
+
+        Creates or links an account and returns auth tokens.
+
+        Not yet implemented — always returns 501.
+
+        '
+      operationId: oauthGoogleCallback
+      responses:
+        '501':
+          description: Not implemented
+  /api/v1/auth/refresh:
+    post:
+      tags:
+      - Auth
+      summary: Refresh access token
+      description: 'Exchanges a valid refresh token for a new access/refresh token pair.
+
+        The old refresh token is revoked upon successful exchange. If the refresh token
+
+        is invalid, expired, or already revoked, returns 401. No authentication required.
+
+        '
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Register a new user
+      description: 'Creates a new user account and returns an access token plus refresh token.
+
+        Username must be 3-30 characters (alphanumeric + underscores), email must be valid,
+
+        and password must be at least 8 characters. Returns 409 if the email or username is already taken.
+
+        No authentication required.
+
+        '
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/v1/auth/reset-password:
+    post:
+      tags:
+      - Auth
+      summary: Reset password (not implemented)
+      description: 'Resets the user''s password using a token received via the forgot-password email.
+
+        Not yet implemented — always returns 501.
+
+        '
+      operationId: resetPassword
+      responses:
+        '501':
+          description: Not implemented
+  /api/v1/auth/verify-email:
+    post:
+      tags:
+      - Auth
+      summary: Verify email (not implemented)
+      description: 'Verifies the user''s email address using a verification token.
+
+        Not yet implemented — always returns 501.
+
+        '
+      operationId: verifyEmail
+      responses:
+        '501':
+          description: Not implemented
+  /api/v1/gamification/admin/badge-categories:
+    post:
+      tags:
+      - Badges
+      summary: Create badge category (admin)
+      description: 'Creates a new badge category with name, description, icon, and sort order.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminCreateBadgeCategory
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/badge-categories/{category_id}:
+    patch:
+      tags:
+      - Badges
+      summary: Update badge category (admin)
+      description: 'Updates an existing badge category. Only provided fields are changed.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminUpdateBadgeCategory
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/badges:
+    get:
+      tags:
+      - Badges
+      summary: List badges (admin)
+      description: 'Lists all badges including inactive ones (admin view).
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminListBadges
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Badges
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+      - Badges
+      summary: Create badge (admin)
+      description: 'Creates a new badge with slug, name, icon, rarity, optional category, and auto-evaluation
+
+        criteria. Returns 409 if the slug is already taken.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminCreateBadge
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/badges/{badge_id}:
+    patch:
+      tags:
+      - Badges
+      summary: Update badge (admin)
+      description: 'Updates an existing badge. The slug cannot be changed. Only provided fields are updated.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminUpdateBadge
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: badge_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/badges/{badge_id}/bulk-grant:
+    post:
+      tags:
+      - Badges
+      summary: Bulk grant badge (admin)
+      description: 'Grants a badge to multiple users at once (max 500 user IDs per request).
+
+        Returns counts of granted vs already-earned. Requires Bearer token with admin grant.
+
+        '
+      operationId: adminBulkGrantBadge
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: badge_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Bulk granted
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/badges/{badge_id}/grant:
+    post:
+      tags:
+      - Badges
+      summary: Grant badge to user (admin)
+      description: 'Manually grants a badge to a single user. Requires user_id and optional reason.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminGrantBadge
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: badge_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Granted
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/badges/{badge_id}/revoke:
+    post:
+      tags:
+      - Badges
+      summary: Revoke badge (admin)
+      description: 'Revokes a previously granted badge from a user. Requires user_id and optional reason.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminRevokeBadge
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: badge_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Revoked
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/cosmetics:
+    post:
+      tags:
+      - Gamification
+      summary: Create cosmetic (admin)
+      description: 'Creates a new cosmetic item (AVATAR_FRAME, NAME_EFFECT, or CARD_BACK) with slug,
+
+        name, asset URL, and optional rarity. Returns 409 if slug is taken.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminCreateCosmetic
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/cosmetics/{cosmetic_id}:
+    patch:
+      tags:
+      - Gamification
+      summary: Update cosmetic (admin)
+      description: 'Updates an existing cosmetic item. Only provided fields are changed.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminUpdateCosmetic
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: cosmetic_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/cosmetics/{cosmetic_id}/grant:
+    post:
+      tags:
+      - Gamification
+      summary: Grant cosmetic (admin)
+      description: 'Grants a cosmetic item to a user. Requires user_id and optional reason.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminGrantCosmetic
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: cosmetic_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Granted
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/cosmetics/{cosmetic_id}/revoke:
+    post:
+      tags:
+      - Gamification
+      summary: Revoke cosmetic (admin)
+      description: 'Revokes a cosmetic item from a user. Requires user_id and optional reason.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminRevokeCosmetic
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: cosmetic_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Revoked
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/levels:
+    put:
+      tags:
+      - Gamification
+      summary: Batch update levels (admin)
+      description: 'Replaces all level definitions at once. Accepts an array of levels with
+
+        xp_required thresholds and optional titles/perks.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminBatchUpdateLevels
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/seasons:
+    post:
+      tags:
+      - Seasons
+      summary: Create a gamification season (admin)
+      description: 'Creates a new competitive season with a name, start date, and end date.
+
+        Returns 400 for invalid date range or 409 if dates overlap an existing season.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: createGamificationSeason
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              - starts_at
+              - ends_at
+              properties:
+                name:
+                  type: string
+                starts_at:
+                  type: string
+                  format: date-time
+                ends_at:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Season created
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/v1/gamification/admin/stats:
+    get:
+      tags:
+      - Gamification
+      summary: Get gamification stats (admin)
+      description: 'Returns admin-level gamification statistics including total XP granted,
+
+        badges/titles/cosmetics earned, level distribution, rarest badges, and
+
+        today''s XP event count. Requires Bearer token with admin grant.
+
+        '
+      operationId: adminGetGamificationStats
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/titles:
+    post:
+      tags:
+      - Gamification
+      summary: Create title (admin)
+      description: 'Creates a new title with slug, name, color (hex), and optional season link.
+
+        Returns 409 if slug is taken. Requires Bearer token with admin grant.
+
+        '
+      operationId: adminCreateTitle
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/titles/{title_id}:
+    patch:
+      tags:
+      - Gamification
+      summary: Update title (admin)
+      description: 'Updates an existing title. Only provided fields are changed.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminUpdateTitle
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: title_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/titles/{title_id}/grant:
+    post:
+      tags:
+      - Gamification
+      summary: Grant title (admin)
+      description: 'Grants a title to a user. Requires user_id and optional reason.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminGrantTitle
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: title_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Granted
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/titles/{title_id}/revoke:
+    post:
+      tags:
+      - Gamification
+      summary: Revoke title (admin)
+      description: 'Revokes a title from a user. Requires user_id and optional reason.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminRevokeTitle
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: title_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Revoked
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/xp-events:
+    get:
+      tags:
+      - Gamification
+      summary: List XP events (admin)
+      description: 'Lists all XP event definitions including inactive ones.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminListXPEvents
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: XP events
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+      - Gamification
+      summary: Create XP event (admin)
+      description: 'Creates a new XP event definition with event_key (UPPER_SNAKE_CASE), xp_amount (1-1000),
+
+        optional cooldown_minutes, and max_per_day. Requires Bearer token with admin grant.
+
+        '
+      operationId: adminCreateXPEvent
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/admin/xp-events/{event_id}:
+    patch:
+      tags:
+      - Gamification
+      summary: Update XP event (admin)
+      description: 'Updates an existing XP event definition. Only provided fields are changed.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: adminUpdateXPEvent
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/seasons/{season_id}/close:
+    post:
+      tags:
+      - Seasons
+      summary: Close season (admin)
+      description: 'Closes an active season, snapshots all rankings, and distributes rewards
+
+        (titles, badges, cosmetics) to top players. Requires confirm=true in the body.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: closeGamificationSeason
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: season_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Season closed
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/gamification/seasons/{season_id}/preview-close:
+    get:
+      tags:
+      - Seasons
+      summary: Preview season close (admin)
+      description: 'Previews what would happen if the season were closed, including estimated rewards,
+
+        player counts per game/format, and top players. Does not modify any data.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: previewSeasonClose
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: season_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Preview
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/marketplace/disputes:
+    get:
+      tags:
+      - Disputes
+      summary: List disputes (admin)
+      description: 'Lists all disputes across the marketplace for admin/moderator review. Supports
+
+        filtering by status, reason, assigned moderator, and unassigned flag. Paginated
+
+        (max 100 per page). Requires Bearer token with MANAGE_DISPUTES grant.
+
+        '
+      operationId: adminListDisputes
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Disputes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disputes:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/marketplace/disputes/{dispute_id}/assign:
+    post:
+      tags:
+      - Disputes
+      summary: Assign dispute (admin)
+      description: 'Assigns a moderator to handle a dispute. Used to distribute dispute
+
+        resolution workload among staff. Requires Bearer token with
+
+        MANAGE_DISPUTES grant.
+
+        '
+      operationId: adminAssignDispute
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: dispute_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Assigned
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/marketplace/disputes/{dispute_id}/resolve:
+    post:
+      tags:
+      - Disputes
+      summary: Resolve dispute (admin)
+      description: 'Moderator resolves a dispute with a resolution outcome (e.g. FULL_REFUND),
+
+        refund amount, notes, and optional sanction against a party. Releases or
+
+        refunds the escrow accordingly. Requires Bearer token with MANAGE_DISPUTES grant.
+
+        '
+      operationId: adminResolveDispute
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: dispute_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Resolved
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/notifications/admin/broadcast:
+    post:
+      tags:
+      - Notifications
+      summary: Create broadcast notification (admin)
+      description: 'Creates a broadcast notification sent to a target group (ALL, ACTIVE_7D, SELLERS,
+
+        JUDGES, TENANT_OWNERS). Sent immediately unless schedule_at is provided.
+
+        Priority is always HIGH. Requires Bearer token with admin grant.
+
+        '
+      operationId: createBroadcast
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBroadcastRequest'
+      responses:
+        '201':
+          description: Broadcast created
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/v1/notifications/admin/broadcasts:
+    get:
+      tags:
+      - Notifications
+      summary: List broadcasts (admin)
+      description: 'Lists all broadcasts with their status, recipient count, and read count.
+
+        Paginated (default 20, max 100). Requires Bearer token with admin grant.
+
+        '
+      operationId: listBroadcasts
+      security:
+      - BearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Broadcasts list with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/notifications/admin/email-templates:
+    get:
+      tags:
+      - Notifications
+      summary: List email templates (admin)
+      description: 'Returns all notification templates that include the EMAIL channel.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: listEmailTemplates
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Email templates
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/notifications/admin/email-templates/{key}/preview:
+    get:
+      tags:
+      - Notifications
+      summary: Preview email template by key (admin)
+      description: 'Renders an email template by its template key and returns the rendered
+
+        title and body. Returns 404 if the template is not found.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: previewEmailTemplate
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Rendered email preview
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/notifications/admin/stats:
+    get:
+      tags:
+      - Notifications
+      summary: Get notification delivery stats (admin)
+      description: 'Returns notification delivery statistics for a given time period (default 24h),
+
+        broken down by channel, category, and priority. Includes read rate.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: getNotificationStats
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: period
+        in: query
+        schema:
+          type: string
+          default: 24h
+      responses:
+        '200':
+          description: Delivery stats by channel, category, priority
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/notifications/admin/templates:
+    get:
+      tags:
+      - Notifications
+      summary: List notification templates (admin)
+      description: 'Lists notification templates with optional filtering by category, active status,
+
+        and search query. Paginated (default 20, max 100).
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: listNotificationTemplates
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: category
+        in: query
+        schema:
+          type: string
+      - name: is_active
+        in: query
+        schema:
+          type: boolean
+      - name: q
+        in: query
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Templates list
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+      - Notifications
+      summary: Create notification template (admin)
+      description: 'Creates a new notification template. Template keys must be unique. Supports
+
+        {{variable}} placeholders and {{#if var}}...{{/if}} conditionals.
+
+        Defaults to IN_APP channel and NORMAL priority. Requires Bearer token with admin grant.
+
+        '
+      operationId: createNotificationTemplate
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '201':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/v1/notifications/admin/templates/{template_id}:
+    patch:
+      tags:
+      - Notifications
+      summary: Update notification template (admin)
+      description: 'Partially updates an existing notification template. Only provided fields
+
+        (title, body, channels, priority, is_active) are changed.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: updateNotificationTemplate
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: template_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title_template:
+                  type: string
+                body_template:
+                  type: string
+                channels:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                    - IN_APP
+                    - EMAIL
+                    - PUSH
+                    - SMS
+                priority:
+                  type: string
+                  enum:
+                  - LOW
+                  - NORMAL
+                  - HIGH
+                  - URGENT
+                is_active:
+                  type: boolean
+      responses:
+        '200':
+          description: Template updated
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/notifications/admin/templates/{template_id}/preview:
+    post:
+      tags:
+      - Notifications
+      summary: Preview rendered template (admin)
+      description: 'Renders a template with optional sample variables and returns the resolved
+
+        title and body. Without variables, returns the raw template text.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: previewNotificationTemplate
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: template_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variables:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        '200':
+          description: Rendered title and body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      body:
+                        type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/notifications/admin/templates/{template_id}/test:
+    post:
+      tags:
+      - Notifications
+      summary: Send test notification from template (admin)
+      description: 'Sends a real test notification to a specific user using the template. If channels
+
+        are omitted, the template''s default channels are used.
+
+        Requires Bearer token with admin grant.
+
+        '
+      operationId: testNotificationTemplate
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: template_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - user_id
+              properties:
+                user_id:
+                  type: integer
+                channels:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                    - IN_APP
+                    - EMAIL
+                    - PUSH
+                    - SMS
+                variables:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        '200':
+          description: Test notification sent
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    TournamentId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    MatchId:
+      name: match_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 20
+    XTenantId:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Tenant scope header
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    MessageResponse:
+      description: Success message
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+      - username
+      - email
+      - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    LoginRequest:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        status:
+          type: string
+        city:
+          type: string
+        region:
+          type: string
+        country:
+          type: string
+        logo_url:
+          type: string
+        is_public:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    CreateTemplateRequest:
+      type: object
+      required:
+      - key
+      - category
+      - title_template
+      - body_template
+      properties:
+        key:
+          type: string
+        category:
+          type: string
+          enum:
+          - tournament
+          - social
+          - marketplace
+          - system
+        title_template:
+          type: string
+        body_template:
+          type: string
+        channels:
+          type: array
+          items:
+            type: string
+            enum:
+            - IN_APP
+            - EMAIL
+            - PUSH
+            - SMS
+          default:
+          - IN_APP
+        priority:
+          type: string
+          enum:
+          - LOW
+          - NORMAL
+          - HIGH
+          - URGENT
+          default: NORMAL
+    CreateBroadcastRequest:
+      type: object
+      required:
+      - title
+      - body
+      - target
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        action_url:
+          type: string
+        target:
+          type: string
+          enum:
+          - ALL
+          - ACTIVE_7D
+          - SELLERS
+          - JUDGES
+          - TENANT_OWNERS
+        channels:
+          type: array
+          items:
+            type: string
+            enum:
+            - IN_APP
+            - EMAIL
+            - PUSH
+            - SMS
+          default:
+          - IN_APP
+        schedule_at:
+          type: string
+          format: date-time
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        avatar_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time

@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@heroui/react";
 import { createXPEvent, getXPEvents, updateXPEvent } from "@/lib/api-admin";
+import { getErrorMessage } from "@/lib/error-message";
 import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Edit, Zap } from "lucide-react";
@@ -65,14 +66,9 @@ export default function XPEventsPage() {
     setLoading(true);
     try {
       const res = await getXPEvents();
-      const payload = res as Record<string, unknown>;
-      const list =
-        (payload.events as XPEvent[]) ||
-        (payload.data as XPEvent[]) ||
-        (Array.isArray(res) ? (res as XPEvent[]) : []);
-      setEvents(list);
-    } catch {
-      toast.error("Error al cargar XP events");
+      setEvents((res.events as XPEvent[]) || []);
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Error al cargar XP events"));
     } finally {
       setLoading(false);
     }
@@ -117,7 +113,7 @@ export default function XPEventsPage() {
       createModal.onClose();
       fetchEvents();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
