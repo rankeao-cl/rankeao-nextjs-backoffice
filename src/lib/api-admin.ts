@@ -16,6 +16,10 @@ const BASE_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE
 );
 
+export function getApiBaseUrl(): string {
+  return BASE_URL;
+}
+
 const LAST_API_ERROR_STORAGE_KEY = "rankeao_admin_last_api_error";
 const API_ERROR_HISTORY_STORAGE_KEY = "rankeao_admin_api_error_history";
 const API_ERROR_HISTORY_LIMIT = 20;

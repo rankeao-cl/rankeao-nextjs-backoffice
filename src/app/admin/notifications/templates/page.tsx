@@ -53,6 +53,30 @@ const EMPTY_META: ListMeta = {
   total_pages: 1,
 };
 
+function parseJsonObject(text: string, fieldName: string): Record<string, string> {
+  if (!text.trim()) {
+    return {};
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error(`${fieldName} debe ser JSON valido`);
+  }
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    throw new Error(`${fieldName} debe ser un objeto JSON`);
+  }
+
+  const output: Record<string, string> = {};
+  Object.entries(parsed as Record<string, unknown>).forEach(([key, value]) => {
+    output[key] = String(value ?? "");
+  });
+
+  return output;
+}
+
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [meta, setMeta] = useState<ListMeta>(EMPTY_META);
@@ -73,15 +97,21 @@ export default function TemplatesPage() {
     body_template: "",
     channels: "IN_APP",
     priority: "NORMAL",
+    is_active: true,
   });
   const [formLoading, setFormLoading] = useState(false);
 
   const previewModal = useDisclosure();
+  const [previewTarget, setPreviewTarget] = useState<Template | null>(null);
+  const [previewVariablesText, setPreviewVariablesText] = useState("{}");
   const [previewData, setPreviewData] = useState<Record<string, unknown> | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const testModal = useDisclosure();
   const [testTarget, setTestTarget] = useState<Template | null>(null);
   const [testUserId, setTestUserId] = useState("");
+  const [testChannels, setTestChannels] = useState("IN_APP");
+  const [testVariablesText, setTestVariablesText] = useState("{}");
   const [testLoading, setTestLoading] = useState(false);
 
   const fetchTemplates = useCallback(async () => {
@@ -134,6 +164,7 @@ export default function TemplatesPage() {
       body_template: "",
       channels: "IN_APP",
       priority: "NORMAL",
+      is_active: true,
     });
     createModal.onOpen();
   };
@@ -149,6 +180,7 @@ export default function TemplatesPage() {
         ? (template.channels as string[]).join(",")
         : "IN_APP",
       priority: String(template.priority || "NORMAL"),
+      is_active: Boolean(template.is_active ?? true),
     });
     createModal.onOpen();
   };
@@ -156,19 +188,30 @@ export default function TemplatesPage() {
   const handleSave = async () => {
     setFormLoading(true);
     try {
-      const payload = {
-        ...formData,
-        channels: formData.channels
-          .split(",")
-          .map((value) => value.trim())
-          .filter(Boolean),
-      };
+      const channelList = formData.channels
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
 
       if (editTarget?.id) {
-        await updateTemplate(Number(editTarget.id), payload);
+        await updateTemplate(Number(editTarget.id), {
+          category: formData.category,
+          title_template: formData.title_template,
+          body_template: formData.body_template,
+          channels: channelList,
+          priority: formData.priority,
+          is_active: formData.is_active,
+        });
         toast.success("Template actualizado");
       } else {
-        await createTemplate(payload);
+        await createTemplate({
+          key: formData.key,
+          category: formData.category,
+          title_template: formData.title_template,
+          body_template: formData.body_template,
+          channels: channelList,
+          priority: formData.priority,
+        });
         toast.success("Template creado");
       }
 
@@ -181,16 +224,41 @@ export default function TemplatesPage() {
     }
   };
 
-  const handlePreview = async (template: Template) => {
-    if (!template.id) return;
+  const openPreview = (template: Template) => {
+    setPreviewTarget(template);
+    setPreviewVariablesText("{}");
+    setPreviewData(null);
+    previewModal.onOpen();
+  };
 
+  const handlePreview = async () => {
+    if (!previewTarget?.id) {
+      return;
+    }
+
+    setPreviewLoading(true);
     try {
-      const result = await previewTemplate(Number(template.id));
+      const variables = parseJsonObject(previewVariablesText, "variables");
+      const result = await previewTemplate(
+        Number(previewTarget.id),
+        Object.keys(variables).length ? variables : undefined
+      );
       setPreviewData(result as Record<string, unknown>);
-      previewModal.onOpen();
     } catch (error: unknown) {
       toast.error(getErrorMessage(error));
+    } finally {
+      setPreviewLoading(false);
     }
+  };
+
+  const openTest = (template: Template) => {
+    setTestTarget(template);
+    setTestUserId("");
+    setTestChannels(
+      Array.isArray(template.channels) ? (template.channels as string[]).join(",") : "IN_APP"
+    );
+    setTestVariablesText("{}");
+    testModal.onOpen();
   };
 
   const handleTest = async () => {
@@ -198,8 +266,16 @@ export default function TemplatesPage() {
 
     setTestLoading(true);
     try {
+      const variables = parseJsonObject(testVariablesText, "variables");
+      const channels = testChannels
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
       await testTemplate(Number(testTarget.id), {
         user_id: Number.parseInt(testUserId, 10),
+        channels: channels.length ? channels : undefined,
+        variables: Object.keys(variables).length ? variables : undefined,
       });
       toast.success("Test notification sent");
       testModal.onClose();
@@ -247,19 +323,10 @@ export default function TemplatesPage() {
             <Button size="sm" variant="ghost" isIconOnly onPress={() => openEdit(template)}>
               <Edit className="h-3.5 w-3.5" />
             </Button>
-            <Button size="sm" variant="ghost" isIconOnly onPress={() => handlePreview(template)}>
+            <Button size="sm" variant="ghost" isIconOnly onPress={() => openPreview(template)}>
               <Eye className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              isIconOnly
-              onPress={() => {
-                setTestTarget(template);
-                setTestUserId("");
-                testModal.onOpen();
-              }}
-            >
+            <Button size="sm" variant="ghost" isIconOnly onPress={() => openTest(template)}>
               <Send className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -279,7 +346,7 @@ export default function TemplatesPage() {
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
             Notification Templates
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">CRUD de templates con preview y test</p>
+          <p className="text-sm text-zinc-500 mt-1">CRUD completo + preview/test con variables</p>
         </div>
         <Button
           onPress={openCreate}
@@ -409,6 +476,16 @@ export default function TemplatesPage() {
                 onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
               />
             </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant={formData.is_active ? "primary" : "ghost"}
+                onPress={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
+              >
+                is_active: {formData.is_active ? "true" : "false"}
+              </Button>
+              <p className="text-xs text-zinc-500">Se envía en `updateTemplate`.</p>
+            </div>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={createModal.onClose}>Cancelar</Button>
@@ -421,9 +498,20 @@ export default function TemplatesPage() {
 
       <Modal isOpen={previewModal.isOpen} onOpenChange={(isOpen) => !isOpen && previewModal.onClose()}>
         <ModalDialog>
-          <ModalHeader>Preview Template</ModalHeader>
-          <ModalBody>
-            {previewData && (
+          <ModalHeader>Preview Template - {String(previewTarget?.key || "")}</ModalHeader>
+          <ModalBody className="gap-4">
+            <TextArea
+              placeholder='variables JSON, ej: {"username":"demo"}'
+              value={previewVariablesText}
+              onChange={(e) => setPreviewVariablesText(e.target.value)}
+              rows={4}
+              className="font-mono text-xs"
+            />
+            <Button size="sm" variant="ghost" onPress={handlePreview} isPending={previewLoading}>
+              Render Preview
+            </Button>
+
+            {previewData ? (
               <div className="space-y-3">
                 <div>
                   <label className="text-xs text-zinc-500">Title</label>
@@ -438,7 +526,7 @@ export default function TemplatesPage() {
                   </p>
                 </div>
               </div>
-            )}
+            ) : null}
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onPress={previewModal.onClose}>Cerrar</Button>
@@ -455,6 +543,18 @@ export default function TemplatesPage() {
               value={testUserId}
               onChange={(e) => setTestUserId(e.target.value)}
               type="number"
+            />
+            <Input
+              placeholder="channels (IN_APP,EMAIL,PUSH,SMS)"
+              value={testChannels}
+              onChange={(e) => setTestChannels(e.target.value)}
+            />
+            <TextArea
+              placeholder='variables JSON, ej: {"username":"demo"}'
+              value={testVariablesText}
+              onChange={(e) => setTestVariablesText(e.target.value)}
+              rows={4}
+              className="font-mono text-xs"
             />
           </ModalBody>
           <ModalFooter>

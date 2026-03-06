@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     User,
+    Code2,
     Store,
     Award,
     Sparkles,
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
         href: "/admin/dashboard",
         icon: LayoutDashboard,
     },
+    { label: "API Explorer", href: "/admin/api-explorer", icon: Code2 },
     { label: "Auth API", href: "/admin/auth", icon: Shield },
     { label: "Perfil", href: "/admin/perfil", icon: User },
     { label: "Tenants", href: "/admin/tenants", icon: Store },
