@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 import {
     Dropdown,
     DropdownTrigger,
@@ -19,6 +20,7 @@ interface AdminNavbarProps {
 
 export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
     const { logout } = useAuth();
+    const router = useRouter();
 
     return (
         <header className="flex h-14 items-center justify-between border-b border-[#2a2f4b]/40 bg-[#0a0b12]/80 backdrop-blur-md px-4 md:px-6 shrink-0">
@@ -64,6 +66,7 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
                             <DropdownItem
                                 key="profile"
                                 className="text-zinc-300"
+                                onPress={() => router.push("/admin/perfil")}
                             >
                                 <span className="flex items-center gap-2">
                                     <User className="h-4 w-4" />

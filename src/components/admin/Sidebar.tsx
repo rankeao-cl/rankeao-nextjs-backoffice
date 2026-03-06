@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
+    User,
     Store,
     Award,
     Sparkles,
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
         href: "/admin/dashboard",
         icon: LayoutDashboard,
     },
+    { label: "Perfil", href: "/admin/perfil", icon: User },
     { label: "Tenants", href: "/admin/tenants", icon: Store },
     { type: "divider" as const, label: "Gamificación" },
     { label: "Badges", href: "/admin/gamification/badges", icon: Award },
