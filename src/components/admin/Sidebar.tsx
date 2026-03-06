@@ -28,6 +28,7 @@ const NAV_ITEMS = [
         href: "/admin/dashboard",
         icon: LayoutDashboard,
     },
+    { label: "Auth API", href: "/admin/auth", icon: Shield },
     { label: "Perfil", href: "/admin/perfil", icon: User },
     { label: "Tenants", href: "/admin/tenants", icon: Store },
     { type: "divider" as const, label: "Gamificación" },

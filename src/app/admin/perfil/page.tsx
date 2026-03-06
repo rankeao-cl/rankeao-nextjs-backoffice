@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Avatar, Button, Card, CardContent, Chip, Spinner } from "@heroui/react";
 import {
+  LAST_API_ERROR_EVENT,
+  clearApiErrorHistory,
+  getApiErrorHistory,
   getBadges,
   getBroadcasts,
   getDisputes,
@@ -18,7 +21,18 @@ import {
 } from "@/lib/api-admin";
 import { useAuth } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/error-message";
-import { Activity, Bell, Mail, Shield, Trophy, Users, Zap } from "lucide-react";
+import {
+  Activity,
+  Bell,
+  Clock3,
+  Mail,
+  Shield,
+  ShieldCheck,
+  Trophy,
+  User,
+  Users,
+  Zap,
+} from "lucide-react";
 import { toast } from "sonner";
 
 type EndpointHealth = {
@@ -46,6 +60,8 @@ type Snapshot = {
   notificationsSent: number;
   notificationsReadRate: number;
 };
+
+type PerfilTab = "resumen" | "seguridad" | "actividad-api";
 
 const INITIAL_SNAPSHOT: Snapshot = {
   tenantsTotal: 0,
@@ -77,13 +93,22 @@ function formatPercent(value: number): string {
 }
 
 export default function AdminPerfilPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const [activeTab, setActiveTab] = useState<PerfilTab>("resumen");
   const [loading, setLoading] = useState(true);
   const [snapshot, setSnapshot] = useState<Snapshot>(INITIAL_SNAPSHOT);
   const [endpointHealth, setEndpointHealth] = useState<Record<string, EndpointHealth>>({});
   const [lastApiError, setLastApiError] = useState<LastApiErrorInfo | null>(null);
+  const [errorHistory, setErrorHistory] = useState<LastApiErrorInfo[]>([]);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string>("");
 
   const accessToken = useMemo(() => getToken(), []);
+
+  const syncApiErrorState = useCallback(() => {
+    setLastApiError(getLastApiError());
+    setErrorHistory(getApiErrorHistory());
+  }, []);
 
   const refreshProfileData = useCallback(async () => {
     setLoading(true);
@@ -148,8 +173,7 @@ export default function AdminPerfilPage() {
     markHealth("gamification-stats", gamificationResult, "Stats de gamificacion cargados");
     markHealth("notification-stats", notificationsResult, "Stats de notificaciones cargados");
 
-    const tenants =
-      tenantsResult.status === "fulfilled" ? tenantsResult.value.tenants || [] : [];
+    const tenants = tenantsResult.status === "fulfilled" ? tenantsResult.value.tenants || [] : [];
 
     const disputesTotal =
       disputesResult.status === "fulfilled"
@@ -186,22 +210,15 @@ export default function AdminPerfilPage() {
         ? broadcastsResult.value.meta?.total || broadcastsResult.value.broadcasts.length
         : 0;
 
-    const badgesTotal =
-      badgesResult.status === "fulfilled" ? badgesResult.value.badges.length : 0;
+    const badgesTotal = badgesResult.status === "fulfilled" ? badgesResult.value.badges.length : 0;
 
-    const xpEventsTotal =
-      xpEventsResult.status === "fulfilled" ? xpEventsResult.value.events.length : 0;
+    const xpEventsTotal = xpEventsResult.status === "fulfilled" ? xpEventsResult.value.events.length : 0;
 
     const emailTemplatesTotal =
-      emailTemplatesResult.status === "fulfilled"
-        ? emailTemplatesResult.value.templates.length
-        : 0;
+      emailTemplatesResult.status === "fulfilled" ? emailTemplatesResult.value.templates.length : 0;
 
-    const gamificationStats =
-      gamificationResult.status === "fulfilled" ? gamificationResult.value : {};
-
-    const notificationStats =
-      notificationsResult.status === "fulfilled" ? notificationsResult.value : {};
+    const gamificationStats = gamificationResult.status === "fulfilled" ? gamificationResult.value : {};
+    const notificationStats = notificationsResult.status === "fulfilled" ? notificationsResult.value : {};
 
     setSnapshot({
       tenantsTotal: tenants.length,
@@ -225,9 +242,10 @@ export default function AdminPerfilPage() {
     });
 
     setEndpointHealth(nextHealth);
-    setLastApiError(getLastApiError());
+    setLastUpdatedAt(new Date().toISOString());
+    syncApiErrorState();
     setLoading(false);
-  }, []);
+  }, [syncApiErrorState]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -240,6 +258,18 @@ export default function AdminPerfilPage() {
     return () => window.clearTimeout(timer);
   }, [refreshProfileData]);
 
+  useEffect(() => {
+    const handler = () => syncApiErrorState();
+
+    window.addEventListener(LAST_API_ERROR_EVENT, handler);
+    return () => window.removeEventListener(LAST_API_ERROR_EVENT, handler);
+  }, [syncApiErrorState]);
+
+  const handleClearHistory = () => {
+    clearApiErrorHistory();
+    syncApiErrorState();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -248,51 +278,48 @@ export default function AdminPerfilPage() {
             Perfil Admin
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
-            Resumen personal y operativo del panel usando datos reales de la API.
+            Control personal, seguridad y actividad de API para soporte.
           </p>
         </div>
-        <Button variant="ghost" onPress={refreshProfileData} isDisabled={loading}>
-          Actualizar datos
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onPress={() => void refreshProfileData()} isDisabled={loading}>
+            Actualizar datos
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="bg-[#0f1017]/80 border border-white/15 lg:col-span-2">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-14 w-14 bg-white/10 text-zinc-200" size="lg">
-                {user?.avatar_url ? <Avatar.Image src={user.avatar_url} alt={user?.username || "Admin"} /> : null}
-                <Avatar.Fallback>{user?.username?.[0]?.toUpperCase() || "A"}</Avatar.Fallback>
-              </Avatar>
-              <div className="space-y-1">
-                <p className="text-lg font-semibold text-zinc-100">{user?.username || "Admin"}</p>
-                <p className="text-sm text-zinc-400">{user?.email || "Sin email"}</p>
-                <p className="text-xs text-zinc-500">User ID: {user?.id || "-"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#0f1017]/80 border border-white/15">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center gap-2 text-zinc-200">
-              <Shield className="h-4 w-4" />
-              <span className="text-sm font-medium">Sesion</span>
-            </div>
-            <p className="text-xs text-zinc-500">Token activo</p>
-            <p className="text-xs text-zinc-300 break-all">
-              {accessToken ? `${accessToken.slice(0, 18)}...` : "No autenticado"}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant={activeTab === "resumen" ? "primary" : "ghost"}
+          onPress={() => setActiveTab("resumen")}
+        >
+          Resumen
+        </Button>
+        <Button
+          size="sm"
+          variant={activeTab === "seguridad" ? "primary" : "ghost"}
+          onPress={() => setActiveTab("seguridad")}
+        >
+          Seguridad
+        </Button>
+        <Button
+          size="sm"
+          variant={activeTab === "actividad-api" ? "primary" : "ghost"}
+          onPress={() => setActiveTab("actividad-api")}
+        >
+          Actividad API (histórico de errores)
+        </Button>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
           <Spinner size="lg" color="current" />
         </div>
-      ) : (
-        <>
+      ) : null}
+
+      {!loading && activeTab === "resumen" ? (
+        <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
               <CardContent className="p-4 space-y-1">
@@ -333,7 +360,7 @@ export default function AdminPerfilPage() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
               <CardContent className="p-5 space-y-3">
                 <div className="flex items-center gap-2 text-zinc-200">
@@ -357,28 +384,6 @@ export default function AdminPerfilPage() {
                 <p className="text-sm text-zinc-400">Enviadas (24h)</p>
                 <p className="text-xl font-semibold text-zinc-100">{snapshot.notificationsSent.toLocaleString()}</p>
                 <p className="text-xs text-zinc-500">Read rate: {formatPercent(snapshot.notificationsReadRate)}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-center gap-2 text-zinc-200">
-                  <Activity className="h-4 w-4" />
-                  <p className="text-sm font-medium">Ultimo error API</p>
-                </div>
-                {lastApiError ? (
-                  <>
-                    <p className="text-xs text-zinc-400">
-                      {lastApiError.method} {lastApiError.path}
-                    </p>
-                    <p className="text-sm text-zinc-200">
-                      {lastApiError.status} {lastApiError.code ? `(${lastApiError.code})` : ""}
-                    </p>
-                    <p className="text-xs text-zinc-500">{lastApiError.message}</p>
-                  </>
-                ) : (
-                  <p className="text-xs text-zinc-500">Sin errores recientes registrados</p>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -406,19 +411,140 @@ export default function AdminPerfilPage() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-zinc-500">
-            <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
-              <Users className="h-3.5 w-3.5" /> Tenants suspendidos: {snapshot.tenantsSuspended}
-            </div>
-            <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
-              <Mail className="h-3.5 w-3.5" /> Email templates: {snapshot.emailTemplatesTotal}
-            </div>
-            <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
-              <Bell className="h-3.5 w-3.5" /> Broadcasts: {snapshot.broadcastsTotal}
-            </div>
+          <div className="text-xs text-zinc-500 flex items-center gap-2">
+            <Clock3 className="h-3.5 w-3.5" />
+            Ultima actualización: {lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleString("es-CL") : "-"}
           </div>
-        </>
-      )}
+        </div>
+      ) : null}
+
+      {!loading && activeTab === "seguridad" ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="bg-[#0f1017]/80 border border-white/15 lg:col-span-2">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-14 w-14 bg-white/10 text-zinc-200" size="lg">
+                    {user?.avatar_url ? <Avatar.Image src={user.avatar_url} alt={user?.username || "Admin"} /> : null}
+                    <Avatar.Fallback>{user?.username?.[0]?.toUpperCase() || "A"}</Avatar.Fallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <p className="text-lg font-semibold text-zinc-100">{user?.username || "Admin"}</p>
+                    <p className="text-sm text-zinc-400">{user?.email || "Sin email"}</p>
+                    <p className="text-xs text-zinc-500">User ID: {user?.id || "-"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-[#0f1017]/80 border border-white/15">
+              <CardContent className="p-5 space-y-2">
+                <div className="flex items-center gap-2 text-zinc-200">
+                  <Shield className="h-4 w-4" />
+                  <span className="text-sm font-medium">Sesion</span>
+                </div>
+                <p className="text-xs text-zinc-500">Token activo</p>
+                <p className="text-xs text-zinc-300 break-all">
+                  {accessToken ? `${accessToken.slice(0, 24)}...` : "No autenticado"}
+                </p>
+                <Chip size="sm" variant="soft" color="default">
+                  {accessToken ? "Sesion valida" : "Sesion ausente"}
+                </Chip>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5 space-y-4">
+              <div className="flex items-center gap-2 text-zinc-200">
+                <ShieldCheck className="h-4 w-4" />
+                <p className="text-sm font-medium">Controles de seguridad</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-zinc-500">
+                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
+                  <User className="h-3.5 w-3.5" /> Usuario autenticado: {user?.username || "-"}
+                </div>
+                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5" /> Email verificado por auth backend
+                </div>
+                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
+                  <Users className="h-3.5 w-3.5" /> Sesion protegida por `proxy` en `/admin/*`
+                </div>
+              </div>
+
+              <div>
+                <Button variant="danger-soft" onPress={logout}>
+                  Cerrar sesión
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+
+      {!loading && activeTab === "actividad-api" ? (
+        <div className="space-y-4">
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-zinc-200">
+                  <Activity className="h-4 w-4" />
+                  <p className="text-sm font-medium">Ultimo error API</p>
+                </div>
+                <Button size="sm" variant="ghost" onPress={handleClearHistory}>
+                  Limpiar historial
+                </Button>
+              </div>
+
+              {lastApiError ? (
+                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 space-y-1">
+                  <p className="text-xs text-zinc-400">
+                    {lastApiError.method} {lastApiError.path}
+                  </p>
+                  <p className="text-sm text-zinc-200">
+                    {lastApiError.status} {lastApiError.code ? `(${lastApiError.code})` : ""}
+                  </p>
+                  <p className="text-xs text-zinc-500">{lastApiError.message}</p>
+                  <p className="text-[11px] text-zinc-600">
+                    {new Date(lastApiError.at).toLocaleString("es-CL")}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-zinc-500">Sin errores API recientes.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center gap-2 text-zinc-200">
+                <Zap className="h-4 w-4" />
+                <p className="text-sm font-medium">Histórico (últimos {errorHistory.length})</p>
+              </div>
+
+              {errorHistory.length === 0 ? (
+                <p className="text-xs text-zinc-500">No hay errores en historial.</p>
+              ) : (
+                <div className="space-y-2">
+                  {errorHistory.map((entry, index) => (
+                    <div key={`${entry.at}-${entry.path}-${index}`} className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                        <span>{entry.method}</span>
+                        <span>{entry.path}</span>
+                        <span className="text-zinc-500">status {entry.status}</span>
+                        {entry.code ? <span className="text-zinc-500">code {entry.code}</span> : null}
+                      </div>
+                      <p className="text-xs text-zinc-500 break-words">{entry.message}</p>
+                      <p className="text-[11px] text-zinc-600">{new Date(entry.at).toLocaleString("es-CL")}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
     </div>
   );
 }

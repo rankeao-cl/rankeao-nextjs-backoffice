@@ -17,6 +17,8 @@ const BASE_URL = normalizeBaseUrl(
 );
 
 const LAST_API_ERROR_STORAGE_KEY = "rankeao_admin_last_api_error";
+const API_ERROR_HISTORY_STORAGE_KEY = "rankeao_admin_api_error_history";
+const API_ERROR_HISTORY_LIMIT = 20;
 export const LAST_API_ERROR_EVENT = "rankeao:api-error-updated";
 
 export interface LastApiErrorInfo {
@@ -35,6 +37,53 @@ function setLastApiError(error: LastApiErrorInfo) {
   }
 
   localStorage.setItem(LAST_API_ERROR_STORAGE_KEY, JSON.stringify(error));
+  window.dispatchEvent(new Event(LAST_API_ERROR_EVENT));
+}
+
+function setApiErrorHistory(history: LastApiErrorInfo[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.setItem(API_ERROR_HISTORY_STORAGE_KEY, JSON.stringify(history));
+}
+
+export function getApiErrorHistory(): LastApiErrorInfo[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const raw = localStorage.getItem(API_ERROR_HISTORY_STORAGE_KEY);
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as LastApiErrorInfo[];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof item.path === "string" &&
+        typeof item.message === "string" &&
+        typeof item.at === "string"
+    );
+  } catch {
+    localStorage.removeItem(API_ERROR_HISTORY_STORAGE_KEY);
+    return [];
+  }
+}
+
+export function clearApiErrorHistory() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.removeItem(API_ERROR_HISTORY_STORAGE_KEY);
   window.dispatchEvent(new Event(LAST_API_ERROR_EVENT));
 }
 
@@ -84,7 +133,7 @@ function rememberApiError(
   message: string,
   code?: string
 ) {
-  setLastApiError({
+  const error: LastApiErrorInfo = {
     path,
     method,
     url,
@@ -92,7 +141,25 @@ function rememberApiError(
     message,
     code,
     at: new Date().toISOString(),
-  });
+  };
+
+  setLastApiError(error);
+
+  const history = getApiErrorHistory();
+  const nextHistory = [error, ...history]
+    .filter(
+      (item, index, arr) =>
+        arr.findIndex(
+          (candidate) =>
+            candidate.at === item.at &&
+            candidate.path === item.path &&
+            candidate.method === item.method &&
+            candidate.status === item.status
+        ) === index
+    )
+    .slice(0, API_ERROR_HISTORY_LIMIT);
+
+  setApiErrorHistory(nextHistory);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -584,6 +651,68 @@ export async function loginAdmin(email: string, password: string): Promise<AuthR
   });
 
   return normalizeAuthResponse(raw);
+}
+
+export async function registerAuth(data: {
+  username: string;
+  email: string;
+  password: string;
+}): Promise<AuthResponse> {
+  const raw = await apiFetch<AuthResponse | AuthPayload>("/auth/register", {
+    method: "POST",
+    body: data,
+    skipAuthRetry: true,
+  });
+
+  return normalizeAuthResponse(raw);
+}
+
+export async function forgotPassword(email: string) {
+  return apiFetch("/auth/forgot-password", {
+    method: "POST",
+    body: { email },
+    skipAuthRetry: true,
+  });
+}
+
+export async function resetPassword(data: Record<string, unknown>) {
+  return apiFetch("/auth/reset-password", {
+    method: "POST",
+    body: data,
+    skipAuthRetry: true,
+  });
+}
+
+export async function verifyEmail(data: Record<string, unknown>) {
+  return apiFetch("/auth/verify-email", {
+    method: "POST",
+    body: data,
+    skipAuthRetry: true,
+  });
+}
+
+export async function oauthGoogleCallback(params?: Record<string, string | undefined>) {
+  return apiFetch("/auth/oauth/google/callback", {
+    method: "GET",
+    params,
+    skipAuthRetry: true,
+  });
+}
+
+export async function oauthDiscordCallback(params?: Record<string, string | undefined>) {
+  return apiFetch("/auth/oauth/discord/callback", {
+    method: "GET",
+    params,
+    skipAuthRetry: true,
+  });
+}
+
+export async function oauthAppleCallback(params?: Record<string, string | undefined>) {
+  return apiFetch("/auth/oauth/apple/callback", {
+    method: "GET",
+    params,
+    skipAuthRetry: true,
+  });
 }
 
 export async function refreshToken(refreshTk: string): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {
