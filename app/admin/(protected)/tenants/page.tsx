@@ -28,16 +28,17 @@ import { Store } from "lucide-react";
 
 type TenantAction = "verify" | "reject" | "suspend" | "reactivate";
 
-const STATUS_COLOR: Record<string, "default"> = {
-  active: "default",
-  pending: "default",
-  suspended: "default",
-  rejected: "default",
+const STATUS_LABELS: Record<string, string> = {
+  ACTIVE: "Activo",
+  PENDING_REVIEW: "Pendiente",
+  SUSPENDED: "Suspendido",
+  REJECTED: "Rechazado",
 };
 
 const TABLE_COLUMNS = [
   { key: "tenant", label: "TENANT" },
-  { key: "city", label: "CIUDAD" },
+  { key: "email", label: "EMAIL" },
+  { key: "plan", label: "PLAN" },
   { key: "status", label: "ESTADO" },
   { key: "created", label: "CREACION" },
   { key: "actions", label: "ACCIONES" },
@@ -69,7 +70,7 @@ export default function TenantsPage() {
     const q = search.toLowerCase();
     return (
       tenant.name?.toLowerCase().includes(q) ||
-      tenant.city?.toLowerCase().includes(q) ||
+      tenant.email?.toLowerCase().includes(q) ||
       tenant.slug?.toLowerCase().includes(q)
     );
   });
@@ -90,7 +91,7 @@ export default function TenantsPage() {
       reactivate: reactivateMutation,
     };
 
-    mutationMap[action].mutate(tenant.id, {
+    mutationMap[action].mutate(String(tenant.id), {
       onSuccess: () => {
         toast.success(`Tenant "${tenant.name}" actualizado`);
         onClose();
@@ -116,7 +117,6 @@ export default function TenantsPage() {
               size="sm"
               className="bg-[var(--default)] text-[var(--foreground)]"
             >
-              {tenant.logo_url ? <Avatar.Image src={tenant.logo_url} alt={tenant.name} /> : null}
               <Avatar.Fallback>
                 {tenant.name?.[0] ? tenant.name[0].toUpperCase() : <Store className="h-4 w-4" />}
               </Avatar.Fallback>
@@ -127,17 +127,20 @@ export default function TenantsPage() {
             </div>
           </div>
         );
-      case "city":
+      case "email":
         return (
-          <span className="text-[var(--muted)]">
-            {tenant.city}
-            {tenant.region ? `, ${tenant.region}` : ""}
-          </span>
+          <span className="text-sm text-[var(--muted)]">{tenant.email}</span>
+        );
+      case "plan":
+        return (
+          <Chip size="sm" color="default" variant="soft">
+            {tenant.plan}
+          </Chip>
         );
       case "status":
         return (
-          <Chip size="sm" color={STATUS_COLOR[tenant.status] || "default"} variant="soft">
-            {tenant.status}
+          <Chip size="sm" color="default" variant="soft">
+            {STATUS_LABELS[tenant.status] || tenant.status}
           </Chip>
         );
       case "created":
@@ -149,7 +152,7 @@ export default function TenantsPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            {tenant.status === "pending" && (
+            {tenant.status === "PENDING_REVIEW" && (
               <>
                 <Button
                   size="sm"
@@ -167,7 +170,7 @@ export default function TenantsPage() {
                 </Button>
               </>
             )}
-            {tenant.status === "active" && (
+            {tenant.status === "ACTIVE" && (
               <Button
                 size="sm"
                 variant="danger"
@@ -176,7 +179,7 @@ export default function TenantsPage() {
                 Suspender
               </Button>
             )}
-            {tenant.status === "suspended" && (
+            {tenant.status === "SUSPENDED" && (
               <Button
                 size="sm"
                 variant="secondary"
@@ -209,7 +212,7 @@ export default function TenantsPage() {
             <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
               <Label className="text-xs text-[var(--muted)]">Busqueda</Label>
               <Input
-                placeholder="Nombre, slug o ciudad..."
+                placeholder="Nombre, slug o email..."
                 value={search}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
               />
