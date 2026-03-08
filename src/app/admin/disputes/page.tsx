@@ -1,10 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Button,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
+import {
   Card,
-  CardContent,
   Chip,
   Description,
   Fieldset,
@@ -12,23 +15,15 @@ import {
   Input,
   Label,
   Modal,
-  ModalBody,
-  ModalDialog,
-  ModalFooter,
-  ModalHeader,
+  Skeleton,
   Spinner,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  TextField,
   TextArea,
+  TextField,
+  Button,
 } from "@heroui/react";
 import { assignDispute, getDisputes, resolveDispute, type ListMeta } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
-import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Scale } from "lucide-react";
 import { toast } from "sonner";
@@ -183,7 +178,7 @@ export default function DisputesPage() {
   const renderCell = (dispute: Dispute, columnKey: string) => {
     switch (columnKey) {
       case "id":
-        return <code className="text-xs text-zinc-500">{String(dispute.id).slice(0, 8)}...</code>;
+        return <code className="text-xs text-[var(--muted)]">{String(dispute.id).slice(0, 8)}...</code>;
       case "reason":
         return <span className="text-sm">{String(dispute.reason || "-")}</span>;
       case "status":
@@ -194,7 +189,7 @@ export default function DisputesPage() {
         );
       case "moderator":
         return (
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-[var(--muted)]">
             {dispute.moderator_id ? `${String(dispute.moderator_id).slice(0, 8)}...` : "Sin asignar"}
           </span>
         );
@@ -203,7 +198,7 @@ export default function DisputesPage() {
           <div className="flex gap-1">
             <Button
               size="sm"
-              variant="ghost"
+              variant="secondary"
               onPress={() => {
                 setSelectedDispute(dispute);
                 setModeratorId("");
@@ -214,7 +209,7 @@ export default function DisputesPage() {
             </Button>
             <Button
               size="sm"
-              variant="ghost"
+              variant="secondary"
               onPress={() => {
                 setSelectedDispute(dispute);
                 setResolution({
@@ -244,194 +239,207 @@ export default function DisputesPage() {
         <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
           Disputas
         </h1>
-        <p className="text-sm text-zinc-500 mt-1">Gestion de disputas del marketplace</p>
+        <p className="text-sm text-[var(--muted)] mt-1">Gestion de disputas del marketplace</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:w-1/3 shrink-0">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5">
-              <Form>
-                <Fieldset className="space-y-4">
-                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
-                  <Description className="text-xs text-zinc-500">
-                    Filtra por ID, estado, razon y moderador para encontrar casos rapidamente.
-                  </Description>
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="px-5 py-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">ID (local)</Label>
+              <Input value={idSearch} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setIdSearch(e.target.value)} />
+            </TextField>
+            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Estado</Label>
+              <Input placeholder="OPEN, RESOLVED..." value={statusFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setStatusFilter(e.target.value)} />
+            </TextField>
+            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Razon</Label>
+              <Input value={reasonFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setReasonFilter(e.target.value)} />
+            </TextField>
+            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Moderador ID</Label>
+              <Input value={assignedModeratorFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setAssignedModeratorFilter(e.target.value)} />
+            </TextField>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <Input
+              className="w-28"
+              type="number"
+              min={1}
+              value={perPageInput}
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPerPageInput(e.target.value)}
+              placeholder="per_page"
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant={unassignedOnly ? "primary" : "secondary"}
+              onPress={() => setUnassignedOnly((prev) => !prev)}
+            >
+              Solo sin asignar
+            </Button>
+            <Button type="button" size="sm" variant="primary" onPress={applyFilters}>
+              Aplicar filtros
+            </Button>
+            <Button type="button" size="sm" variant="tertiary" onPress={clearFilters}>
+              Limpiar
+            </Button>
+          </div>
+        </Card.Content>
+      </Card>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">ID (local)</Label>
-                      <Input value={idSearch} onChange={(e) => setIdSearch(e.target.value)} />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Estado</Label>
-                      <Input placeholder="OPEN, RESOLVED..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Razon</Label>
-                      <Input value={reasonFilter} onChange={(e) => setReasonFilter(e.target.value)} />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Moderador ID</Label>
-                      <Input value={assignedModeratorFilter} onChange={(e) => setAssignedModeratorFilter(e.target.value)} />
-                    </TextField>
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="p-0">
+          {loading ? (
+            <div className="space-y-3 p-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-3/5 rounded" />
                   </div>
-
-                  <Fieldset.Actions className="flex flex-wrap items-center gap-2">
-                    <Input
-                      className="w-28"
-                      type="number"
-                      min={1}
-                      value={perPageInput}
-                      onChange={(e) => setPerPageInput(e.target.value)}
-                      placeholder="per_page"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={unassignedOnly ? "primary" : "ghost"}
-                      onPress={() => setUnassignedOnly((prev) => !prev)}
-                    >
-                      Solo sin asignar
-                    </Button>
-                    <Button type="button" size="sm" onPress={applyFilters}>
-                      Aplicar filtros
-                    </Button>
-                    <Button type="button" size="sm" variant="ghost" onPress={clearFilters}>
-                      Limpiar
-                    </Button>
-                  </Fieldset.Actions>
-                </Fieldset>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="w-full lg:w-2/3">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5 space-y-4">
-              {loading ? (
-                <div className="flex justify-center py-20">
-                  <Spinner size="lg" />
                 </div>
-              ) : (
-                <Table>
-                  <Table.Content aria-label="Disputes">
-                    <TableHeader columns={TABLE_COLUMNS}>
-                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                    </TableHeader>
-                    <TableBody items={filteredDisputes}>
-                      {(dispute) => (
-                        <TableRow key={String(dispute.id)}>
-                          {(column) => <TableCell>{renderCell(dispute, getTableColumnKey(column))}</TableCell>}
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table.Content>
-                </Table>
-              )}
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <Table.ScrollContainer>
+                <Table.Content aria-label="Disputes">
+                  <Table.Header columns={TABLE_COLUMNS}>
+                    {(column: { key: string; label: string }) => (
+                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+                        {column.label}
+                      </Table.Column>
+                    )}
+                  </Table.Header>
+                  <Table.Body>
+                    {filteredDisputes.map((dispute) => (
+                      <Table.Row key={String(dispute.id)}>
+                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
+                          <Table.Cell key={column.key}>
+                            {renderCell(dispute, column.key)}
+                          </Table.Cell>
+                        ))}
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
-                <span>
-                  Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
-                </span>
-                <div className="flex gap-2">
-                  <Button type="button" size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
-                    Anterior
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
-                    Siguiente
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+            <span>
+              Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+            </span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+                Anterior
+              </Button>
+              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        </Card.Content>
+      </Card>
 
-      <Modal isOpen={assignModal.isOpen} onOpenChange={(isOpen) => !isOpen && assignModal.onClose()}>
-        <ModalDialog>
-          <ModalHeader>Asignar Moderador</ModalHeader>
-          <ModalBody className="gap-4">
-            <Form className="w-full">
-              <Fieldset className="space-y-4 w-full">
-                <Description className="text-xs text-zinc-500">Disputa: {String(selectedDispute?.id || "")}</Description>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Moderador ID</Label>
-                  <Input value={moderatorId} onChange={(e) => setModeratorId(e.target.value)} />
-                </TextField>
-              </Fieldset>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={assignModal.onClose}>
-              Cancelar
-            </Button>
-            <Button onPress={handleAssign} isPending={assignLoading}>
-              Asignar
-            </Button>
-          </ModalFooter>
-        </ModalDialog>
+      <Modal>
+        <Modal.Backdrop isOpen={assignModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && assignModal.onClose()}>
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header><Modal.Heading>Asignar Moderador</Modal.Heading></Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <Description className="text-xs text-[var(--muted)]">Disputa: {String(selectedDispute?.id || "")}</Description>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Moderador ID</Label>
+                      <Input value={moderatorId} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setModeratorId(e.target.value)} />
+                    </TextField>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={assignModal.onClose}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onPress={handleAssign} isPending={assignLoading}>
+                  Asignar
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
 
-      <Modal isOpen={resolveModal.isOpen} onOpenChange={(isOpen) => !isOpen && resolveModal.onClose()}>
-        <ModalDialog>
-          <ModalHeader>
-            <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-zinc-200" />
-              Resolver Disputa
-            </div>
-          </ModalHeader>
-          <ModalBody className="gap-4">
-            <Form className="w-full">
-              <Fieldset className="space-y-4 w-full">
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Outcome</Label>
-                  <Input
-                    value={resolution.outcome}
-                    onChange={(e) => setResolution((prev) => ({ ...prev, outcome: e.target.value }))}
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Refund amount</Label>
-                  <Input
-                    type="number"
-                    value={String(resolution.refund_amount)}
-                    onChange={(e) =>
-                      setResolution((prev) => ({
-                        ...prev,
-                        refund_amount: Number.parseFloat(e.target.value) || 0,
-                      }))
-                    }
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Notas</Label>
-                  <TextArea
-                    value={resolution.notes}
-                    onChange={(e) => setResolution((prev) => ({ ...prev, notes: e.target.value }))}
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Sancion</Label>
-                  <Input
-                    value={resolution.sanction}
-                    onChange={(e) => setResolution((prev) => ({ ...prev, sanction: e.target.value }))}
-                  />
-                </TextField>
-              </Fieldset>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={resolveModal.onClose}>
-              Cancelar
-            </Button>
-            <Button onPress={handleResolve} isPending={resolveLoading}>
-              Resolver
-            </Button>
-          </ModalFooter>
-        </ModalDialog>
+      <Modal>
+        <Modal.Backdrop isOpen={resolveModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && resolveModal.onClose()}>
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header>
+                <Modal.Heading>
+                  <div className="flex items-center gap-2">
+                    <Scale className="h-5 w-5 text-[var(--foreground)]" />
+                    Resolver Disputa
+                  </div>
+                </Modal.Heading>
+              </Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Outcome</Label>
+                      <Input
+                        value={resolution.outcome}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setResolution((prev) => ({ ...prev, outcome: e.target.value }))}
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Refund amount</Label>
+                      <Input
+                        type="number"
+                        value={String(resolution.refund_amount)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                          setResolution((prev) => ({
+                            ...prev,
+                            refund_amount: Number.parseFloat(e.target.value) || 0,
+                          }))
+                        }
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Notas</Label>
+                      <TextArea
+                        value={resolution.notes}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setResolution((prev) => ({ ...prev, notes: e.target.value }))}
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Sancion</Label>
+                      <Input
+                        value={resolution.sanction}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setResolution((prev) => ({ ...prev, sanction: e.target.value }))}
+                      />
+                    </TextField>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={resolveModal.onClose}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onPress={handleResolve} isPending={resolveLoading}>
+                  Resolver
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </div>
   );
 }
+

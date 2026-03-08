@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, CardContent } from "@heroui/react";
+import { Button, Card, Skeleton } from "@heroui/react";
 import {
     LAST_API_ERROR_EVENT,
     clearLastApiError,
@@ -33,23 +33,31 @@ interface StatCardProps {
     label: string;
     value: string | number;
     icon: React.ReactNode;
-    color: "white" | "slate";
+    color: "accent" | "success" | "warning" | "default";
     href?: string;
 }
 
 function StatCard({ label, value, icon, color, href }: StatCardProps) {
     const colorMap = {
-        white: {
-            bg: "from-white/12 to-white/0",
-            border: "border-white/25",
-            text: "text-white",
-            iconBg: "bg-white/10",
+        accent: {
+            text: "text-[var(--foreground)]",
+            iconBg: "bg-[var(--accent)]/15",
+            iconColor: "text-[var(--accent)]",
         },
-        slate: {
-            bg: "from-zinc-300/12 to-zinc-300/0",
-            border: "border-zinc-300/20",
-            text: "text-zinc-200",
-            iconBg: "bg-zinc-300/10",
+        success: {
+            text: "text-[var(--foreground)]",
+            iconBg: "bg-[var(--success)]/15",
+            iconColor: "text-[var(--success)]",
+        },
+        warning: {
+            text: "text-[var(--foreground)]",
+            iconBg: "bg-[var(--warning)]/15",
+            iconColor: "text-[var(--warning)]",
+        },
+        default: {
+            text: "text-[var(--foreground)]",
+            iconBg: "bg-[var(--default)]",
+            iconColor: "text-[var(--foreground)]",
         },
     };
 
@@ -57,21 +65,21 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
 
     const content = (
         <Card
-            className={`h-full bg-gradient-to-br ${c.bg} border ${c.border} hover:scale-[1.03] transition-transform duration-200 cursor-pointer`}
+            className={`h-full bg-gradient-to-br hover:scale-[1.03] transition-transform duration-200 cursor-pointer`}
         >
-            <CardContent className="flex flex-row items-center gap-4 p-5">
+            <Card.Content className="flex flex-row items-center gap-4 p-5">
                 <div
                     className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${c.iconBg}`}
                 >
-                    {icon}
+                    <div className={c.iconColor}>{icon}</div>
                 </div>
                 <div>
-                    <p className="text-xs text-zinc-500 uppercase tracking-wide">{label}</p>
+                    <p className="text-xs text-[var(--muted)] uppercase tracking-wide">{label}</p>
                     <p className={`text-2xl font-bold ${c.text} font-[var(--font-heading)]`}>
                         {value}
                     </p>
                 </div>
-            </CardContent>
+            </Card.Content>
         </Card>
     );
 
@@ -80,14 +88,14 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
 
 function SkeletonCard() {
     return (
-        <Card className="h-full bg-[#0f1017]/60 border border-[#2a2f4b]/30">
-            <CardContent className="flex flex-row items-center gap-4 p-5">
-                <div className="skeleton h-12 w-12 rounded-xl" />
+        <Card className="h-full bg-[var(--surface-secondary)] border border-[var(--border)]">
+            <Card.Content className="flex flex-row items-center gap-4 p-5">
+                <Skeleton className="h-12 w-12 rounded-xl" />
                 <div className="space-y-2 flex-1">
-                    <div className="skeleton h-3 w-20 rounded" />
-                    <div className="skeleton h-7 w-16 rounded" />
+                    <Skeleton className="h-3 w-20 rounded" />
+                    <Skeleton className="h-7 w-16 rounded" />
                 </div>
-            </CardContent>
+            </Card.Content>
         </Card>
     );
 }
@@ -102,26 +110,24 @@ interface QuickLinkProps {
 function QuickLink({ label, href, icon, description }: QuickLinkProps) {
     return (
         <Link href={href} className="block h-full">
-            <Card className="h-full bg-[#0f1017]/80 border border-white/15 hover:border-white/35 hover:bg-[#0f1017] transition-all duration-200 hover:scale-[1.02]">
-                <CardContent className="flex flex-row items-center gap-4 p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/5">
+            <Card className="h-full bg-[var(--surface-secondary)] border border-[var(--border)] hover:border-[var(--muted)] hover:bg-[var(--surface)] transition-all duration-200 hover:scale-[1.02]">
+                <Card.Content className="flex flex-row items-center gap-4 p-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--default)]">
                         {icon}
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-zinc-200">{label}</p>
-                        <p className="text-xs text-zinc-500">{description}</p>
+                        <p className="text-sm font-medium text-[var(--foreground)]">{label}</p>
+                        <p className="text-xs text-[var(--muted)]">{description}</p>
                     </div>
-                </CardContent>
+                </Card.Content>
             </Card>
         </Link>
     );
 }
 
 export default function DashboardPage() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [gamStats, setGamStats] = useState<any>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [notifStats, setNotifStats] = useState<any>(null);
+    const [gamStats, setGamStats] = useState<Record<string, unknown> | null>(null);
+    const [notifStats, setNotifStats] = useState<Record<string, unknown> | null>(null);
     const [lastApiError, setLastApiError] = useState<LastApiErrorInfo | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -160,10 +166,10 @@ export default function DashboardPage() {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold font-[var(--font-heading)] bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
                     Panel
                 </h1>
-                <p className="text-sm text-zinc-500 mt-1">
+                <p className="text-sm text-[var(--muted)] mt-1">
                     Resumen general del panel de administración
                 </p>
             </div>
@@ -182,28 +188,28 @@ export default function DashboardPage() {
                         <StatCard
                             label="Total XP Otorgado"
                             value={gamStats?.total_xp_granted?.toLocaleString() ?? "—"}
-                            icon={<TrendingUp className="h-6 w-6 text-white" />}
-                            color="white"
+                            icon={<TrendingUp className="h-6 w-6" />}
+                            color="accent"
                         />
                         <StatCard
                             label="Insignias Otorgadas"
                             value={gamStats?.total_badges_earned?.toLocaleString() ?? "—"}
-                            icon={<Award className="h-6 w-6 text-zinc-200" />}
-                            color="slate"
+                            icon={<Award className="h-6 w-6" />}
+                            color="success"
                             href="/admin/gamification/badges"
                         />
                         <StatCard
                             label="Titulos Activos"
                             value={gamStats?.total_titles_earned?.toLocaleString() ?? "—"}
-                            icon={<Crown className="h-6 w-6 text-white" />}
-                            color="white"
+                            icon={<Crown className="h-6 w-6" />}
+                            color="warning"
                             href="/admin/gamification/titles"
                         />
                         <StatCard
                             label="Eventos XP Hoy"
                             value={gamStats?.xp_events_today?.toLocaleString() ?? "—"}
-                            icon={<Zap className="h-6 w-6 text-zinc-200" />}
-                            color="slate"
+                            icon={<Zap className="h-6 w-6" />}
+                            color="accent"
                         />
                     </>
                 )}
@@ -215,38 +221,38 @@ export default function DashboardPage() {
                     <StatCard
                         label="Notificaciones Enviadas"
                         value={notifStats?.total_sent?.toLocaleString() ?? "—"}
-                        icon={<Bell className="h-6 w-6 text-white" />}
-                        color="white"
+                        icon={<Bell className="h-6 w-6" />}
+                        color="default"
                     />
                     <StatCard
                         label="Tasa de Lectura"
                         value={
-                            notifStats?.read_rate
+                            typeof notifStats?.read_rate === "number"
                                 ? `${(notifStats.read_rate * 100).toFixed(1)}%`
                                 : "—"
                         }
-                        icon={<BarChart3 className="h-6 w-6 text-zinc-200" />}
-                        color="slate"
+                        icon={<BarChart3 className="h-6 w-6" />}
+                        color="success"
                     />
                     <StatCard
                         label="Cosmeticos Otorgados"
                         value={gamStats?.total_cosmetics_earned?.toLocaleString() ?? "—"}
-                        icon={<Sparkles className="h-6 w-6 text-white" />}
-                        color="white"
+                        icon={<Sparkles className="h-6 w-6" />}
+                        color="warning"
                         href="/admin/gamification/cosmetics"
                     />
                 </div>
             )}
 
-            <Card className="bg-[#0f1017]/80 border border-white/15">
-                <CardContent className="p-5 space-y-4">
+            <Card className="bg-[var(--surface-secondary)] border border-[var(--border)]">
+                <Card.Content className="p-5 space-y-4">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
-                            <Bug className="h-5 w-5 text-zinc-200" />
-                            <h2 className="text-base font-semibold text-zinc-200">Diagnostico API</h2>
+                            <Bug className="h-5 w-5 text-[var(--foreground)]" />
+                            <h2 className="text-base font-semibold text-[var(--foreground)]">Diagnostico API</h2>
                         </div>
                         {lastApiError ? (
-                            <Button size="sm" variant="ghost" onPress={clearLastApiError}>
+                            <Button size="sm" variant="tertiary" onPress={clearLastApiError}>
                                 Limpiar
                             </Button>
                         ) : null}
@@ -254,99 +260,99 @@ export default function DashboardPage() {
 
                     {lastApiError ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Estado</p>
-                                <p className="text-zinc-100 font-semibold">{lastApiError.status}</p>
+                            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                                <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide">Estado</p>
+                                <p className="text-[var(--foreground)] font-semibold">{lastApiError.status}</p>
                             </div>
-                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Codigo</p>
-                                <p className="text-zinc-100 font-semibold">{lastApiError.code || "N/A"}</p>
+                            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                                <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide">Codigo</p>
+                                <p className="text-[var(--foreground)] font-semibold">{lastApiError.code || "N/A"}</p>
                             </div>
-                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3 lg:col-span-2">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Ruta</p>
-                                <code className="text-xs text-zinc-200">{lastApiError.path}</code>
+                            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 lg:col-span-2">
+                                <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide">Ruta</p>
+                                <code className="text-xs text-[var(--foreground)]">{lastApiError.path}</code>
                             </div>
-                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Metodo</p>
-                                <p className="text-zinc-100 font-semibold">{lastApiError.method}</p>
+                            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                                <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide">Metodo</p>
+                                <p className="text-[var(--foreground)] font-semibold">{lastApiError.method}</p>
                             </div>
-                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Fecha</p>
-                                <p className="text-zinc-100 font-semibold">
+                            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                                <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide">Fecha</p>
+                                <p className="text-[var(--foreground)] font-semibold">
                                     {new Date(lastApiError.at).toLocaleString("es-CL")}
                                 </p>
                             </div>
-                            <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-3 lg:col-span-2">
-                                <p className="text-[11px] text-zinc-500 uppercase tracking-wide">Mensaje</p>
-                                <p className="text-sm text-zinc-300">{lastApiError.message}</p>
+                            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 lg:col-span-2">
+                                <p className="text-[11px] text-[var(--muted)] uppercase tracking-wide">Mensaje</p>
+                                <p className="text-sm text-[var(--foreground)]">{lastApiError.message}</p>
                             </div>
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-white/15 bg-[#0a0b12] p-4 flex items-center gap-2">
-                            <ShieldCheck className="h-4 w-4 text-zinc-300" />
-                            <p className="text-sm text-zinc-400">No hay errores API recientes registrados.</p>
+                        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-[var(--foreground)]" />
+                            <p className="text-sm text-[var(--muted)]">No hay errores API recientes registrados.</p>
                         </div>
                     )}
 
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
                         <TriangleAlert className="h-3.5 w-3.5" />
                         Muestra el ultimo error capturado por el cliente admin para soporte rapido.
                     </div>
-                </CardContent>
+                </Card.Content>
             </Card>
 
             {/* Quick Links */}
             <div>
-                <h2 className="text-lg font-semibold text-zinc-200 mb-4 font-[var(--font-heading)]">
+                <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 font-[var(--font-heading)]">
                     Accesos Rápidos
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <QuickLink
                         label="Gestion de Tiendas"
                         href="/admin/tenants"
-                        icon={<Store className="h-5 w-5 text-white" />}
+                        icon={<Store className="h-5 w-5 text-[var(--foreground)]" />}
                         description="Verificar, suspender y reactivar tiendas"
                     />
                     <QuickLink
                         label="Insignias y Gamificacion"
                         href="/admin/gamification/badges"
-                        icon={<Award className="h-5 w-5 text-zinc-200" />}
+                        icon={<Award className="h-5 w-5 text-[var(--foreground)]" />}
                         description="Crear, editar y otorgar insignias"
                     />
                     <QuickLink
                         label="Disputas Marketplace"
                         href="/admin/disputes"
-                        icon={<Scale className="h-5 w-5 text-white" />}
+                        icon={<Scale className="h-5 w-5 text-[var(--foreground)]" />}
                         description="Resolver disputas entre usuarios"
                     />
                     <QuickLink
                         label="Temporadas"
                         href="/admin/gamification/seasons"
-                        icon={<Users className="h-5 w-5 text-zinc-200" />}
+                        icon={<Users className="h-5 w-5 text-[var(--foreground)]" />}
                         description="Administrar temporadas competitivas"
                     />
                     <QuickLink
                         label="Plantillas de Notificacion"
                         href="/admin/notifications/templates"
-                        icon={<Bell className="h-5 w-5 text-white" />}
+                        icon={<Bell className="h-5 w-5 text-[var(--foreground)]" />}
                         description="CRUD y previsualizacion de plantillas"
                     />
                     <QuickLink
                         label="Plantillas de Email"
                         href="/admin/notifications/email-templates"
-                        icon={<Mail className="h-5 w-5 text-zinc-200" />}
+                        icon={<Mail className="h-5 w-5 text-[var(--foreground)]" />}
                         description="Previsualizacion de plantillas de correo"
                     />
                     <QuickLink
                         label="Difusiones"
                         href="/admin/notifications/broadcasts"
-                        icon={<Users className="h-5 w-5 text-zinc-200" />}
+                        icon={<Users className="h-5 w-5 text-[var(--foreground)]" />}
                         description="Enviar notificaciones masivas"
                     />
                     <QuickLink
                         label="Niveles"
                         href="/admin/gamification/levels"
-                        icon={<Layers className="h-5 w-5 text-white" />}
+                        icon={<Layers className="h-5 w-5 text-[var(--foreground)]" />}
                         description="Configurar thresholds de XP"
                     />
                 </div>
@@ -354,3 +360,4 @@ export default function DashboardPage() {
         </div>
     );
 }
+

@@ -8,13 +8,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
             {children}
             <Toaster
-                theme="dark"
+                theme="system"
                 position="top-right"
                 toastOptions={{
                     style: {
-                        background: "#0f1017",
-                        border: "1px solid #2a2f4b",
-                        color: "#e4e4e7",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
+                        color: "var(--foreground)",
                     },
                 }}
             />

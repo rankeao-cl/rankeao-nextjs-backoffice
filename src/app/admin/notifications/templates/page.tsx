@@ -1,33 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 import {
   Button,
-  Card,
-  CardContent,
   Chip,
   ComboBox,
-  Description,
   Fieldset,
   Form,
   Input,
   Label,
   ListBox,
   Modal,
-  ModalBody,
-  ModalDialog,
-  ModalFooter,
-  ModalHeader,
   Select,
+  Skeleton,
   Spinner,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  TextField,
   TextArea,
+  TextField,
+  Card,
 } from "@heroui/react";
 import {
   createTemplate,
@@ -38,7 +32,6 @@ import {
   type ListMeta,
 } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
-import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Bell, Edit, Eye, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -304,7 +297,7 @@ export default function TemplatesPage() {
       case "key":
         return (
           <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-zinc-200" />
+            <Bell className="h-4 w-4 text-[var(--foreground)]" />
             <code className="text-xs">{String(template.key || "-")}</code>
           </div>
         );
@@ -333,13 +326,13 @@ export default function TemplatesPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="ghost" isIconOnly onPress={() => openEdit(template)}>
+            <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(template)}>
               <Edit className="h-3.5 w-3.5" />
             </Button>
-            <Button size="sm" variant="ghost" isIconOnly onPress={() => openPreview(template)}>
+            <Button size="sm" variant="secondary" isIconOnly onPress={() => openPreview(template)}>
               <Eye className="h-3.5 w-3.5" />
             </Button>
-            <Button size="sm" variant="ghost" isIconOnly onPress={() => openTest(template)}>
+            <Button size="sm" variant="secondary" isIconOnly onPress={() => openTest(template)}>
               <Send className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -359,352 +352,366 @@ export default function TemplatesPage() {
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
             Plantillas de Notificacion
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">CRUD completo con preview y test usando variables</p>
+          <p className="text-sm text-[var(--muted)] mt-1">CRUD completo con preview y test usando variables</p>
         </div>
         <Button
           type="button"
           onPress={openCreate}
-          className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
+
         >
           Nueva plantilla
         </Button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:w-1/3 shrink-0">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5">
-              <Form>
-                <Fieldset className="space-y-4">
-                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
-                  <Description className="text-xs text-zinc-500">
-                    Ajusta busqueda, categoria, estado y paginacion para revisar plantillas rapidamente.
-                  </Description>
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="px-5 py-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <TextField className="space-y-1 flex flex-col min-w-[160px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Busqueda</Label>
+              <Input placeholder="texto libre" value={query} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setQuery(e.target.value)} />
+            </TextField>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Busqueda</Label>
-                      <Input placeholder="texto libre" value={query} onChange={(e) => setQuery(e.target.value)} />
-                    </TextField>
+            <ComboBox
+              className="min-w-[160px] flex-1"
+              inputValue={category}
+              onInputChange={setCategory}
+              onSelectionChange={(key: string | number | null) => setCategory(String(key || ""))}
+            >
+              <Label>Categoria</Label>
+              <ComboBox.InputGroup>
+                <Input placeholder="system, social..." />
+                <ComboBox.Trigger />
+              </ComboBox.InputGroup>
+              <ComboBox.Popover>
+                <ListBox>
+                  {CATEGORY_OPTIONS.map((option) => (
+                    <ListBox.Item key={option} id={option} textValue={option}>
+                      {option}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </ComboBox.Popover>
+            </ComboBox>
 
-                    <ComboBox
-                      className="w-full"
-                      inputValue={category}
-                      onInputChange={setCategory}
-                      onSelectionChange={(key) => setCategory(String(key || ""))}
-                    >
-                      <Label>Categoria</Label>
-                      <ComboBox.InputGroup>
-                        <Input placeholder="system, social..." />
-                        <ComboBox.Trigger />
-                      </ComboBox.InputGroup>
-                      <ComboBox.Popover>
-                        <ListBox>
-                          {CATEGORY_OPTIONS.map((option) => (
-                            <ListBox.Item key={option} id={option} textValue={option}>
-                              {option}
-                              <ListBox.ItemIndicator />
-                            </ListBox.Item>
-                          ))}
-                        </ListBox>
-                      </ComboBox.Popover>
-                    </ComboBox>
+            <TextField className="space-y-1 flex flex-col w-24">
+              <Label className="text-xs text-[var(--muted)]">Per page</Label>
+              <Input
+                type="number"
+                min={1}
+                value={perPageInput}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPerPageInput(e.target.value)}
+              />
+            </TextField>
 
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Per page</Label>
-                      <Input
+            <Select
+              className="min-w-[120px]"
+              selectedKey={isActive}
+              onSelectionChange={(key: string | number | null) => setIsActive(String(key || "all") as ActiveFilter)}
+            >
+              <Label>Estado</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="all" textValue="Todos">
+                    Todos
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="true" textValue="Activos">
+                    Activos
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="false" textValue="Inactivos">
+                    Inactivos
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                </ListBox>
+              </Select.Popover>
+            </Select>
+
+            <Button type="button" size="sm" variant="primary" onPress={applyFilters}>Aplicar filtros</Button>
+            <Button type="button" size="sm" variant="tertiary" onPress={clearFilters}>Limpiar</Button>
+          </div>
+        </Card.Content>
+      </Card>
+
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="p-0">
+          {loading ? (
+            <div className="space-y-3 p-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-4/5 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <Table.ScrollContainer>
+                <Table.Content aria-label="Templates">
+                  <Table.Header columns={TABLE_COLUMNS}>
+                    {(column: { key: string; label: string }) => (
+                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+                        {column.label}
+                      </Table.Column>
+                    )}
+                  </Table.Header>
+                  <Table.Body>
+                    {templates.map((template) => (
+                      <Table.Row key={String(template.id || template.key || "-")}>
+                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
+                          <Table.Cell key={column.key}>
+                            {renderCell(template, column.key)}
+                          </Table.Cell>
+                        ))}
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+            <span>
+              Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+            </span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+                Anterior
+              </Button>
+              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        </Card.Content>
+      </Card>
+
+      <Modal>
+        <Modal.Backdrop isOpen={createModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}>
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header><Modal.Heading>{editTarget ? "Editar plantilla" : "Crear plantilla"}</Modal.Heading></Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Key</Label>
+                        <Input
+                          value={formData.key}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, key: e.target.value }))}
+                          disabled={Boolean(editTarget)}
+                        />
+                      </TextField>
+                      <ComboBox
                         className="w-full"
-                        type="number"
-                        min={1}
-                        value={perPageInput}
-                        onChange={(e) => setPerPageInput(e.target.value)}
+                        inputValue={formData.category}
+                        onInputChange={(value: string) => setFormData((prev) => ({ ...prev, category: value }))}
+                        onSelectionChange={(key: string | number | null) =>
+                          setFormData((prev) => ({ ...prev, category: String(key || prev.category) }))
+                        }
+                      >
+                        <Label>Categoria</Label>
+                        <ComboBox.InputGroup>
+                          <Input placeholder="category" />
+                          <ComboBox.Trigger />
+                        </ComboBox.InputGroup>
+                        <ComboBox.Popover>
+                          <ListBox>
+                            {CATEGORY_OPTIONS.map((option) => (
+                              <ListBox.Item key={option} id={option} textValue={option}>
+                                {option}
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                            ))}
+                          </ListBox>
+                        </ComboBox.Popover>
+                      </ComboBox>
+                    </div>
+
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Titulo plantilla</Label>
+                      <Input
+                        value={formData.title_template}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, title_template: e.target.value }))}
                       />
                     </TextField>
 
-                    <Select
-                      className="w-full"
-                      selectedKey={isActive}
-                      onSelectionChange={(key) => setIsActive(String(key || "all") as ActiveFilter)}
-                    >
-                      <Label>Estado</Label>
-                      <Select.Trigger>
-                        <Select.Value />
-                        <Select.Indicator />
-                      </Select.Trigger>
-                      <Select.Popover>
-                        <ListBox>
-                          <ListBox.Item id="all" textValue="Todos">
-                            Todos
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                          <ListBox.Item id="true" textValue="Activos">
-                            Activos
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                          <ListBox.Item id="false" textValue="Inactivos">
-                            Inactivos
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        </ListBox>
-                      </Select.Popover>
-                    </Select>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Cuerpo plantilla</Label>
+                      <TextArea
+                        value={formData.body_template}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, body_template: e.target.value }))}
+                        rows={3}
+                      />
+                    </TextField>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Canales</Label>
+                        <Input
+                          placeholder="IN_APP,EMAIL..."
+                          value={formData.channels}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
+                        />
+                      </TextField>
+                      <Select
+                        className="w-full"
+                        selectedKey={formData.priority}
+                        onSelectionChange={(key: string | number | null) =>
+                          setFormData((prev) => ({ ...prev, priority: String(key || "NORMAL") }))
+                        }
+                      >
+                        <Label>Prioridad</Label>
+                        <Select.Trigger>
+                          <Select.Value />
+                          <Select.Indicator />
+                        </Select.Trigger>
+                        <Select.Popover>
+                          <ListBox>
+                            {PRIORITY_OPTIONS.map((option) => (
+                              <ListBox.Item key={option} id={option} textValue={option}>
+                                {option}
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                            ))}
+                          </ListBox>
+                        </Select.Popover>
+                      </Select>
+                    </div>
+
+                    <Fieldset.Actions className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={formData.is_active ? "primary" : "secondary"}
+                        onPress={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
+                      >
+                        is_active: {formData.is_active ? "true" : "false"}
+                      </Button>
+                      <p className="text-xs text-[var(--muted)]">Se envía en update.</p>
+                    </Fieldset.Actions>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
+                <Button variant="primary" onPress={handleSave} isPending={formLoading}>
+                  {editTarget ? "Guardar" : "Crear"}
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+
+      <Modal>
+        <Modal.Backdrop isOpen={previewModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && previewModal.onClose()}>
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header><Modal.Heading>Previsualizar plantilla - {String(previewTarget?.key || "")}</Modal.Heading></Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Variables (JSON)</Label>
+                      <TextArea
+                        placeholder='{"username":"demo"}'
+                        value={previewVariablesText}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPreviewVariablesText(e.target.value)}
+                        rows={4}
+                        className="font-mono text-xs"
+                      />
+                    </TextField>
+                    <Fieldset.Actions>
+                      <Button type="button" size="sm" variant="secondary" onPress={handlePreview} isPending={previewLoading}>
+                        Renderizar preview
+                      </Button>
+                    </Fieldset.Actions>
+                  </Fieldset>
+                </Form>
+
+                {previewData ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-[var(--muted)]">Titulo</label>
+                      <p className="text-[var(--foreground)] font-medium">
+                        {String((previewData.data as Record<string, unknown>)?.title || previewData.title || "")}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-xs text-[var(--muted)]">Cuerpo</label>
+                      <p className="text-[var(--foreground)] text-sm whitespace-pre-wrap">
+                        {String((previewData.data as Record<string, unknown>)?.body || previewData.body || "")}
+                      </p>
+                    </div>
                   </div>
-
-                  <Fieldset.Actions className="flex gap-2">
-                    <Button type="button" size="sm" onPress={applyFilters}>Aplicar filtros</Button>
-                    <Button type="button" size="sm" variant="ghost" onPress={clearFilters}>Limpiar</Button>
-                  </Fieldset.Actions>
-                </Fieldset>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="w-full lg:w-2/3">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5 space-y-4">
-              {loading ? (
-                <div className="flex justify-center py-20">
-                  <Spinner size="lg" color="current" />
-                </div>
-              ) : (
-                <Table>
-                  <Table.Content aria-label="Templates">
-                    <TableHeader columns={TABLE_COLUMNS}>
-                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                    </TableHeader>
-                    <TableBody items={templates}>
-                      {(template) => (
-                        <TableRow key={String(template.id || template.key || "-")}>
-                          {(column) => <TableCell>{renderCell(template, getTableColumnKey(column))}</TableCell>}
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table.Content>
-                </Table>
-              )}
-
-              <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
-                <span>
-                  Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
-                </span>
-                <div className="flex gap-2">
-                  <Button type="button" size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
-                    Anterior
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
-                    Siguiente
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Modal isOpen={createModal.isOpen} onOpenChange={(isOpen) => !isOpen && createModal.onClose()}>
-        <ModalDialog>
-          <ModalHeader>{editTarget ? "Editar plantilla" : "Crear plantilla"}</ModalHeader>
-          <ModalBody className="gap-4">
-            <Form className="w-full">
-              <Fieldset className="space-y-4 w-full">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Key</Label>
-                    <Input
-                      value={formData.key}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, key: e.target.value }))}
-                      disabled={Boolean(editTarget)}
-                    />
-                  </TextField>
-                  <ComboBox
-                    className="w-full"
-                    inputValue={formData.category}
-                    onInputChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
-                    onSelectionChange={(key) =>
-                      setFormData((prev) => ({ ...prev, category: String(key || prev.category) }))
-                    }
-                  >
-                    <Label>Categoria</Label>
-                    <ComboBox.InputGroup>
-                      <Input placeholder="category" />
-                      <ComboBox.Trigger />
-                    </ComboBox.InputGroup>
-                    <ComboBox.Popover>
-                      <ListBox>
-                        {CATEGORY_OPTIONS.map((option) => (
-                          <ListBox.Item key={option} id={option} textValue={option}>
-                            {option}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </ComboBox.Popover>
-                  </ComboBox>
-                </div>
-
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Titulo plantilla</Label>
-                  <Input
-                    value={formData.title_template}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, title_template: e.target.value }))}
-                  />
-                </TextField>
-
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Cuerpo plantilla</Label>
-                  <TextArea
-                    value={formData.body_template}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, body_template: e.target.value }))}
-                    rows={3}
-                  />
-                </TextField>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Canales</Label>
-                    <Input
-                      placeholder="IN_APP,EMAIL..."
-                      value={formData.channels}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
-                    />
-                  </TextField>
-                  <Select
-                    className="w-full"
-                    selectedKey={formData.priority}
-                    onSelectionChange={(key) =>
-                      setFormData((prev) => ({ ...prev, priority: String(key || "NORMAL") }))
-                    }
-                  >
-                    <Label>Prioridad</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {PRIORITY_OPTIONS.map((option) => (
-                          <ListBox.Item key={option} id={option} textValue={option}>
-                            {option}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </div>
-
-                <Fieldset.Actions className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={formData.is_active ? "primary" : "ghost"}
-                    onPress={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
-                  >
-                    is_active: {formData.is_active ? "true" : "false"}
-                  </Button>
-                  <p className="text-xs text-zinc-500">Se envía en update.</p>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={createModal.onClose}>Cancelar</Button>
-            <Button onPress={handleSave} isPending={formLoading}>
-              {editTarget ? "Guardar" : "Crear"}
-            </Button>
-          </ModalFooter>
-        </ModalDialog>
+                ) : null}
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={previewModal.onClose}>Cerrar</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
 
-      <Modal isOpen={previewModal.isOpen} onOpenChange={(isOpen) => !isOpen && previewModal.onClose()}>
-        <ModalDialog>
-          <ModalHeader>Previsualizar plantilla - {String(previewTarget?.key || "")}</ModalHeader>
-          <ModalBody className="gap-4">
-            <Form className="w-full">
-              <Fieldset className="space-y-4 w-full">
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Variables (JSON)</Label>
-                  <TextArea
-                    placeholder='{"username":"demo"}'
-                    value={previewVariablesText}
-                    onChange={(e) => setPreviewVariablesText(e.target.value)}
-                    rows={4}
-                    className="font-mono text-xs"
-                  />
-                </TextField>
-                <Fieldset.Actions>
-                  <Button type="button" size="sm" variant="ghost" onPress={handlePreview} isPending={previewLoading}>
-                    Renderizar preview
-                  </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-
-            {previewData ? (
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-zinc-500">Titulo</label>
-                  <p className="text-zinc-200 font-medium">
-                    {String((previewData.data as Record<string, unknown>)?.title || previewData.title || "")}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-xs text-zinc-500">Cuerpo</label>
-                  <p className="text-zinc-300 text-sm whitespace-pre-wrap">
-                    {String((previewData.data as Record<string, unknown>)?.body || previewData.body || "")}
-                  </p>
-                </div>
-              </div>
-            ) : null}
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={previewModal.onClose}>Cerrar</Button>
-          </ModalFooter>
-        </ModalDialog>
+      <Modal>
+        <Modal.Backdrop isOpen={testModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && testModal.onClose()}>
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header><Modal.Heading>Enviar prueba - {String(testTarget?.key || "")}</Modal.Heading></Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">User ID</Label>
+                      <Input
+                        value={testUserId}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTestUserId(e.target.value)}
+                        type="number"
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Canales</Label>
+                      <Input
+                        placeholder="IN_APP,EMAIL,PUSH,SMS"
+                        value={testChannels}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTestChannels(e.target.value)}
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Variables (JSON)</Label>
+                      <TextArea
+                        placeholder='{"username":"demo"}'
+                        value={testVariablesText}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTestVariablesText(e.target.value)}
+                        rows={4}
+                        className="font-mono text-xs"
+                      />
+                    </TextField>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={testModal.onClose}>Cancelar</Button>
+                <Button variant="primary" onPress={handleTest} isPending={testLoading}>Enviar prueba</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
-
-      <Modal isOpen={testModal.isOpen} onOpenChange={(isOpen) => !isOpen && testModal.onClose()}>
-        <ModalDialog>
-          <ModalHeader>Enviar prueba - {String(testTarget?.key || "")}</ModalHeader>
-          <ModalBody className="gap-4">
-            <Form className="w-full">
-              <Fieldset className="space-y-4 w-full">
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">User ID</Label>
-                  <Input
-                    value={testUserId}
-                    onChange={(e) => setTestUserId(e.target.value)}
-                    type="number"
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Canales</Label>
-                  <Input
-                    placeholder="IN_APP,EMAIL,PUSH,SMS"
-                    value={testChannels}
-                    onChange={(e) => setTestChannels(e.target.value)}
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Variables (JSON)</Label>
-                  <TextArea
-                    placeholder='{"username":"demo"}'
-                    value={testVariablesText}
-                    onChange={(e) => setTestVariablesText(e.target.value)}
-                    rows={4}
-                    className="font-mono text-xs"
-                  />
-                </TextField>
-              </Fieldset>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={testModal.onClose}>Cancelar</Button>
-            <Button onPress={handleTest} isPending={testLoading}>Enviar prueba</Button>
-          </ModalFooter>
-        </ModalDialog>
-      </Modal>
-    </div>
+    </div >
   );
 }
+
+

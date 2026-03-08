@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/hooks/use-theme";
 import { usePathname, useRouter } from "next/navigation";
 import {
     Breadcrumbs,
@@ -12,7 +13,7 @@ import {
     Avatar,
     Button,
 } from "@heroui/react";
-import { Menu, LogOut, User } from "lucide-react";
+import { Menu, LogOut, User, Sun, Moon } from "lucide-react";
 
 interface AdminNavbarProps {
     user: { id: string; username: string; email: string; avatar_url?: string } | null;
@@ -21,6 +22,7 @@ interface AdminNavbarProps {
 
 export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
     const { logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -48,12 +50,12 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
     const adminSegments = segments[0] === "admin" ? segments.slice(1) : segments;
 
     return (
-        <header className="flex h-14 items-center justify-between border-b border-[#2a2f4b]/40 bg-[#0a0b12]/80 backdrop-blur-md px-4 md:px-6 shrink-0">
+        <header className="flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md px-4 md:px-6 shrink-0">
             {/* Mobile menu toggle */}
             <Button
                 isIconOnly
-                variant="ghost"
-                className="md:hidden text-zinc-400"
+                variant="secondary"
+                className="md:hidden text-[var(--muted)]"
                 onPress={onMenuToggle}
                 aria-label="Toggle menu"
             >
@@ -61,12 +63,12 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
             </Button>
 
             <div className="hidden md:flex min-w-0 flex-1 items-center">
-                <Breadcrumbs className="gap-2 text-xs text-zinc-500" separator={<span className="text-zinc-700">/</span>}>
-                    <Breadcrumbs.Item href="/admin/dashboard" className="text-zinc-400 hover:text-zinc-200">
+                <Breadcrumbs className="gap-2 text-xs text-[var(--muted)]" separator={<span className="text-[var(--muted)]">/</span>}>
+                    <Breadcrumbs.Item href="/admin/dashboard" className="text-[var(--muted)] hover:text-[var(--foreground)]">
                         Admin
                     </Breadcrumbs.Item>
                     {adminSegments.length === 0 ? (
-                        <Breadcrumbs.Item className="text-zinc-200">Panel</Breadcrumbs.Item>
+                        <Breadcrumbs.Item className="text-[var(--foreground)]">Panel</Breadcrumbs.Item>
                     ) : (
                         adminSegments.map((segment, index) => {
                             const href = `/admin/${adminSegments.slice(0, index + 1).join("/")}`;
@@ -77,7 +79,7 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
                                 <Breadcrumbs.Item
                                     key={`${segment}-${index}`}
                                     href={isLast ? undefined : href}
-                                    className={isLast ? "text-zinc-200" : "text-zinc-400 hover:text-zinc-200"}
+                                    className={isLast ? "text-[var(--foreground)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"}
                                 >
                                     {label}
                                 </Breadcrumbs.Item>
@@ -87,13 +89,27 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
                 </Breadcrumbs>
             </div>
 
-            {/* Right side — user dropdown */}
-            <div className="flex items-center gap-3">
+            {/* Right side — theme toggle + user dropdown */}
+            <div className="flex items-center gap-2">
+                <Button
+                    isIconOnly
+                    variant="secondary"
+                    size="sm"
+                    onPress={toggleTheme}
+                    aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                    className="text-[var(--muted)] hover:text-[var(--foreground)]"
+                >
+                    {theme === "dark" ? (
+                        <Sun className="h-4 w-4" />
+                    ) : (
+                        <Moon className="h-4 w-4" />
+                    )}
+                </Button>
                 <Dropdown>
-                    <DropdownTrigger className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 hover:bg-white/5 transition-colors outline-none">
+                    <DropdownTrigger className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 hover:bg-[var(--default)] transition-colors outline-none">
                         <Avatar
                             size="sm"
-                            className="h-8 w-8 bg-white/10 text-zinc-200"
+                            className="h-8 w-8 bg-[var(--default)] text-[var(--foreground)]"
                         >
                             {user?.avatar_url ? (
                                 <Avatar.Image src={user.avatar_url} alt={user?.username || "Admin"} />
@@ -101,20 +117,20 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
                             <Avatar.Fallback>{user?.username?.[0]?.toUpperCase() || "A"}</Avatar.Fallback>
                         </Avatar>
                         <div className="hidden sm:flex flex-col items-start">
-                            <span className="text-sm font-medium text-zinc-200">
+                            <span className="text-sm font-medium text-[var(--foreground)]">
                                 {user?.username || "Admin"}
                             </span>
-                            <span className="text-[11px] text-zinc-500">{user?.email}</span>
+                            <span className="text-[11px] text-[var(--muted)]">{user?.email}</span>
                         </div>
                     </DropdownTrigger>
                     <DropdownPopover placement="bottom end">
                         <DropdownMenu
                             aria-label="User menu"
-                            className="bg-[#0f1017] border border-[#2a2f4b]"
+                            className="bg-[var(--overlay)] border border-[var(--border)]"
                         >
                             <DropdownItem
                                 key="profile"
-                                className="text-zinc-300"
+                                className="text-[var(--foreground)]"
                                 onPress={() => router.push("/admin/perfil")}
                             >
                                 <span className="flex items-center gap-2">
@@ -124,7 +140,7 @@ export function AdminNavbar({ user, onMenuToggle }: AdminNavbarProps) {
                             </DropdownItem>
                             <DropdownItem
                                 key="logout"
-                                className="text-zinc-100"
+                                className="text-[var(--foreground)]"
                                 onPress={logout}
                             >
                                 <span className="flex items-center gap-2">

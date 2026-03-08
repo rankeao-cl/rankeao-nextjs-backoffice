@@ -5,6 +5,7 @@ import {
     useContext,
     useState,
     useCallback,
+    useEffect,
     type ReactNode,
 } from "react";
 import {
@@ -33,29 +34,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(() => {
-        if (typeof window === "undefined") {
-            return null;
-        }
+    const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
+    useEffect(() => {
         const token = getToken();
         if (!token) {
-            return null;
+            setIsLoading(false);
+            return;
         }
 
         const storedUser = localStorage.getItem("rankeao_admin_user");
         if (!storedUser) {
-            return null;
+            setIsLoading(false);
+            return;
         }
 
         try {
-            return JSON.parse(storedUser) as User;
+            setUser(JSON.parse(storedUser) as User);
         } catch {
             clearTokens();
-            return null;
+            setUser(null);
+        } finally {
+            setIsLoading(false);
         }
-    });
-    const isLoading = false;
+    }, []);
 
     const login = useCallback(async (email: string, password: string) => {
         const res: AuthResponse = await apiLogin(email, password);

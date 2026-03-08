@@ -80,8 +80,8 @@ export function Sidebar({
     const sidebarContent = (
         <div className="flex h-full flex-col">
             {/* Logo */}
-            <div className="flex items-center gap-3 px-4 py-5 border-b border-[#2a2f4b]/50">
-                <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/20 bg-gradient-to-br from-zinc-800 to-black">
+            <div className="flex items-center gap-3 px-4 py-5 border-b border-[var(--border)]">
+                <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
                     <Image
                         src="/logo.png"
                         alt="Rankeao"
@@ -96,7 +96,7 @@ export function Sidebar({
                         <span className="font-[var(--font-heading)] text-lg font-bold text-gradient-purple-cyan">
                             Rankeao
                         </span>
-                        <span className="text-[10px] uppercase tracking-widest text-zinc-500">
+                        <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">
                             Panel Admin
                         </span>
                     </div>
@@ -110,11 +110,11 @@ export function Sidebar({
                         return (
                             <div key={i} className="pt-4 pb-1 px-3">
                                 {!collapsed && (
-                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">
                                         {item.label}
                                     </span>
                                 )}
-                                {collapsed && <div className="border-t border-[#2a2f4b]/40 my-1" />}
+                                {collapsed && <div className="border-t border-[var(--border)] my-1" />}
                             </div>
                         );
                     }
@@ -132,16 +132,16 @@ export function Sidebar({
                 group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
                 transition-all duration-200
                 ${isActive
-                                    ? "bg-white/10 text-zinc-200 shadow-[inset_0_0_0_1px_rgba(248,250,252,0.22)]"
-                                    : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+                                    ? "bg-[var(--default)] text-[var(--foreground)] shadow-[inset_0_0_0_1px_var(--border)]"
+                                    : "text-[var(--muted)] hover:bg-[var(--default)] hover:text-[var(--foreground)]"
                                 }
               `}
                             title={collapsed ? item.label : undefined}
                         >
                             <Icon
                                 className={`h-[18px] w-[18px] shrink-0 transition-colors ${isActive
-                                        ? "text-zinc-200"
-                                        : "text-zinc-500 group-hover:text-zinc-300"
+                                    ? "text-[var(--foreground)]"
+                                    : "text-[var(--muted)] group-hover:text-[var(--foreground)]"
                                     }`}
                             />
                             {!collapsed && <span>{item.label}</span>}
@@ -151,11 +151,11 @@ export function Sidebar({
             </nav>
 
             {/* Collapse toggle (desktop only) */}
-            <div className="hidden md:flex border-t border-[#2a2f4b]/50 p-3">
+            <div className="hidden md:flex border-t border-[var(--border)] p-3">
                 <Button
-                    variant="ghost"
+                    variant="secondary"
                     onPress={onToggle}
-                    className="w-full text-zinc-500 hover:text-zinc-300"
+                    className="w-full text-[var(--muted)] hover:text-[var(--foreground)]"
                 >
                     {collapsed ? (
                         <ChevronRight className="h-4 w-4" />
@@ -172,7 +172,7 @@ export function Sidebar({
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+                    className="fixed inset-0 z-40 bg-[var(--background)]/60 backdrop-blur-sm md:hidden"
                     onClick={onMobileClose}
                 />
             )}
@@ -180,7 +180,7 @@ export function Sidebar({
             {/* Mobile drawer */}
             <aside
                 className={`
-          fixed inset-y-0 left-0 z-50 w-64 transform bg-[#0a0b12] border-r border-[#2a2f4b]/40
+          fixed inset-y-0 left-0 z-50 w-64 transform bg-[var(--surface)] border-r border-[var(--border)]
           transition-transform duration-300 md:hidden
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
@@ -188,9 +188,9 @@ export function Sidebar({
                 <Button
                     isIconOnly
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={onMobileClose}
-                    className="absolute right-3 top-4 text-zinc-500 hover:text-zinc-300"
+                    className="absolute right-3 top-4 text-[var(--muted)] hover:text-[var(--foreground)]"
                 >
                     <X className="h-5 w-5" />
                 </Button>
@@ -200,7 +200,7 @@ export function Sidebar({
             {/* Desktop sidebar */}
             <aside
                 className={`
-          hidden md:flex flex-col bg-[#0a0b12] border-r border-[#2a2f4b]/40
+          hidden md:flex flex-col bg-[var(--surface)] border-r border-[var(--border)]
           transition-all duration-300 shrink-0
           ${collapsed ? "w-[68px]" : "w-60"}
         `}

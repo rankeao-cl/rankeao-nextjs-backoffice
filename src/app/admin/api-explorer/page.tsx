@@ -232,22 +232,22 @@ export default function AdminApiExplorerPage() {
         <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
           Admin API Explorer
         </h1>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-[var(--muted)] mt-1">
           Lee `admin-api.yaml` y ejecuta operaciones por `operationId`.
         </p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40 xl:col-span-1">
+        <Card className="bg-[var(--surface)] border border-[var(--border)] xl:col-span-1">
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-zinc-300" />
-              <p className="text-sm text-zinc-200 font-medium">Operaciones</p>
+              <Search className="h-4 w-4 text-[var(--foreground)]" />
+              <p className="text-sm text-[var(--foreground)] font-medium">Operaciones</p>
             </div>
             <Input
               placeholder="Buscar operationId, path, method..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
             />
 
             {loadingOperations ? (
@@ -260,22 +260,21 @@ export default function AdminApiExplorerPage() {
                   <Button
                     key={operation.operationId}
                     type="button"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => setSelectedOperationId(operation.operationId)}
-                    className={`h-auto w-full justify-start rounded-lg border p-3 text-left transition-colors ${
-                      selectedOperationId === operation.operationId
-                        ? "border-white/30 bg-white/10"
-                        : "border-white/10 bg-[#0a0b12] hover:border-white/25"
-                    }`}
+                    className={`h-auto w-full justify-start rounded-lg border p-3 text-left transition-colors ${selectedOperationId === operation.operationId
+                        ? "border-[var(--focus)] bg-[var(--default)]"
+                        : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--muted)]"
+                      }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold text-zinc-200">{operation.operationId}</p>
+                      <p className="text-xs font-semibold text-[var(--foreground)]">{operation.operationId}</p>
                       <Chip size="sm" variant="soft" color="default">
                         {operation.method}
                       </Chip>
                     </div>
-                    <p className="text-[11px] text-zinc-500 mt-1 break-all">{operation.path}</p>
-                    {operation.tag ? <p className="text-[11px] text-zinc-600 mt-1">{operation.tag}</p> : null}
+                    <p className="text-[11px] text-[var(--muted)] mt-1 break-all">{operation.path}</p>
+                    {operation.tag ? <p className="text-[11px] text-[var(--field-placeholder)] mt-1">{operation.tag}</p> : null}
                   </Button>
                 ))}
               </div>
@@ -283,16 +282,16 @@ export default function AdminApiExplorerPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#0f1017] border border-[#2a2f4b]/40 xl:col-span-2">
+        <Card className="bg-[var(--surface)] border border-[var(--border)] xl:col-span-2">
           <CardContent className="p-4 space-y-4">
             {!selectedOperation ? (
-              <p className="text-sm text-zinc-500">Selecciona una operación.</p>
+              <p className="text-sm text-[var(--muted)]">Selecciona una operación.</p>
             ) : (
               <>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Code2 className="h-4 w-4 text-zinc-300" />
-                    <p className="text-sm font-medium text-zinc-100">{selectedOperation.operationId}</p>
+                    <Code2 className="h-4 w-4 text-[var(--foreground)]" />
+                    <p className="text-sm font-medium text-[var(--foreground)]">{selectedOperation.operationId}</p>
                     <Chip size="sm" variant="soft" color="default">
                       {selectedOperation.method}
                     </Chip>
@@ -302,20 +301,20 @@ export default function AdminApiExplorerPage() {
                       </Chip>
                     ) : null}
                   </div>
-                  <p className="text-xs text-zinc-500 break-all">{selectedOperation.path}</p>
-                  <p className="text-xs text-zinc-400">{selectedOperation.summary}</p>
+                  <p className="text-xs text-[var(--muted)] break-all">{selectedOperation.path}</p>
+                  <p className="text-xs text-[var(--muted)]">{selectedOperation.summary}</p>
                 </div>
 
                 {selectedOperation.pathParams.length > 0 ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-zinc-500 uppercase tracking-wide">Path params</p>
+                    <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Path params</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {selectedOperation.pathParams.map((param) => (
                         <Input
                           key={param}
                           placeholder={param}
                           value={pathParams[param] || ""}
-                          onChange={(e) => setPathParams((prev) => ({ ...prev, [param]: e.target.value }))}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPathParams((prev) => ({ ...prev, [param]: e.target.value }))}
                         />
                       ))}
                     </div>
@@ -324,14 +323,14 @@ export default function AdminApiExplorerPage() {
 
                 {selectedOperation.queryParams.length > 0 ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-zinc-500 uppercase tracking-wide">Query params</p>
+                    <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Query params</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {selectedOperation.queryParams.map((param) => (
                         <Input
                           key={param}
                           placeholder={param}
                           value={queryParams[param] || ""}
-                          onChange={(e) => setQueryParams((prev) => ({ ...prev, [param]: e.target.value }))}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setQueryParams((prev) => ({ ...prev, [param]: e.target.value }))}
                         />
                       ))}
                     </div>
@@ -340,10 +339,10 @@ export default function AdminApiExplorerPage() {
 
                 {selectedOperation.hasRequestBody ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-zinc-500 uppercase tracking-wide">Body JSON</p>
+                    <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Body JSON</p>
                     <TextArea
                       value={bodyText}
-                      onChange={(e) => setBodyText(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setBodyText(e.target.value)}
                       rows={8}
                       className="font-mono text-xs"
                     />
@@ -353,7 +352,7 @@ export default function AdminApiExplorerPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
                     size="sm"
-                    variant={sendAuth ? "primary" : "ghost"}
+                    variant={sendAuth ? "primary" : "secondary"}
                     onPress={() => setSendAuth((prev) => !prev)}
                   >
                     Authorization: {sendAuth ? "ON" : "OFF"}
@@ -362,7 +361,7 @@ export default function AdminApiExplorerPage() {
                     size="sm"
                     onPress={executeOperation}
                     isPending={running}
-                    className="bg-gradient-to-r from-zinc-700 to-black"
+                    variant="secondary"
                   >
                     <Play className="h-3.5 w-3.5" /> Ejecutar
                   </Button>
@@ -373,11 +372,11 @@ export default function AdminApiExplorerPage() {
         </Card>
       </div>
 
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Terminal className="h-4 w-4 text-zinc-300" />
-            <p className="text-sm font-medium text-zinc-200">Respuesta</p>
+            <Terminal className="h-4 w-4 text-[var(--foreground)]" />
+            <p className="text-sm font-medium text-[var(--foreground)]">Respuesta</p>
           </div>
 
           {response ? (
@@ -393,20 +392,21 @@ export default function AdminApiExplorerPage() {
                   {response.durationMs} ms
                 </Chip>
               </div>
-              <p className="text-[11px] text-zinc-500 break-all">{response.url}</p>
-              <details className="rounded-lg border border-white/10 bg-[#0a0b12] p-2">
-                <summary className="cursor-pointer text-xs text-zinc-400">Headers</summary>
-                <pre className="mt-2 text-xs text-zinc-500 overflow-auto">{prettyJson(response.headers)}</pre>
+              <p className="text-[11px] text-[var(--muted)] break-all">{response.url}</p>
+              <details className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2">
+                <summary className="cursor-pointer text-xs text-[var(--muted)]">Headers</summary>
+                <pre className="mt-2 text-xs text-[var(--muted)] overflow-auto">{prettyJson(response.headers)}</pre>
               </details>
-              <pre className="rounded-lg border border-white/10 bg-[#0a0b12] p-3 text-xs text-zinc-300 overflow-auto max-h-[28rem] whitespace-pre-wrap">
+              <pre className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--foreground)] overflow-auto max-h-[28rem] whitespace-pre-wrap">
                 {response.body}
               </pre>
             </>
           ) : (
-            <p className="text-sm text-zinc-500">Aun no se ha ejecutado ninguna operación.</p>
+            <p className="text-sm text-[var(--muted)]">Aun no se ha ejecutado ninguna operación.</p>
           )}
         </CardContent>
       </Card>
     </div>
   );
 }
+

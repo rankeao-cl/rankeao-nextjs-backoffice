@@ -1,34 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Button,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
+import {
   Card,
-  CardContent,
   Chip,
-  Description,
   Fieldset,
   Form,
   Input,
   Label,
   Modal,
-  ModalBody,
-  ModalDialog,
-  ModalFooter,
-  ModalHeader,
+  Skeleton,
   Spinner,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  TextField,
   TextArea,
+  TextField,
+  Button,
 } from "@heroui/react";
 import { createBroadcast, getBroadcasts, type ListMeta } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
-import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Radio, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -163,7 +157,7 @@ export default function BroadcastsPage() {
       case "title":
         return (
           <div className="flex items-center gap-2">
-            <Radio className="h-4 w-4 text-zinc-200" />
+            <Radio className="h-4 w-4 text-[var(--foreground)]" />
             <span className="font-medium">{String(broadcast.title || "-")}</span>
           </div>
         );
@@ -198,176 +192,180 @@ export default function BroadcastsPage() {
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
             Difusiones
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">Notificaciones masivas a grupos de usuarios</p>
+          <p className="text-sm text-[var(--muted)] mt-1">Notificaciones masivas a grupos de usuarios</p>
         </div>
         <Button
           type="button"
           onPress={createModal.onOpen}
-          className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
         >
           Nueva difusion
         </Button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:w-1/3 shrink-0">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5">
-              <Form>
-                <Fieldset className="space-y-4">
-                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
-                  <Description className="text-xs text-zinc-500">
-                    Filtra por titulo, target y estado; ajusta la paginacion para revisar historico de envios.
-                  </Description>
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="px-5 py-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Titulo</Label>
+              <Input placeholder="texto" value={queryFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setQueryFilter(e.target.value)} />
+            </TextField>
+            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Target</Label>
+              <Input placeholder="ALL, SEGMENT..." value={targetFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTargetFilter(e.target.value)} />
+            </TextField>
+            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Estado</Label>
+              <Input placeholder="PENDING, SENT..." value={statusFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setStatusFilter(e.target.value)} />
+            </TextField>
+            <TextField className="space-y-1 flex flex-col w-24">
+              <Label className="text-xs text-[var(--muted)]">Per page</Label>
+              <Input
+                type="number"
+                min={1}
+                value={perPageInput}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPerPageInput(e.target.value)}
+              />
+            </TextField>
+            <Button type="button" size="sm" variant="primary" onPress={applyPagination}>Aplicar</Button>
+            <Button type="button" size="sm" variant="tertiary" onPress={clearFilters}>Limpiar</Button>
+          </div>
+        </Card.Content>
+      </Card>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="p-0">
+          {loading ? (
+            <div className="space-y-3 p-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-3/5 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <Table.ScrollContainer>
+                <Table.Content aria-label="Broadcasts">
+                  <Table.Header columns={TABLE_COLUMNS}>
+                    {(column: { key: string; label: string }) => (
+                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+                        {column.label}
+                      </Table.Column>
+                    )}
+                  </Table.Header>
+                  <Table.Body>
+                    {filteredBroadcasts.map((broadcast) => (
+                      <Table.Row key={String(broadcast.id || String(broadcast.title || "-"))}>
+                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
+                          <Table.Cell key={column.key}>
+                            {renderCell(broadcast, column.key)}
+                          </Table.Cell>
+                        ))}
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+            <span>
+              Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
+            </span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+                Anterior
+              </Button>
+              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        </Card.Content>
+      </Card>
+
+      <Modal>
+        <Modal.Backdrop isOpen={createModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}>
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header>
+                <div className="flex items-center gap-2">
+                  <Send className="h-5 w-5 text-[var(--foreground)]" />
+                  Crear difusion
+                </div>
+              </Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
                     <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Titulo</Label>
-                      <Input placeholder="texto" value={queryFilter} onChange={(e) => setQueryFilter(e.target.value)} />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Target</Label>
-                      <Input placeholder="ALL, SEGMENT..." value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)} />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Estado</Label>
-                      <Input placeholder="PENDING, SENT..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Per page</Label>
+                      <Label className="text-xs text-[var(--muted)]">Titulo</Label>
                       <Input
-                        type="number"
-                        min={1}
-                        value={perPageInput}
-                        onChange={(e) => setPerPageInput(e.target.value)}
+                        value={formData.title}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                       />
                     </TextField>
-                  </div>
 
-                  <Fieldset.Actions className="flex gap-2">
-                    <Button type="button" size="sm" onPress={applyPagination}>Aplicar paginacion</Button>
-                    <Button type="button" size="sm" variant="ghost" onPress={clearFilters}>Limpiar filtros</Button>
-                  </Fieldset.Actions>
-                </Fieldset>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Mensaje</Label>
+                      <TextArea
+                        value={formData.body}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
+                        rows={3}
+                      />
+                    </TextField>
 
-        <div className="w-full lg:w-2/3">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5 space-y-4">
-              {loading ? (
-                <div className="flex justify-center py-20">
-                  <Spinner size="lg" color="current" />
-                </div>
-              ) : (
-                <Table>
-                  <Table.Content aria-label="Broadcasts">
-                    <TableHeader columns={TABLE_COLUMNS}>
-                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                    </TableHeader>
-                    <TableBody items={filteredBroadcasts}>
-                      {(broadcast) => (
-                        <TableRow key={String(broadcast.id || String(broadcast.title || "-"))}>
-                          {(column) => <TableCell>{renderCell(broadcast, getTableColumnKey(column))}</TableCell>}
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table.Content>
-                </Table>
-              )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Target</Label>
+                        <Input
+                          value={formData.target}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, target: e.target.value }))}
+                        />
+                      </TextField>
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Canales</Label>
+                        <Input
+                          placeholder="IN_APP,EMAIL..."
+                          value={formData.channels}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
+                        />
+                      </TextField>
+                    </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-zinc-500">
-                <span>
-                  Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
-                </span>
-                <div className="flex gap-2">
-                  <Button type="button" size="sm" variant="ghost" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
-                    Anterior
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
-                    Siguiente
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Modal isOpen={createModal.isOpen} onOpenChange={(isOpen) => !isOpen && createModal.onClose()}>
-        <ModalDialog>
-          <ModalHeader>
-            <div className="flex items-center gap-2">
-              <Send className="h-5 w-5 text-zinc-200" />
-              Crear difusion
-            </div>
-          </ModalHeader>
-          <ModalBody className="gap-4">
-            <Form className="w-full">
-              <Fieldset className="space-y-4 w-full">
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Titulo</Label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                  />
-                </TextField>
-
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Mensaje</Label>
-                  <TextArea
-                    value={formData.body}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
-                    rows={3}
-                  />
-                </TextField>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Target</Label>
-                    <Input
-                      value={formData.target}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, target: e.target.value }))}
-                    />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Canales</Label>
-                    <Input
-                      placeholder="IN_APP,EMAIL..."
-                      value={formData.channels}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
-                    />
-                  </TextField>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Action URL</Label>
-                    <Input
-                      value={formData.action_url}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, action_url: e.target.value }))}
-                    />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Programar para</Label>
-                    <Input
-                      type="datetime-local"
-                      value={formData.schedule_at}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, schedule_at: e.target.value }))}
-                    />
-                  </TextField>
-                </div>
-              </Fieldset>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={createModal.onClose}>Cancelar</Button>
-            <Button onPress={handleCreate} isPending={formLoading}>Enviar difusion</Button>
-          </ModalFooter>
-        </ModalDialog>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Action URL</Label>
+                        <Input
+                          value={formData.action_url}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, action_url: e.target.value }))}
+                        />
+                      </TextField>
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Programar para</Label>
+                        <Input
+                          type="datetime-local"
+                          value={formData.schedule_at}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, schedule_at: e.target.value }))}
+                        />
+                      </TextField>
+                    </div>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
+                <Button variant="primary" onPress={handleCreate} isPending={formLoading}>Enviar difusion</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </div>
   );
 }
+

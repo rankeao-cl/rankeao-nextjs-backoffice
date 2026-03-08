@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import {
-  Button,
+  useState
+} from "react";
+import {
   Card,
-  CardContent,
   Description,
   Fieldset,
   Form,
   Label,
   TextArea,
   TextField,
+  Button,
 } from "@heroui/react";
 import { batchUpdateLevels } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
@@ -63,28 +64,28 @@ export default function LevelsPage() {
         <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
           Levels
         </h1>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-[var(--muted)] mt-1">
           Reemplaza en bloque la configuracion de niveles de gamificacion.
         </p>
       </div>
 
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-        <CardContent className="p-5">
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="p-5">
           <Form className="space-y-4">
             <Fieldset className="space-y-4">
-              <Fieldset.Legend className="flex items-center gap-2 font-semibold text-zinc-200">
-                <Layers className="h-5 w-5 text-zinc-200" />
+              <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+                <Layers className="h-5 w-5 text-[var(--foreground)]" />
                 Batch update payload
               </Fieldset.Legend>
-              <Description className="text-xs text-zinc-500">
+              <Description className="text-xs text-[var(--muted)]">
                 Puedes enviar un array de niveles (se envuelve como <code>{'{"levels": [...]}'} </code>) o un objeto JSON completo.
               </Description>
 
               <TextField className="space-y-1 flex flex-col">
-                <Label className="text-xs text-zinc-400">JSON de niveles</Label>
+                <Label className="text-xs text-[var(--muted)]">JSON de niveles</Label>
                 <TextArea
                   value={payloadText}
-                  onChange={(e) => setPayloadText(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPayloadText(e.target.value)}
                   rows={16}
                   className="font-mono text-xs"
                 />
@@ -94,14 +95,15 @@ export default function LevelsPage() {
                 <Button type="button" onPress={handleBatchUpdate} isPending={loading}>
                   Aplicar cambios
                 </Button>
-                <Button type="button" variant="ghost" onPress={() => setPayloadText(EXAMPLE_LEVELS)}>
+                <Button type="button" variant="secondary" onPress={() => setPayloadText(EXAMPLE_LEVELS)}>
                   Restaurar ejemplo
                 </Button>
               </Fieldset.Actions>
             </Fieldset>
           </Form>
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );
 }
+

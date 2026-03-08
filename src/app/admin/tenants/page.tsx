@@ -1,30 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 import {
   Avatar,
-  Button,
   Card,
-  CardContent,
   Chip,
-  Description,
-  Fieldset,
-  Form,
   Input,
   Label,
   Modal,
-  ModalBody,
-  ModalDialog,
-  ModalFooter,
-  ModalHeader,
+  Skeleton,
   Spinner,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
   TextField,
+  Button,
 } from "@heroui/react";
 import {
   getTenants,
@@ -35,7 +27,6 @@ import {
   verifyTenant,
 } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
-import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Store } from "lucide-react";
 import { toast } from "sonner";
@@ -137,7 +128,7 @@ export default function TenantsPage() {
           <div className="flex items-center gap-3">
             <Avatar
               size="sm"
-              className="bg-white/10 text-zinc-200"
+              className="bg-[var(--default)] text-[var(--foreground)]"
             >
               {tenant.logo_url ? <Avatar.Image src={tenant.logo_url} alt={tenant.name} /> : null}
               <Avatar.Fallback>
@@ -145,14 +136,14 @@ export default function TenantsPage() {
               </Avatar.Fallback>
             </Avatar>
             <div>
-              <p className="font-medium text-zinc-200">{tenant.name}</p>
-              <p className="text-xs text-zinc-500">{tenant.slug}</p>
+              <p className="font-medium text-[var(--foreground)]">{tenant.name}</p>
+              <p className="text-xs text-[var(--muted)]">{tenant.slug}</p>
             </div>
           </div>
         );
       case "city":
         return (
-          <span className="text-zinc-400">
+          <span className="text-[var(--muted)]">
             {tenant.city}
             {tenant.region ? `, ${tenant.region}` : ""}
           </span>
@@ -165,7 +156,7 @@ export default function TenantsPage() {
         );
       case "created":
         return (
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-[var(--muted)]">
             {tenant.created_at ? new Date(tenant.created_at).toLocaleDateString("es-CL") : "-"}
           </span>
         );
@@ -176,14 +167,14 @@ export default function TenantsPage() {
               <>
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="secondary"
                   onPress={() => openAction(tenant, "verify")}
                 >
                   Verificar
                 </Button>
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="danger"
                   onPress={() => openAction(tenant, "reject")}
                 >
                   Rechazar
@@ -193,7 +184,7 @@ export default function TenantsPage() {
             {tenant.status === "active" && (
               <Button
                 size="sm"
-                variant="ghost"
+                variant="danger"
                 onPress={() => openAction(tenant, "suspend")}
               >
                 Suspender
@@ -202,7 +193,7 @@ export default function TenantsPage() {
             {tenant.status === "suspended" && (
               <Button
                 size="sm"
-                variant="ghost"
+                variant="secondary"
                 onPress={() => openAction(tenant, "reactivate")}
               >
                 Reactivar
@@ -222,86 +213,97 @@ export default function TenantsPage() {
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
             Tiendas
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">Gestion de tiendas registradas</p>
+          <p className="text-sm text-[var(--muted)] mt-1">Gestion de tiendas registradas</p>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:w-1/3 shrink-0">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5">
-              <Form>
-                <Fieldset className="space-y-3">
-                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtro</Fieldset.Legend>
-                  <Description className="text-xs text-zinc-500">Busca por nombre, slug o ciudad.</Description>
-                  <div className="grid grid-cols-1 gap-3">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Busqueda</Label>
-                      <Input
-                        placeholder="texto"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                      />
-                    </TextField>
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="px-5 py-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Busqueda</Label>
+              <Input
+                placeholder="Nombre, slug o ciudad..."
+                value={search}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
+              />
+            </TextField>
+          </div>
+        </Card.Content>
+      </Card>
+
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="p-0">
+          {loading ? (
+            <div className="space-y-3 p-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-3/5 rounded" />
                   </div>
-                </Fieldset>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="w-full lg:w-2/3">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5">
-              {loading ? (
-                <div className="flex justify-center py-20">
-                  <Spinner size="lg" color="current" />
                 </div>
-              ) : (
-                <Table>
-                  <Table.Content aria-label="Tenants table">
-                    <TableHeader columns={TABLE_COLUMNS}>
-                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                    </TableHeader>
-                    <TableBody items={filteredTenants}>
-                      {(tenant) => (
-                        <TableRow key={tenant.id}>
-                          {(column) => <TableCell>{renderCell(tenant, getTableColumnKey(column))}</TableCell>}
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table.Content>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <Table.ScrollContainer>
+                <Table.Content aria-label="Tenants table">
+                  <Table.Header columns={TABLE_COLUMNS}>
+                    {(column: { key: string; label: string }) => (
+                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+                        {column.label}
+                      </Table.Column>
+                    )}
+                  </Table.Header>
+                  <Table.Body>
+                    {filteredTenants.map((tenant) => (
+                      <Table.Row key={tenant.id}>
+                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
+                          <Table.Cell key={column.key}>
+                            {renderCell(tenant, column.key)}
+                          </Table.Cell>
+                        ))}
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
+        </Card.Content>
+      </Card>
 
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={(isOpen) => !isOpen && onClose()}
-      >
-        <ModalDialog>
-          <ModalHeader>
-            {actionTarget ? `¿${actionLabels[actionTarget.action]} tenant?` : "Confirmar"}
-          </ModalHeader>
-          <ModalBody>
-            <p className="text-zinc-400 text-sm">
-              Esta accion cambiara el estado de
-              <strong className="text-zinc-200"> {actionTarget?.tenant.name}</strong>.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={onClose}>
-              Cancelar
-            </Button>
-            <Button onPress={executeAction} isPending={actionLoading}>
-              Confirmar
-            </Button>
-          </ModalFooter>
-        </ModalDialog>
+      <Modal>
+        <Modal.Backdrop
+          isOpen={isOpen}
+          onOpenChange={(isOpen: boolean) => !isOpen && onClose()}
+        >
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header>
+                <Modal.Heading>{actionTarget ? `¿${actionLabels[actionTarget.action]} tenant?` : "Confirmar"}</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <p className="text-[var(--muted)] text-sm">
+                  Esta accion cambiara el estado de
+                  <strong className="text-[var(--foreground)]"> {actionTarget?.tenant.name}</strong>.
+                </p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={onClose}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onPress={executeAction} isPending={actionLoading}>
+                  Confirmar
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </div>
   );
 }
+

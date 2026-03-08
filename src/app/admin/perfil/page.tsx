@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Avatar, Button, Card, CardContent, Chip, Spinner } from "@heroui/react";
+import { Avatar, Button, Card, Chip, Skeleton, Spinner } from "@heroui/react";
 import {
   LAST_API_ERROR_EVENT,
   clearApiErrorHistory,
@@ -277,12 +277,12 @@ export default function AdminPerfilPage() {
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
             Perfil Admin
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Control personal, seguridad y actividad de API para soporte.
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" onPress={() => void refreshProfileData()} isDisabled={loading}>
+          <Button variant="secondary" onPress={() => void refreshProfileData()} isDisabled={loading}>
             Actualizar datos
           </Button>
         </div>
@@ -291,21 +291,21 @@ export default function AdminPerfilPage() {
       <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
-          variant={activeTab === "resumen" ? "primary" : "ghost"}
+          variant={activeTab === "resumen" ? "primary" : "secondary"}
           onPress={() => setActiveTab("resumen")}
         >
           Resumen
         </Button>
         <Button
           size="sm"
-          variant={activeTab === "seguridad" ? "primary" : "ghost"}
+          variant={activeTab === "seguridad" ? "primary" : "secondary"}
           onPress={() => setActiveTab("seguridad")}
         >
           Seguridad
         </Button>
         <Button
           size="sm"
-          variant={activeTab === "actividad-api" ? "primary" : "ghost"}
+          variant={activeTab === "actividad-api" ? "primary" : "secondary"}
           onPress={() => setActiveTab("actividad-api")}
         >
           Actividad API (histórico de errores)
@@ -313,105 +313,116 @@ export default function AdminPerfilPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="lg" color="current" />
+        <div className="space-y-6 py-10">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-48 rounded" />
+              <Skeleton className="h-3 w-32 rounded" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="h-3 w-full rounded" />
+            <Skeleton className="h-3 w-4/5 rounded" />
+            <Skeleton className="h-3 w-3/5 rounded" />
+          </div>
         </div>
       ) : null}
 
       {!loading && activeTab === "resumen" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-4 space-y-1">
-                <p className="text-xs text-zinc-500 uppercase tracking-wide">Tenants</p>
-                <p className="text-2xl font-bold text-zinc-100">{snapshot.tenantsTotal}</p>
-                <p className="text-xs text-zinc-500">
+            <Card className="bg-[var(--surface)] border border-[var(--border)]">
+              <Card.Content className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Tenants</p>
+                <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.tenantsTotal}</p>
+                <p className="text-xs text-[var(--muted)]">
                   Activos {snapshot.tenantsActive} | Pendientes {snapshot.tenantsPending}
                 </p>
-              </CardContent>
+              </Card.Content>
             </Card>
 
-            <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-4 space-y-1">
-                <p className="text-xs text-zinc-500 uppercase tracking-wide">Disputes</p>
-                <p className="text-2xl font-bold text-zinc-100">{snapshot.disputesTotal}</p>
-                <p className="text-xs text-zinc-500">
+            <Card className="bg-[var(--surface)] border border-[var(--border)]">
+              <Card.Content className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Disputes</p>
+                <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.disputesTotal}</p>
+                <p className="text-xs text-[var(--muted)]">
                   Open {snapshot.disputesOpen} | Resueltas {snapshot.disputesResolved}
                 </p>
-              </CardContent>
+              </Card.Content>
             </Card>
 
-            <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-4 space-y-1">
-                <p className="text-xs text-zinc-500 uppercase tracking-wide">Templates</p>
-                <p className="text-2xl font-bold text-zinc-100">{snapshot.templatesTotal}</p>
-                <p className="text-xs text-zinc-500">
+            <Card className="bg-[var(--surface)] border border-[var(--border)]">
+              <Card.Content className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Templates</p>
+                <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.templatesTotal}</p>
+                <p className="text-xs text-[var(--muted)]">
                   Activos {snapshot.templatesActive} | Inactivos {snapshot.templatesInactive}
                 </p>
-              </CardContent>
+              </Card.Content>
             </Card>
 
-            <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-4 space-y-1">
-                <p className="text-xs text-zinc-500 uppercase tracking-wide">Broadcasts</p>
-                <p className="text-2xl font-bold text-zinc-100">{snapshot.broadcastsTotal}</p>
-                <p className="text-xs text-zinc-500">Email templates {snapshot.emailTemplatesTotal}</p>
-              </CardContent>
+            <Card className="bg-[var(--surface)] border border-[var(--border)]">
+              <Card.Content className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Broadcasts</p>
+                <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.broadcastsTotal}</p>
+                <p className="text-xs text-[var(--muted)]">Email templates {snapshot.emailTemplatesTotal}</p>
+              </Card.Content>
             </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-center gap-2 text-zinc-200">
+            <Card className="bg-[var(--surface)] border border-[var(--border)]">
+              <Card.Content className="p-5 space-y-3">
+                <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Trophy className="h-4 w-4" />
                   <p className="text-sm font-medium">Gamificacion</p>
                 </div>
-                <p className="text-sm text-zinc-400">XP total otorgado</p>
-                <p className="text-xl font-semibold text-zinc-100">{snapshot.totalXpGranted.toLocaleString()}</p>
-                <p className="text-xs text-zinc-500">Eventos XP hoy: {snapshot.xpEventsToday}</p>
-                <p className="text-xs text-zinc-500">Badges: {snapshot.badgesTotal}</p>
-                <p className="text-xs text-zinc-500">XP events definidos: {snapshot.xpEventsTotal}</p>
-              </CardContent>
+                <p className="text-sm text-[var(--muted)]">XP total otorgado</p>
+                <p className="text-xl font-semibold text-[var(--foreground)]">{snapshot.totalXpGranted.toLocaleString()}</p>
+                <p className="text-xs text-[var(--muted)]">Eventos XP hoy: {snapshot.xpEventsToday}</p>
+                <p className="text-xs text-[var(--muted)]">Badges: {snapshot.badgesTotal}</p>
+                <p className="text-xs text-[var(--muted)]">XP events definidos: {snapshot.xpEventsTotal}</p>
+              </Card.Content>
             </Card>
 
-            <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-center gap-2 text-zinc-200">
+            <Card className="bg-[var(--surface)] border border-[var(--border)]">
+              <Card.Content className="p-5 space-y-3">
+                <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Bell className="h-4 w-4" />
                   <p className="text-sm font-medium">Notificaciones</p>
                 </div>
-                <p className="text-sm text-zinc-400">Enviadas (24h)</p>
-                <p className="text-xl font-semibold text-zinc-100">{snapshot.notificationsSent.toLocaleString()}</p>
-                <p className="text-xs text-zinc-500">Read rate: {formatPercent(snapshot.notificationsReadRate)}</p>
-              </CardContent>
+                <p className="text-sm text-[var(--muted)]">Enviadas (24h)</p>
+                <p className="text-xl font-semibold text-[var(--foreground)]">{snapshot.notificationsSent.toLocaleString()}</p>
+                <p className="text-xs text-[var(--muted)]">Read rate: {formatPercent(snapshot.notificationsReadRate)}</p>
+              </Card.Content>
             </Card>
           </div>
 
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-center gap-2 text-zinc-200">
+          <Card className="bg-[var(--surface)] border border-[var(--border)]">
+            <Card.Content className="p-5 space-y-4">
+              <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <Zap className="h-4 w-4" />
                 <p className="text-sm font-medium">Estado de endpoints</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {Object.entries(endpointHealth).map(([key, health]) => (
-                  <div key={key} className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 space-y-2">
+                  <div key={key} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs uppercase tracking-wide text-zinc-500">{key}</p>
+                      <p className="text-xs uppercase tracking-wide text-[var(--muted)]">{key}</p>
                       <Chip size="sm" variant="soft" color="default">
                         {health.ok ? "OK" : "Error"}
                       </Chip>
                     </div>
-                    <p className="text-xs text-zinc-400 break-words">{health.detail}</p>
+                    <p className="text-xs text-[var(--muted)] break-words">{health.detail}</p>
                   </div>
                 ))}
               </div>
-            </CardContent>
+            </Card.Content>
           </Card>
 
-          <div className="text-xs text-zinc-500 flex items-center gap-2">
+          <div className="text-xs text-[var(--muted)] flex items-center gap-2">
             <Clock3 className="h-3.5 w-3.5" />
             Ultima actualización: {lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleString("es-CL") : "-"}
           </div>
@@ -421,130 +432,131 @@ export default function AdminPerfilPage() {
       {!loading && activeTab === "seguridad" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Card className="bg-[#0f1017]/80 border border-white/15 lg:col-span-2">
-              <CardContent className="p-5">
+            <Card className="bg-[var(--surface-secondary)] border border-[var(--border)] lg:col-span-2">
+              <Card.Content className="p-5">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-14 w-14 bg-white/10 text-zinc-200" size="lg">
+                  <Avatar className="h-14 w-14 bg-[var(--default)] text-[var(--foreground)]" size="lg">
                     {user?.avatar_url ? <Avatar.Image src={user.avatar_url} alt={user?.username || "Admin"} /> : null}
                     <Avatar.Fallback>{user?.username?.[0]?.toUpperCase() || "A"}</Avatar.Fallback>
                   </Avatar>
                   <div className="space-y-1">
-                    <p className="text-lg font-semibold text-zinc-100">{user?.username || "Admin"}</p>
-                    <p className="text-sm text-zinc-400">{user?.email || "Sin email"}</p>
-                    <p className="text-xs text-zinc-500">User ID: {user?.id || "-"}</p>
+                    <p className="text-lg font-semibold text-[var(--foreground)]">{user?.username || "Admin"}</p>
+                    <p className="text-sm text-[var(--muted)]">{user?.email || "Sin email"}</p>
+                    <p className="text-xs text-[var(--muted)]">User ID: {user?.id || "-"}</p>
                   </div>
                 </div>
-              </CardContent>
+              </Card.Content>
             </Card>
 
-            <Card className="bg-[#0f1017]/80 border border-white/15">
-              <CardContent className="p-5 space-y-2">
-                <div className="flex items-center gap-2 text-zinc-200">
+            <Card className="bg-[var(--surface-secondary)] border border-[var(--border)]">
+              <Card.Content className="p-5 space-y-2">
+                <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Shield className="h-4 w-4" />
                   <span className="text-sm font-medium">Sesion</span>
                 </div>
-                <p className="text-xs text-zinc-500">Token activo</p>
-                <p className="text-xs text-zinc-300 break-all">
+                <p className="text-xs text-[var(--muted)]">Token activo</p>
+                <p className="text-xs text-[var(--foreground)] break-all">
                   {accessToken ? `${accessToken.slice(0, 24)}...` : "No autenticado"}
                 </p>
                 <Chip size="sm" variant="soft" color="default">
                   {accessToken ? "Sesion valida" : "Sesion ausente"}
                 </Chip>
-              </CardContent>
+              </Card.Content>
             </Card>
           </div>
 
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-center gap-2 text-zinc-200">
+          <Card className="bg-[var(--surface)] border border-[var(--border)]">
+            <Card.Content className="p-5 space-y-4">
+              <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <ShieldCheck className="h-4 w-4" />
                 <p className="text-sm font-medium">Controles de seguridad</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-zinc-500">
-                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-[var(--muted)]">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 flex items-center gap-2">
                   <User className="h-3.5 w-3.5" /> Usuario autenticado: {user?.username || "-"}
                 </div>
-                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5" /> Email verificado por auth backend
                 </div>
-                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 flex items-center gap-2">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 flex items-center gap-2">
                   <Users className="h-3.5 w-3.5" /> Sesion protegida por `proxy` en `/admin/*`
                 </div>
               </div>
 
               <div>
-                <Button variant="danger-soft" onPress={logout}>
+                <Button variant="danger" onPress={logout}>
                   Cerrar sesión
                 </Button>
               </div>
-            </CardContent>
+            </Card.Content>
           </Card>
         </div>
       ) : null}
 
       {!loading && activeTab === "actividad-api" ? (
         <div className="space-y-4">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5 space-y-3">
+          <Card className="bg-[var(--surface)] border border-[var(--border)]">
+            <Card.Content className="p-5 space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-zinc-200">
+                <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Activity className="h-4 w-4" />
                   <p className="text-sm font-medium">Ultimo error API</p>
                 </div>
-                <Button size="sm" variant="ghost" onPress={handleClearHistory}>
+                <Button size="sm" variant="tertiary" onPress={handleClearHistory}>
                   Limpiar historial
                 </Button>
               </div>
 
               {lastApiError ? (
-                <div className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 space-y-1">
-                  <p className="text-xs text-zinc-400">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 space-y-1">
+                  <p className="text-xs text-[var(--muted)]">
                     {lastApiError.method} {lastApiError.path}
                   </p>
-                  <p className="text-sm text-zinc-200">
+                  <p className="text-sm text-[var(--foreground)]">
                     {lastApiError.status} {lastApiError.code ? `(${lastApiError.code})` : ""}
                   </p>
-                  <p className="text-xs text-zinc-500">{lastApiError.message}</p>
-                  <p className="text-[11px] text-zinc-600">
+                  <p className="text-xs text-[var(--muted)]">{lastApiError.message}</p>
+                  <p className="text-[11px] text-[var(--field-placeholder)]">
                     {new Date(lastApiError.at).toLocaleString("es-CL")}
                   </p>
                 </div>
               ) : (
-                <p className="text-xs text-zinc-500">Sin errores API recientes.</p>
+                <p className="text-xs text-[var(--muted)]">Sin errores API recientes.</p>
               )}
-            </CardContent>
+            </Card.Content>
           </Card>
 
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5 space-y-3">
-              <div className="flex items-center gap-2 text-zinc-200">
+          <Card className="bg-[var(--surface)] border border-[var(--border)]">
+            <Card.Content className="p-5 space-y-3">
+              <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <Zap className="h-4 w-4" />
                 <p className="text-sm font-medium">Histórico (últimos {errorHistory.length})</p>
               </div>
 
               {errorHistory.length === 0 ? (
-                <p className="text-xs text-zinc-500">No hay errores en historial.</p>
+                <p className="text-xs text-[var(--muted)]">No hay errores en historial.</p>
               ) : (
                 <div className="space-y-2">
                   {errorHistory.map((entry, index) => (
-                    <div key={`${entry.at}-${entry.path}-${index}`} className="rounded-xl border border-white/10 bg-[#0a0b12] p-3 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                    <div key={`${entry.at}-${entry.path}-${index}`} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
                         <span>{entry.method}</span>
                         <span>{entry.path}</span>
-                        <span className="text-zinc-500">status {entry.status}</span>
-                        {entry.code ? <span className="text-zinc-500">code {entry.code}</span> : null}
+                        <span className="text-[var(--muted)]">status {entry.status}</span>
+                        {entry.code ? <span className="text-[var(--muted)]">code {entry.code}</span> : null}
                       </div>
-                      <p className="text-xs text-zinc-500 break-words">{entry.message}</p>
-                      <p className="text-[11px] text-zinc-600">{new Date(entry.at).toLocaleString("es-CL")}</p>
+                      <p className="text-xs text-[var(--muted)] break-words">{entry.message}</p>
+                      <p className="text-[11px] text-[var(--field-placeholder)]">{new Date(entry.at).toLocaleString("es-CL")}</p>
                     </div>
                   ))}
                 </div>
               )}
-            </CardContent>
+            </Card.Content>
           </Card>
         </div>
       ) : null}
     </div>
   );
 }
+

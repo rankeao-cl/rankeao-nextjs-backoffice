@@ -1,33 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import {
-  Button,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import {
   Card,
-  CardContent,
   Chip,
-  Description,
   Fieldset,
   Form,
   Input,
   Label,
   Modal,
-  ModalBody,
-  ModalDialog,
-  ModalFooter,
-  ModalHeader,
+  Skeleton,
   Spinner,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
   TextField,
+  Button,
 } from "@heroui/react";
 import { createXPEvent, getXPEvents, updateXPEvent } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
-import { getTableColumnKey } from "@/lib/table-column-key";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Edit, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -131,12 +124,12 @@ export default function XPEventsPage() {
       case "event":
         return (
           <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-zinc-200" />
+            <Zap className="h-4 w-4 text-[var(--foreground)]" />
             <code className="text-xs">{String(event.event_key || "-")}</code>
           </div>
         );
       case "xp":
-        return <span className="font-bold text-zinc-200">+{String(event.xp_amount || 0)}</span>;
+        return <span className="font-bold text-[var(--foreground)]">+{String(event.xp_amount || 0)}</span>;
       case "cooldown":
         return Number(event.cooldown_minutes) > 0 ? `${event.cooldown_minutes} min` : "-";
       case "max":
@@ -149,7 +142,7 @@ export default function XPEventsPage() {
         );
       case "actions":
         return (
-          <Button size="sm" variant="ghost" isIconOnly onPress={() => openEdit(event)}>
+          <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(event)}>
             <Edit className="h-3.5 w-3.5" />
           </Button>
         );
@@ -165,136 +158,145 @@ export default function XPEventsPage() {
           <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
             Eventos XP
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">Definiciones de eventos que otorgan XP</p>
+          <p className="text-sm text-[var(--muted)] mt-1">Definiciones de eventos que otorgan XP</p>
         </div>
         <Button
           type="button"
           onPress={openCreate}
-          className="bg-gradient-to-r from-zinc-700 to-black shadow-lg shadow-white/10"
+
         >
           Nuevo evento XP
         </Button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:w-1/3 shrink-0">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5">
-              <Form>
-                <Fieldset className="space-y-4">
-                  <Fieldset.Legend className="text-zinc-200 font-semibold">Filtros</Fieldset.Legend>
-                  <Description className="text-xs text-zinc-500">
-                    Busca eventos por su <code>event_key</code> y mantén la tabla ordenada.
-                  </Description>
-                  <div className="grid grid-cols-1 gap-3">
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="px-5 py-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Buscar</Label>
+              <Input
+                placeholder="event_key..."
+                value={search}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
+              />
+            </TextField>
+          </div>
+        </Card.Content>
+      </Card>
+
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="p-0">
+          {loading ? (
+            <div className="space-y-3 p-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-4/5 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <Table.ScrollContainer>
+                <Table.Content aria-label="XP Events">
+                  <Table.Header columns={TABLE_COLUMNS}>
+                    {(column: { key: string; label: string }) => (
+                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+                        {column.label}
+                      </Table.Column>
+                    )}
+                  </Table.Header>
+                  <Table.Body>
+                    {filtered.map((event) => (
+                      <Table.Row key={String(event.id || event.event_key || "-")}>
+                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
+                          <Table.Cell key={column.key}>
+                            {renderCell(event, column.key)}
+                          </Table.Cell>
+                        ))}
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
+        </Card.Content>
+      </Card>
+
+      <Modal>
+        <Modal.Backdrop isOpen={createModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}>
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>{editTarget ? "Editar evento XP" : "Crear evento XP"}</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
                     <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-zinc-400">Buscar</Label>
+                      <Label className="text-xs text-[var(--muted)]">Event key</Label>
                       <Input
-                        placeholder="event_key"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        value={formData.event_key}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, event_key: e.target.value }))}
+                        disabled={Boolean(editTarget)}
                       />
                     </TextField>
-                  </div>
-                </Fieldset>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="w-full lg:w-2/3">
-          <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
-            <CardContent className="p-5">
-              {loading ? (
-                <div className="flex justify-center py-20">
-                  <Spinner size="lg" color="current" />
-                </div>
-              ) : (
-                <Table>
-                  <Table.Content aria-label="XP Events">
-                    <TableHeader columns={TABLE_COLUMNS}>
-                      {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                    </TableHeader>
-                    <TableBody items={filtered}>
-                      {(event) => (
-                        <TableRow key={String(event.id || event.event_key || "-")}>
-                          {(column) => <TableCell>{renderCell(event, getTableColumnKey(column))}</TableCell>}
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table.Content>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Modal
-        isOpen={createModal.isOpen}
-        onOpenChange={(isOpen) => !isOpen && createModal.onClose()}
-      >
-        <ModalDialog>
-          <ModalHeader>{editTarget ? "Editar evento XP" : "Crear evento XP"}</ModalHeader>
-          <ModalBody className="gap-4">
-            <Form className="w-full">
-              <Fieldset className="space-y-4 w-full">
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Event key</Label>
-                  <Input
-                    value={formData.event_key}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, event_key: e.target.value }))}
-                    disabled={Boolean(editTarget)}
-                  />
-                </TextField>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">XP amount</Label>
-                    <Input
-                      type="number"
-                      value={String(formData.xp_amount)}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, xp_amount: Number.parseInt(e.target.value, 10) || 0 }))
-                      }
-                    />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Cooldown (min)</Label>
-                    <Input
-                      type="number"
-                      value={String(formData.cooldown_minutes)}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          cooldown_minutes: Number.parseInt(e.target.value, 10) || 0,
-                        }))
-                      }
-                    />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-zinc-400">Max por dia</Label>
-                    <Input
-                      type="number"
-                      value={String(formData.max_per_day)}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, max_per_day: Number.parseInt(e.target.value, 10) || 0 }))
-                      }
-                    />
-                  </TextField>
-                </div>
-              </Fieldset>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onPress={createModal.onClose}>
-              Cancelar
-            </Button>
-            <Button onPress={handleSave} isPending={formLoading}>
-              {editTarget ? "Guardar" : "Crear"}
-            </Button>
-          </ModalFooter>
-        </ModalDialog>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">XP amount</Label>
+                        <Input
+                          type="number"
+                          value={String(formData.xp_amount)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                            setFormData((prev) => ({ ...prev, xp_amount: Number.parseInt(e.target.value, 10) || 0 }))
+                          }
+                        />
+                      </TextField>
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Cooldown (min)</Label>
+                        <Input
+                          type="number"
+                          value={String(formData.cooldown_minutes)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cooldown_minutes: Number.parseInt(e.target.value, 10) || 0,
+                            }))
+                          }
+                        />
+                      </TextField>
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Max por dia</Label>
+                        <Input
+                          type="number"
+                          value={String(formData.max_per_day)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                            setFormData((prev) => ({ ...prev, max_per_day: Number.parseInt(e.target.value, 10) || 0 }))
+                          }
+                        />
+                      </TextField>
+                    </div>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={createModal.onClose}>
+                  Cancelar
+                </Button>
+                <Button onPress={handleSave} isPending={formLoading}>
+                  {editTarget ? "Guardar" : "Crear"}
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </div>
   );
 }
+

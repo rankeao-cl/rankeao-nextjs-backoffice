@@ -69,48 +69,48 @@ export default function AuthApiPage() {
         <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
           Auth API
         </h1>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-[var(--muted)] mt-1">
           Herramientas para probar todos los endpoints de autenticacion del OpenAPI.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+        <Card className="h-full bg-[var(--surface)] border border-[var(--border)]">
           <CardContent className="p-5">
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-zinc-200">
-                  <UserPlus className="h-4 w-4 text-zinc-200" />
+                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                  <UserPlus className="h-4 w-4 text-[var(--foreground)]" />
                   Registro
                 </Fieldset.Legend>
-                <Description className="text-xs text-zinc-500">
+                <Description className="text-xs text-[var(--muted)]">
                   Crea usuarios para validar flujo completo de autenticacion.
                 </Description>
 
                 <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Usuario</Label>
+                  <Label className="text-xs text-[var(--muted)]">Usuario</Label>
                   <Input
                     placeholder="username"
                     value={registerForm.username}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, username: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRegisterForm((prev) => ({ ...prev, username: e.target.value }))}
                   />
                 </TextField>
                 <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Email</Label>
+                  <Label className="text-xs text-[var(--muted)]">Email</Label>
                   <Input
                     placeholder="email"
                     type="email"
                     value={registerForm.email}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, email: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRegisterForm((prev) => ({ ...prev, email: e.target.value }))}
                   />
                 </TextField>
                 <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Contrasena</Label>
+                  <Label className="text-xs text-[var(--muted)]">Contraseña</Label>
                   <Input
                     placeholder="password"
                     type="password"
                     value={registerForm.password}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
                   />
                 </TextField>
 
@@ -136,33 +136,33 @@ export default function AuthApiPage() {
           </CardContent>
         </Card>
 
-        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+        <Card className="h-full bg-[var(--surface)] border border-[var(--border)]">
           <CardContent className="p-5">
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-zinc-200">
-                  <Mail className="h-4 w-4 text-zinc-200" />
+                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                  <Mail className="h-4 w-4 text-[var(--foreground)]" />
                   Recuperar / Verificar / Restablecer
                 </Fieldset.Legend>
-                <Description className="text-xs text-zinc-500">
+                <Description className="text-xs text-[var(--muted)]">
                   Ejecuta endpoints de recuperacion y verificacion de cuenta.
                 </Description>
 
                 <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Email</Label>
+                  <Label className="text-xs text-[var(--muted)]">Email</Label>
                   <Input
                     placeholder="email para forgot-password"
                     type="email"
                     value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForgotEmail(e.target.value)}
                   />
                 </TextField>
                 <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Token</Label>
+                  <Label className="text-xs text-[var(--muted)]">Token</Label>
                   <Input
                     placeholder="token (verify/reset)"
                     value={tokenField}
-                    onChange={(e) => setTokenField(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTokenField(e.target.value)}
                   />
                 </TextField>
 
@@ -170,16 +170,16 @@ export default function AuthApiPage() {
                   <Button
                     type="button"
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => runAction("forgot", () => forgotPassword(forgotEmail))}
                     isPending={loadingKey === "forgot"}
                   >
-                    Olvide mi contrasena
+                    Olvide mi contraseña
                   </Button>
                   <Button
                     type="button"
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => runAction("verify", () => verifyEmail({ token: tokenField }))}
                     isPending={loadingKey === "verify"}
                   >
@@ -188,7 +188,7 @@ export default function AuthApiPage() {
                   <Button
                     type="button"
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => runAction("reset", () => resetPassword({ token: tokenField }))}
                     isPending={loadingKey === "reset"}
                   >
@@ -200,23 +200,23 @@ export default function AuthApiPage() {
           </CardContent>
         </Card>
 
-        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+        <Card className="h-full bg-[var(--surface)] border border-[var(--border)]">
           <CardContent className="p-5">
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-zinc-200">
-                  <KeyRound className="h-4 w-4 text-zinc-200" />
+                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                  <KeyRound className="h-4 w-4 text-[var(--foreground)]" />
                   Renovar token
                 </Fieldset.Legend>
-                <Description className="text-xs text-zinc-500">
+                <Description className="text-xs text-[var(--muted)]">
                   Usa un refresh token valido para obtener nuevos tokens.
                 </Description>
                 <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-zinc-400">Refresh token</Label>
+                  <Label className="text-xs text-[var(--muted)]">Refresh token</Label>
                   <TextArea
                     placeholder="refresh_token"
                     value={refreshValue}
-                    onChange={(e) => setRefreshValue(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRefreshValue(e.target.value)}
                     rows={4}
                   />
                 </TextField>
@@ -234,22 +234,22 @@ export default function AuthApiPage() {
           </CardContent>
         </Card>
 
-        <Card className="h-full bg-[#0f1017] border border-[#2a2f4b]/40">
+        <Card className="h-full bg-[var(--surface)] border border-[var(--border)]">
           <CardContent className="p-5">
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-zinc-200">
-                  <Shield className="h-4 w-4 text-zinc-200" />
+                <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                  <Shield className="h-4 w-4 text-[var(--foreground)]" />
                   Callbacks OAuth
                 </Fieldset.Legend>
-                <Description className="text-xs text-zinc-500">
+                <Description className="text-xs text-[var(--muted)]">
                   Ejecuta callbacks tal como estan definidos en OpenAPI.
                 </Description>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => runAction("oauth-google", () => oauthGoogleCallback())}
                     isPending={loadingKey === "oauth-google"}
                   >
@@ -258,7 +258,7 @@ export default function AuthApiPage() {
                   <Button
                     type="button"
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => runAction("oauth-discord", () => oauthDiscordCallback())}
                     isPending={loadingKey === "oauth-discord"}
                   >
@@ -267,7 +267,7 @@ export default function AuthApiPage() {
                   <Button
                     type="button"
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => runAction("oauth-apple", () => oauthAppleCallback())}
                     isPending={loadingKey === "oauth-apple"}
                   >
@@ -280,10 +280,10 @@ export default function AuthApiPage() {
         </Card>
       </div>
 
-      <Card className="bg-[#0f1017] border border-[#2a2f4b]/40">
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
         <CardContent className="p-5 space-y-2">
-          <p className="text-sm font-medium text-zinc-200">Resultado</p>
-          <pre className="rounded-lg bg-[#0a0b12] border border-white/10 p-3 text-xs text-zinc-400 overflow-auto max-h-72 whitespace-pre-wrap">
+          <p className="text-sm font-medium text-[var(--foreground)]">Resultado</p>
+          <pre className="rounded-lg bg-[var(--surface)] border border-[var(--border)] p-3 text-xs text-[var(--muted)] overflow-auto max-h-72 whitespace-pre-wrap">
             {resultText}
           </pre>
         </CardContent>
@@ -291,3 +291,4 @@ export default function AuthApiPage() {
     </div>
   );
 }
+

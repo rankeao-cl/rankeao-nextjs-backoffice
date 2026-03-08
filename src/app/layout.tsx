@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${rajdhani.variable} font-[var(--font-body)] antialiased bg-[#050507] text-zinc-200`}
+        className={`${inter.variable} ${rajdhani.variable} font-[var(--font-body)] antialiased bg-[var(--background)] text-[var(--foreground)]`}
       >
         <Providers>{children}</Providers>
       </body>

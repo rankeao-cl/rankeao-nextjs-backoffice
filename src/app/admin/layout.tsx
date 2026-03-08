@@ -33,10 +33,10 @@ export default function AdminLayout({
 
     if (isLoading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-[#050507]">
+            <div className="flex h-screen items-center justify-center bg-[var(--background)]">
                 <div className="flex flex-col items-center gap-4">
                     <Spinner size="lg" color="current" />
-                    <p className="text-zinc-500 text-sm">Cargando panel...</p>
+                    <p className="text-[var(--muted)] text-sm">Cargando panel...</p>
                 </div>
             </div>
         );
@@ -45,7 +45,7 @@ export default function AdminLayout({
     if (!isAuthenticated) return null;
 
     return (
-        <div className="admin-shell flex h-screen overflow-hidden bg-[#050507]">
+        <div className="admin-shell flex h-screen overflow-hidden bg-[var(--background)]">
             {/* Sidebar */}
             <Sidebar
                 collapsed={collapsed}
