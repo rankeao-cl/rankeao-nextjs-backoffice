@@ -5,13 +5,16 @@ import type {
   UpdateBadgeRequest,
   GrantRequest,
   BulkGrantRequest,
+  Cosmetic,
   CreateCosmeticRequest,
   UpdateCosmeticRequest,
+  Title,
   CreateTitleRequest,
   UpdateTitleRequest,
   XPEvent,
   CreateXPEventRequest,
   UpdateXPEventRequest,
+  Season,
   CreateSeasonRequest,
   GamificationStats,
 } from "@/lib/types/gamification";
@@ -70,6 +73,18 @@ export async function updateBadgeCategory(id: string, data: Record<string, unkno
 // Cosmetics
 // ---------------------------------------------------------------------------
 
+export async function listCosmetics(params?: {
+  type?: string;
+  rarity?: string;
+  page?: number;
+  per_page?: number;
+}): Promise<{ items: Cosmetic[]; meta: { page: number; page_size: number; total: number; total_pages: number } }> {
+  const payload = await apiFetch<unknown>("/gamification/admin/cosmetics", { params });
+  const items = extractList<Cosmetic>(payload, ["cosmetics", "items", "data"]);
+  const meta = (payload as Record<string, unknown>)?.meta as { page: number; page_size: number; total: number; total_pages: number } | undefined;
+  return { items, meta: meta ?? { page: 1, page_size: 20, total: items.length, total_pages: 1 } };
+}
+
 export async function createCosmetic(data: CreateCosmeticRequest) {
   return apiFetch("/gamification/admin/cosmetics", { method: "POST", body: data });
 }
@@ -87,8 +102,18 @@ export async function revokeCosmetic(cosmeticId: string, data: GrantRequest) {
 }
 
 // ---------------------------------------------------------------------------
-// Titles
+// Titles (public list endpoint)
 // ---------------------------------------------------------------------------
+
+export async function listTitles(params?: {
+  type?: string;
+  season_id?: string;
+  page?: number;
+  per_page?: number;
+}): Promise<Title[]> {
+  const payload = await apiFetch<unknown>("/gamification/titles", { params });
+  return extractList<Title>(payload, ["titles", "items", "data"]);
+}
 
 export async function createTitle(data: CreateTitleRequest) {
   return apiFetch("/gamification/admin/titles", { method: "POST", body: data });
@@ -132,8 +157,13 @@ export async function batchUpdateLevels(data: unknown) {
 }
 
 // ---------------------------------------------------------------------------
-// Seasons
+// Seasons (public list endpoint)
 // ---------------------------------------------------------------------------
+
+export async function listSeasons(): Promise<Season[]> {
+  const payload = await apiFetch<unknown>("/gamification/seasons");
+  return extractList<Season>(payload, ["seasons", "items", "data"]);
+}
 
 export async function createSeason(data: CreateSeasonRequest) {
   return apiFetch("/gamification/admin/seasons", { method: "POST", body: data });

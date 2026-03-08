@@ -16,9 +16,7 @@ import type {
   CreateSeasonRequest,
 } from "@/lib/types/gamification";
 
-// ---------------------------------------------------------------------------
-// Stats
-// ---------------------------------------------------------------------------
+// ── Stats ──
 
 export function useGamificationStats() {
   return useQuery({
@@ -27,9 +25,7 @@ export function useGamificationStats() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Badges
-// ---------------------------------------------------------------------------
+// ── Badges ──
 
 export function useBadges() {
   return useQuery({
@@ -82,9 +78,7 @@ export function useBulkGrantBadge() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Badge Categories
-// ---------------------------------------------------------------------------
+// ── Badge Categories ──
 
 export function useCreateBadgeCategory() {
   const qc = useQueryClient();
@@ -103,71 +97,95 @@ export function useUpdateBadgeCategory() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Cosmetics
-// ---------------------------------------------------------------------------
+// ── Cosmetics ──
+
+export function useCosmetics(params?: { type?: string; rarity?: string; page?: number; per_page?: number }) {
+  return useQuery({
+    queryKey: ["cosmetics", params],
+    queryFn: () => gamificationApi.listCosmetics(params),
+  });
+}
 
 export function useCreateCosmetic() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateCosmeticRequest) => gamificationApi.createCosmetic(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cosmetics"] }),
   });
 }
 
 export function useUpdateCosmetic() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateCosmeticRequest }) =>
       gamificationApi.updateCosmetic(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cosmetics"] }),
   });
 }
 
 export function useGrantCosmetic() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ cosmeticId, data }: { cosmeticId: string; data: GrantRequest }) =>
       gamificationApi.grantCosmetic(cosmeticId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cosmetics"] }),
   });
 }
 
 export function useRevokeCosmetic() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ cosmeticId, data }: { cosmeticId: string; data: GrantRequest }) =>
       gamificationApi.revokeCosmetic(cosmeticId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cosmetics"] }),
   });
 }
 
-// ---------------------------------------------------------------------------
-// Titles
-// ---------------------------------------------------------------------------
+// ── Titles ──
+
+export function useTitles(params?: { type?: string; season_id?: string; page?: number; per_page?: number }) {
+  return useQuery({
+    queryKey: ["titles", params],
+    queryFn: () => gamificationApi.listTitles(params),
+  });
+}
 
 export function useCreateTitle() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateTitleRequest) => gamificationApi.createTitle(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["titles"] }),
   });
 }
 
 export function useUpdateTitle() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateTitleRequest }) =>
       gamificationApi.updateTitle(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["titles"] }),
   });
 }
 
 export function useGrantTitle() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ titleId, data }: { titleId: string; data: GrantRequest }) =>
       gamificationApi.grantTitle(titleId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["titles"] }),
   });
 }
 
 export function useRevokeTitle() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ titleId, data }: { titleId: string; data: GrantRequest }) =>
       gamificationApi.revokeTitle(titleId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["titles"] }),
   });
 }
 
-// ---------------------------------------------------------------------------
-// XP Events
-// ---------------------------------------------------------------------------
+// ── XP Events ──
 
 export function useXPEvents() {
   return useQuery({
@@ -193,9 +211,7 @@ export function useUpdateXPEvent() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Levels
-// ---------------------------------------------------------------------------
+// ── Levels ──
 
 export function useBatchUpdateLevels() {
   return useMutation({
@@ -203,13 +219,20 @@ export function useBatchUpdateLevels() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Seasons
-// ---------------------------------------------------------------------------
+// ── Seasons ──
+
+export function useSeasons() {
+  return useQuery({
+    queryKey: ["seasons"],
+    queryFn: gamificationApi.listSeasons,
+  });
+}
 
 export function useCreateSeason() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateSeasonRequest) => gamificationApi.createSeason(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["seasons"] }),
   });
 }
 
@@ -220,7 +243,9 @@ export function usePreviewSeasonClose() {
 }
 
 export function useCloseSeason() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (seasonId: string) => gamificationApi.closeSeason(seasonId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["seasons"] }),
   });
 }

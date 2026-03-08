@@ -50,8 +50,10 @@ export interface Cosmetic {
   slug: string;
   name: string;
   type: string;
+  description?: string;
   asset_url?: string;
   rarity?: string;
+  total_owners?: number;
   is_active?: boolean;
   created_at?: string;
 }
@@ -76,8 +78,12 @@ export interface Title {
   id: string;
   slug: string;
   name: string;
+  description?: string;
   color?: string;
+  is_seasonal?: boolean;
+  season?: { id: string; name: string } | null;
   season_id?: string;
+  total_holders?: number;
   is_active?: boolean;
   created_at?: string;
 }
@@ -131,10 +137,22 @@ export interface Level {
 export interface Season {
   id: string;
   name: string;
-  starts_at: string;
-  ends_at: string;
+  slug?: string;
+  start_date?: string;
+  end_date?: string;
+  starts_at?: string;
+  ends_at?: string;
   status?: string;
+  days_remaining?: number | null;
+  is_current_season?: boolean;
+  stats?: {
+    total_players: number;
+    total_tournaments: number;
+    total_matches: number;
+    games_played: string[];
+  } | null;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface CreateSeasonRequest {

@@ -1,0 +1,274 @@
+// ── Games ──
+
+export interface Game {
+  id: string;
+  slug: string;
+  name: string;
+  short_name?: string;
+  publisher?: string;
+  logo_url?: string;
+  banner_url?: string;
+  description?: string;
+  is_active: boolean;
+  sort_order: number;
+  metadata?: Record<string, unknown>;
+  formats_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateGameRequest {
+  slug: string;
+  name: string;
+  short_name?: string;
+  publisher?: string;
+  logo_url?: string;
+  banner_url?: string;
+  description?: string;
+  is_active?: boolean;
+  sort_order?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateGameRequest {
+  name?: string;
+  short_name?: string;
+  publisher?: string;
+  logo_url?: string;
+  banner_url?: string;
+  description?: string;
+  is_active?: boolean;
+  sort_order?: number;
+  metadata?: Record<string, unknown>;
+}
+
+// ── Formats ──
+
+export interface Format {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  is_ranked: boolean;
+  is_active: boolean;
+  sort_order: number;
+  rules_url?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateFormatRequest {
+  slug: string;
+  name: string;
+  description?: string;
+  is_ranked?: boolean;
+  is_active?: boolean;
+  sort_order?: number;
+  rules_url?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateFormatRequest {
+  name?: string;
+  description?: string;
+  is_ranked?: boolean;
+  is_active?: boolean;
+  sort_order?: number;
+  rules_url?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// ── Sets ──
+
+export interface CardSet {
+  id: string;
+  code: string;
+  name: string;
+  release_date?: string | null;
+  set_type?: string;
+  total_cards?: number | null;
+  logo_url?: string;
+  icon_url?: string;
+  is_active: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSetRequest {
+  code: string;
+  name: string;
+  release_date?: string;
+  set_type?: string;
+  total_cards?: number;
+  logo_url?: string;
+  icon_url?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateSetRequest {
+  code?: string;
+  name?: string;
+  release_date?: string;
+  set_type?: string;
+  total_cards?: number;
+  logo_url?: string;
+  icon_url?: string;
+  is_active?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+// ── Cards ──
+
+export interface Card {
+  id: string;
+  name: string;
+  type_line?: string;
+  oracle_text?: string;
+  flavor_text?: string;
+  is_token: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateCardRequest {
+  game_id: string;
+  name: string;
+  type_line?: string;
+  oracle_text?: string;
+  flavor_text?: string;
+  is_token?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateCardRequest {
+  name?: string;
+  type_line?: string;
+  oracle_text?: string;
+  flavor_text?: string;
+  is_token?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+// ── Printings ──
+
+export interface Printing {
+  id: string;
+  set_id: string;
+  set_code?: string;
+  set_name?: string;
+  collector_number?: string;
+  rarity?: string;
+  image_url?: string;
+  image_url_small?: string;
+  image_url_art?: string;
+  is_foil_available: boolean;
+  is_nonfoil_available: boolean;
+  is_first_edition: boolean;
+  artist?: string;
+  frame_effects?: string[];
+  promo_types?: string[];
+  price_usd?: string;
+  price_clp?: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreatePrintingRequest {
+  set_id: string;
+  collector_number?: string;
+  rarity?: string;
+  image_url?: string;
+  image_url_small?: string;
+  image_url_art?: string;
+  is_foil_available?: boolean;
+  is_nonfoil_available?: boolean;
+  is_first_edition?: boolean;
+  artist?: string;
+  frame_effects?: string[];
+  promo_types?: string[];
+  price_usd?: string;
+  price_clp?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdatePrintingRequest {
+  collector_number?: string;
+  rarity?: string;
+  image_url?: string;
+  image_url_small?: string;
+  image_url_art?: string;
+  is_foil_available?: boolean;
+  is_nonfoil_available?: boolean;
+  is_first_edition?: boolean;
+  artist?: string;
+  frame_effects?: string[];
+  promo_types?: string[];
+  price_usd?: string;
+  price_clp?: number;
+  metadata?: Record<string, unknown>;
+}
+
+// ── Legality ──
+
+export interface LegalityUpdate {
+  format_id: string;
+  legality: "LEGAL" | "BANNED" | "RESTRICTED" | "NOT_LEGAL";
+}
+
+export interface BatchLegalityRequest {
+  updates: LegalityUpdate[];
+}
+
+// ── Bulk Import ──
+
+export interface BulkImportSetsRequest {
+  game_id: string;
+  source?: string;
+  sets: { code: string; name: string }[];
+}
+
+export interface BulkImportCardsRequest {
+  game_id: string;
+  source?: string;
+  cards: {
+    name: string;
+    type_line?: string;
+    oracle_text?: string;
+    flavor_text?: string;
+    is_token?: boolean;
+    metadata?: Record<string, unknown>;
+    printings: {
+      set_code: string;
+      collector_number: string;
+      rarity?: string;
+      image_url?: string;
+      image_url_small?: string;
+      image_url_art?: string;
+      is_foil_available?: boolean;
+      is_nonfoil_available?: boolean;
+      is_first_edition?: boolean;
+      artist?: string;
+      frame_effects?: string[];
+      promo_types?: string[];
+      price_usd?: string;
+      price_clp?: number;
+      metadata?: Record<string, unknown>;
+    }[];
+  }[];
+}
+
+export interface BulkImportLegalityRequest {
+  game_id: string;
+  format_slug: string;
+  entries: { card_name: string; legality: "LEGAL" | "BANNED" | "RESTRICTED" | "NOT_LEGAL" }[];
+}
+
+export interface BulkImportResult {
+  created: number;
+  updated: number;
+  errors: number;
+}

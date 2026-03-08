@@ -1,372 +1,542 @@
 "use client";
 
+import { useState } from "react";
 import {
-  useState
-} from "react";
-import {
+  Button,
   Card,
-  Description,
+  Chip,
   Fieldset,
   Form,
   Input,
   Label,
+  Modal,
+  Skeleton,
+  Table,
   TextArea,
   TextField,
-  Button,
 } from "@heroui/react";
 import { toast } from "@heroui/react";
-import { getErrorMessage } from "@/lib/utils/error-message";
-import { Crown, Gift, Pencil, Trash2 } from "lucide-react";
-import type { CreateTitleRequest, UpdateTitleRequest, GrantRequest } from "@/lib/types/gamification";
+import { useDisclosure } from "@/lib/hooks/use-disclosure";
+import { Crown, Edit, Gift, Trash2 } from "lucide-react";
+import type { Title, CreateTitleRequest, UpdateTitleRequest, GrantRequest } from "@/lib/types/gamification";
 import {
+  useTitles,
   useCreateTitle,
   useUpdateTitle,
   useGrantTitle,
   useRevokeTitle,
 } from "@/lib/hooks/use-gamification";
+import { getErrorMessage } from "@/lib/utils/error-message";
+
+type TitleForm = {
+  slug: string;
+  name: string;
+  color: string;
+  season_id: string;
+  is_active: boolean;
+};
+
+const INITIAL_FORM: TitleForm = {
+  slug: "",
+  name: "",
+  color: "#d4d4d8",
+  season_id: "",
+  is_active: true,
+};
+
+const TABLE_COLUMNS = [
+  { key: "name", label: "NOMBRE" },
+  { key: "slug", label: "SLUG" },
+  { key: "seasonal", label: "ESTACIONAL" },
+  { key: "season", label: "TEMPORADA" },
+  { key: "holders", label: "PORTADORES" },
+  { key: "created_at", label: "CREADO" },
+  { key: "actions", label: "ACCIONES" },
+] as const;
 
 export default function TitlesPage() {
-  const createMutation = useCreateTitle();
-  const updateMutation = useUpdateTitle();
-  const grantMutation = useGrantTitle();
-  const revokeMutation = useRevokeTitle();
+  const { data: titles = [], isLoading: loading } = useTitles();
+  const [search, setSearch] = useState("");
 
-  const [createForm, setCreateForm] = useState({
-    slug: "",
-    name: "",
-    color: "#d4d4d8",
-    season_id: "",
+  const createModal = useDisclosure();
+  const [editTarget, setEditTarget] = useState<Title | null>(null);
+  const [formData, setFormData] = useState<TitleForm>(INITIAL_FORM);
+
+  const grantModal = useDisclosure();
+  const [grantTarget, setGrantTarget] = useState<Title | null>(null);
+  const [grantUserId, setGrantUserId] = useState("");
+  const [grantReason, setGrantReason] = useState("");
+
+  const revokeModal = useDisclosure();
+  const [revokeTarget, setRevokeTarget] = useState<Title | null>(null);
+  const [revokeUserId, setRevokeUserId] = useState("");
+  const [revokeReason, setRevokeReason] = useState("");
+
+  const createTitle = useCreateTitle();
+  const updateTitle = useUpdateTitle();
+  const grantTitle = useGrantTitle();
+  const revokeTitle = useRevokeTitle();
+
+  const filteredTitles = titles.filter((title) => {
+    const q = search.toLowerCase();
+    return (
+      String(title.name || "").toLowerCase().includes(q) ||
+      String(title.slug || "").toLowerCase().includes(q)
+    );
   });
 
-  const [updateForm, setUpdateForm] = useState({
-    title_id: "",
-    name: "",
-    color: "",
-    season_id: "",
-  });
+  const openCreate = () => {
+    setEditTarget(null);
+    setFormData(INITIAL_FORM);
+    createModal.onOpen();
+  };
 
-  const [grantForm, setGrantForm] = useState({
-    title_id: "",
-    user_id: "",
-    reason: "",
-  });
+  const openEdit = (title: Title) => {
+    setEditTarget(title);
+    setFormData({
+      slug: String(title.slug || ""),
+      name: String(title.name || ""),
+      color: String(title.color || "#d4d4d8"),
+      season_id: String(title.season_id || ""),
+      is_active: Boolean(title.is_active ?? true),
+    });
+    createModal.onOpen();
+  };
 
-  const [revokeForm, setRevokeForm] = useState({
-    title_id: "",
-    user_id: "",
-    reason: "",
-  });
+  const handleSave = () => {
+    if (editTarget?.id) {
+      const data: UpdateTitleRequest = {};
+      if (formData.name) data.name = formData.name;
+      if (formData.color) data.color = formData.color;
+      if (formData.season_id) data.season_id = formData.season_id;
+      data.is_active = formData.is_active;
 
-  const handleCreate = async () => {
-    if (!createForm.slug || !createForm.name) {
-      toast.danger("Slug y nombre son requeridos");
-      return;
-    }
+      updateTitle.mutate(
+        { id: String(editTarget.id), data },
+        {
+          onSuccess: () => {
+            toast.success("Titulo actualizado");
+            createModal.onClose();
+          },
+          onError: (err) => {
+            toast.danger(getErrorMessage(err));
+          },
+        },
+      );
+    } else {
+      if (!formData.slug || !formData.name) {
+        toast.danger("Slug y nombre son requeridos");
+        return;
+      }
 
-    const data: CreateTitleRequest = {
-      slug: createForm.slug,
-      name: createForm.name,
-      color: createForm.color || undefined,
-      season_id: createForm.season_id || undefined,
-    };
+      const data: CreateTitleRequest = {
+        slug: formData.slug,
+        name: formData.name,
+        color: formData.color || undefined,
+        season_id: formData.season_id || undefined,
+      };
 
-    try {
-      await createMutation.mutateAsync(data);
-      toast.success("Titulo creado");
-      setCreateForm({ slug: "", name: "", color: "#d4d4d8", season_id: "" });
-    } catch (error: unknown) {
-      toast.danger(getErrorMessage(error));
+      createTitle.mutate(data, {
+        onSuccess: () => {
+          toast.success("Titulo creado");
+          createModal.onClose();
+        },
+        onError: (err) => {
+          toast.danger(getErrorMessage(err));
+        },
+      });
     }
   };
 
-  const handleUpdate = async () => {
-    if (!updateForm.title_id) {
-      toast.danger("Ingresa el Title ID");
-      return;
-    }
-
-    const data: UpdateTitleRequest = {};
-    if (updateForm.name) data.name = updateForm.name;
-    if (updateForm.color) data.color = updateForm.color;
-    if (updateForm.season_id) data.season_id = updateForm.season_id;
-
-    if (Object.keys(data).length === 0) {
-      toast.danger("Ingresa al menos un campo para actualizar");
-      return;
-    }
-
-    try {
-      await updateMutation.mutateAsync({ id: updateForm.title_id, data });
-      toast.success("Titulo actualizado");
-    } catch (error: unknown) {
-      toast.danger(getErrorMessage(error));
-    }
+  const openGrant = (title: Title) => {
+    setGrantTarget(title);
+    setGrantUserId("");
+    setGrantReason("");
+    grantModal.onOpen();
   };
 
-  const handleGrant = async () => {
-    if (!grantForm.title_id || !grantForm.user_id) {
-      toast.danger("Title ID y User ID son requeridos");
+  const handleGrant = () => {
+    if (!grantTarget?.id || !grantUserId) {
+      toast.danger("User ID es requerido");
       return;
     }
 
     const data: GrantRequest = {
-      user_id: grantForm.user_id,
-      reason: grantForm.reason || undefined,
+      user_id: grantUserId,
+      reason: grantReason || undefined,
     };
 
-    try {
-      await grantMutation.mutateAsync({ titleId: grantForm.title_id, data });
-      toast.success("Titulo otorgado");
-      setGrantForm((prev) => ({ ...prev, user_id: "", reason: "" }));
-    } catch (error: unknown) {
-      toast.danger(getErrorMessage(error));
-    }
+    grantTitle.mutate(
+      { titleId: String(grantTarget.id), data },
+      {
+        onSuccess: () => {
+          toast.success("Titulo otorgado");
+          grantModal.onClose();
+        },
+        onError: (err) => {
+          toast.danger(getErrorMessage(err));
+        },
+      },
+    );
   };
 
-  const handleRevoke = async () => {
-    if (!revokeForm.title_id || !revokeForm.user_id) {
-      toast.danger("Title ID y User ID son requeridos");
+  const openRevoke = (title: Title) => {
+    setRevokeTarget(title);
+    setRevokeUserId("");
+    setRevokeReason("");
+    revokeModal.onOpen();
+  };
+
+  const handleRevoke = () => {
+    if (!revokeTarget?.id || !revokeUserId) {
+      toast.danger("User ID es requerido");
       return;
     }
 
     const data: GrantRequest = {
-      user_id: revokeForm.user_id,
-      reason: revokeForm.reason || undefined,
+      user_id: revokeUserId,
+      reason: revokeReason || undefined,
     };
 
-    try {
-      await revokeMutation.mutateAsync({ titleId: revokeForm.title_id, data });
-      toast.success("Titulo revocado");
-      setRevokeForm((prev) => ({ ...prev, user_id: "", reason: "" }));
-    } catch (error: unknown) {
-      toast.danger(getErrorMessage(error));
+    revokeTitle.mutate(
+      { titleId: String(revokeTarget.id), data },
+      {
+        onSuccess: () => {
+          toast.success("Titulo revocado");
+          revokeModal.onClose();
+        },
+        onError: (err) => {
+          toast.danger(getErrorMessage(err));
+        },
+      },
+    );
+  };
+
+  const formLoading = createTitle.isPending || updateTitle.isPending;
+  const grantLoading = grantTitle.isPending;
+  const revokeLoading = revokeTitle.isPending;
+
+  const renderCell = (title: Title, columnKey: string) => {
+    switch (columnKey) {
+      case "name":
+        return (
+          <div className="flex items-center gap-3">
+            <div
+              className="h-4 w-4 shrink-0 rounded-full border border-[var(--border)]"
+              style={{ backgroundColor: title.color || "#d4d4d8" }}
+            />
+            <span className="font-medium text-[var(--foreground)]">
+              {String(title.name || "-")}
+            </span>
+          </div>
+        );
+      case "slug":
+        return (
+          <code className="text-xs text-[var(--muted)] bg-[var(--surface)] px-2 py-0.5 rounded">
+            {String(title.slug || "-")}
+          </code>
+        );
+      case "seasonal":
+        return (
+          <Chip
+            size="sm"
+            color="default"
+            variant="soft"
+          >
+            {title.is_seasonal ? "Si" : "No"}
+          </Chip>
+        );
+      case "season":
+        return (
+          <span className="text-sm text-[var(--foreground)]">
+            {title.season?.name || "-"}
+          </span>
+        );
+      case "holders":
+        return (
+          <span className="text-sm text-[var(--foreground)]">
+            {title.total_holders ?? 0}
+          </span>
+        );
+      case "created_at":
+        return (
+          <span className="text-xs text-[var(--muted)]">
+            {title.created_at
+              ? new Date(title.created_at).toLocaleDateString("es-CL")
+              : "-"}
+          </span>
+        );
+      case "actions":
+        return (
+          <div className="flex gap-1">
+            <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(title)}>
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+            <Button size="sm" variant="secondary" isIconOnly onPress={() => openGrant(title)}>
+              <Gift className="h-3.5 w-3.5" />
+            </Button>
+            <Button size="sm" variant="danger" isIconOnly onPress={() => openRevoke(title)}>
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        );
+      default:
+        return null;
     }
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
-          Titulos
-        </h1>
-        <p className="text-sm text-[var(--muted)] mt-1">
-          Operaciones admin de titulos. La API no expone listado, por eso editas con Title ID.
-        </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+            Titulos
+          </h1>
+          <p className="text-sm text-[var(--muted)] mt-1">Crear, editar y otorgar titulos a usuarios</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Crown className="h-5 w-5 text-[var(--foreground)]" />
-                  Crear titulo
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
-                  Crea un titulo nuevo con slug unico y color opcional.
-                </Description>
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="px-5 py-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
+              <Label className="text-xs text-[var(--muted)]">Buscar titulo</Label>
+              <Input
+                placeholder="Nombre o slug..."
+                value={search}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
+              />
+            </TextField>
+            <Button type="button" variant="primary" size="sm" onPress={openCreate}>
+              Nuevo titulo
+            </Button>
+          </div>
+        </Card.Content>
+      </Card>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Slug</Label>
-                  <Input
-                    placeholder="season-1-champion"
-                    value={createForm.slug}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCreateForm((prev) => ({ ...prev, slug: e.target.value }))}
-                  />
-                </TextField>
-
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Nombre</Label>
-                  <Input
-                    placeholder="Champion"
-                    value={createForm.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
-                  />
-                </TextField>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Color</Label>
-                    <Input
-                      placeholder="#d4d4d8"
-                      value={createForm.color}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCreateForm((prev) => ({ ...prev, color: e.target.value }))}
-                    />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Season ID</Label>
-                    <Input
-                      placeholder="opcional"
-                      value={createForm.season_id}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCreateForm((prev) => ({ ...prev, season_id: e.target.value }))}
-                    />
-                  </TextField>
+      <Card className="bg-[var(--surface)] border border-[var(--border)]">
+        <Card.Content className="p-0">
+          {loading ? (
+            <div className="space-y-3 p-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-4 shrink-0 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-4/5 rounded" />
+                  </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <Table.ScrollContainer>
+                <Table.Content aria-label="Titles table">
+                  <Table.Header columns={TABLE_COLUMNS}>
+                    {(column: { key: string; label: string }) => (
+                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+                        {column.label}
+                      </Table.Column>
+                    )}
+                  </Table.Header>
+                  <Table.Body>
+                    {filteredTitles.map((title) => (
+                      <Table.Row key={String(title.id || title.slug || "-")}>
+                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
+                          <Table.Cell key={column.key}>
+                            {renderCell(title, column.key)}
+                          </Table.Cell>
+                        ))}
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
+        </Card.Content>
+      </Card>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleCreate} isPending={createMutation.isPending}>
-                    Crear
-                  </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+      {/* Create / Edit Modal */}
+      <Modal>
+        <Modal.Backdrop
+          isOpen={createModal.isOpen}
+          onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}
+        >
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header><Modal.Heading>{editTarget ? "Editar Titulo" : "Crear Titulo"}</Modal.Heading></Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Nombre</Label>
+                        <Input
+                          value={formData.name}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                        />
+                      </TextField>
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Slug</Label>
+                        <Input
+                          placeholder="season-1-champion"
+                          value={formData.slug}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
+                          disabled={Boolean(editTarget)}
+                        />
+                      </TextField>
+                    </div>
 
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Pencil className="h-5 w-5 text-[var(--foreground)]" />
-                  Actualizar titulo
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
-                  Modifica campos del titulo existente usando su ID.
-                </Description>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Color hex</Label>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-8 w-8 shrink-0 rounded border border-[var(--border)]"
+                            style={{ backgroundColor: formData.color || "#d4d4d8" }}
+                          />
+                          <Input
+                            placeholder="#d4d4d8"
+                            value={formData.color}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
+                          />
+                        </div>
+                      </TextField>
+                      <TextField className="space-y-1 flex flex-col">
+                        <Label className="text-xs text-[var(--muted)]">Season ID</Label>
+                        <Input
+                          placeholder="opcional"
+                          value={formData.season_id}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, season_id: e.target.value }))}
+                        />
+                      </TextField>
+                    </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Title ID</Label>
-                  <Input
-                    placeholder="title_id"
-                    value={updateForm.title_id}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setUpdateForm((prev) => ({ ...prev, title_id: e.target.value }))}
-                  />
-                </TextField>
+                    {editTarget && (
+                      <div className="flex items-center gap-3">
+                        <label className="text-xs text-[var(--muted)]">Activo</label>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.is_active}
+                          onClick={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${formData.is_active ? "bg-[var(--primary)]" : "bg-[var(--default)]"}`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${formData.is_active ? "translate-x-5" : "translate-x-0"}`}
+                          />
+                        </button>
+                        <span className="text-xs text-[var(--muted)]">
+                          {formData.is_active ? "Activo" : "Inactivo"}
+                        </span>
+                      </div>
+                    )}
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={createModal.onClose}>
+                  Cancelar
+                </Button>
+                <Button
+                  onPress={handleSave}
+                  isPending={formLoading}
+                  variant="primary"
+                >
+                  {editTarget ? "Guardar" : "Crear"}
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Nombre</Label>
-                  <Input
-                    placeholder="opcional"
-                    value={updateForm.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setUpdateForm((prev) => ({ ...prev, name: e.target.value }))}
-                  />
-                </TextField>
+      {/* Grant Modal */}
+      <Modal>
+        <Modal.Backdrop
+          isOpen={grantModal.isOpen}
+          onOpenChange={(isOpen: boolean) => !isOpen && grantModal.onClose()}
+        >
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header><Modal.Heading>Otorgar titulo - {String(grantTarget?.name || "")}</Modal.Heading></Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">User ID</Label>
+                      <Input
+                        value={grantUserId}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setGrantUserId(e.target.value)}
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Motivo</Label>
+                      <TextArea
+                        placeholder="opcional"
+                        value={grantReason}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setGrantReason(e.target.value)}
+                      />
+                    </TextField>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={grantModal.onClose}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onPress={handleGrant} isPending={grantLoading}>
+                  Otorgar
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Color hex</Label>
-                    <Input
-                      placeholder="opcional"
-                      value={updateForm.color}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setUpdateForm((prev) => ({ ...prev, color: e.target.value }))}
-                    />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Season ID</Label>
-                    <Input
-                      placeholder="opcional"
-                      value={updateForm.season_id}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setUpdateForm((prev) => ({ ...prev, season_id: e.target.value }))}
-                    />
-                  </TextField>
-                </div>
-
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleUpdate} isPending={updateMutation.isPending}>
-                    Guardar cambios
-                  </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
-
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Gift className="h-5 w-5 text-[var(--foreground)]" />
-                  Otorgar titulo
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
-                  Asigna un titulo a un usuario con motivo opcional.
-                </Description>
-
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Title ID</Label>
-                  <Input
-                    placeholder="title_id"
-                    value={grantForm.title_id}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setGrantForm((prev) => ({ ...prev, title_id: e.target.value }))}
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">User ID</Label>
-                  <Input
-                    placeholder="user_id"
-                    value={grantForm.user_id}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setGrantForm((prev) => ({ ...prev, user_id: e.target.value }))}
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Motivo</Label>
-                  <TextArea
-                    placeholder="opcional"
-                    value={grantForm.reason}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setGrantForm((prev) => ({ ...prev, reason: e.target.value }))}
-                  />
-                </TextField>
-
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleGrant} isPending={grantMutation.isPending}>
-                    Otorgar
-                  </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
-
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Trash2 className="h-5 w-5 text-[var(--foreground)]" />
-                  Revocar titulo
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
-                  Quita un titulo de un usuario y guarda un motivo opcional.
-                </Description>
-
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Title ID</Label>
-                  <Input
-                    placeholder="title_id"
-                    value={revokeForm.title_id}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRevokeForm((prev) => ({ ...prev, title_id: e.target.value }))}
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">User ID</Label>
-                  <Input
-                    placeholder="user_id"
-                    value={revokeForm.user_id}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRevokeForm((prev) => ({ ...prev, user_id: e.target.value }))}
-                  />
-                </TextField>
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Motivo</Label>
-                  <TextArea
-                    placeholder="opcional"
-                    value={revokeForm.reason}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRevokeForm((prev) => ({ ...prev, reason: e.target.value }))}
-                  />
-                </TextField>
-
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleRevoke} isPending={revokeMutation.isPending}>
-                    Revocar
-                  </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
-      </div>
+      {/* Revoke Modal */}
+      <Modal>
+        <Modal.Backdrop
+          isOpen={revokeModal.isOpen}
+          onOpenChange={(isOpen: boolean) => !isOpen && revokeModal.onClose()}
+        >
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.Header><Modal.Heading>Revocar titulo - {String(revokeTarget?.name || "")}</Modal.Heading></Modal.Header>
+              <Modal.Body className="gap-4">
+                <Form className="w-full">
+                  <Fieldset className="space-y-4 w-full">
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">User ID</Label>
+                      <Input
+                        value={revokeUserId}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRevokeUserId(e.target.value)}
+                      />
+                    </TextField>
+                    <TextField className="space-y-1 flex flex-col">
+                      <Label className="text-xs text-[var(--muted)]">Motivo</Label>
+                      <TextArea
+                        placeholder="opcional"
+                        value={revokeReason}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRevokeReason(e.target.value)}
+                      />
+                    </TextField>
+                  </Fieldset>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="tertiary" onPress={revokeModal.onClose}>
+                  Cancelar
+                </Button>
+                <Button variant="danger" onPress={handleRevoke} isPending={revokeLoading}>
+                  Revocar
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
     </div>
   );
 }
