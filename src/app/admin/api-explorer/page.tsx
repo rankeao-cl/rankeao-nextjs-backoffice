@@ -5,7 +5,7 @@ import { Button, Card, CardContent, Chip, Input, Spinner, TextArea } from "@hero
 import { getApiBaseUrl, getToken } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { Code2, Play, Search, Terminal } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type ExplorerOperation = {
   operationId: string;
@@ -71,7 +71,7 @@ export default function AdminApiExplorerPage() {
           setSelectedOperationId(payload.operations[0].operationId);
         }
       } catch (error: unknown) {
-        toast.error(getErrorMessage(error, "No se pudo cargar admin-api.yaml"));
+        toast.danger(getErrorMessage(error, "No se pudo cargar admin-api.yaml"));
       } finally {
         setLoadingOperations(false);
       }
@@ -130,7 +130,7 @@ export default function AdminApiExplorerPage() {
     for (const param of selectedOperation.pathParams) {
       const value = pathParams[param]?.trim();
       if (!value) {
-        toast.error(`Falta path param: ${param}`);
+        toast.danger(`Falta path param: ${param}`);
         return;
       }
 
@@ -156,7 +156,7 @@ export default function AdminApiExplorerPage() {
     if (sendAuth) {
       const token = getToken();
       if (!token) {
-        toast.error("No hay token admin para enviar Authorization");
+        toast.danger("No hay token admin para enviar Authorization");
         return;
       }
       headers.Authorization = `Bearer ${token}`;
@@ -171,7 +171,7 @@ export default function AdminApiExplorerPage() {
         body = JSON.stringify(parsed);
         headers["Content-Type"] = "application/json";
       } catch {
-        toast.error("Body JSON invalido");
+        toast.danger("Body JSON invalido");
         return;
       }
     }
@@ -212,7 +212,7 @@ export default function AdminApiExplorerPage() {
         body: outputBody || "(sin contenido)",
       });
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error de red al ejecutar la operacion"));
+      toast.danger(getErrorMessage(error, "Error de red al ejecutar la operacion"));
       setResponse({
         status: 0,
         ok: false,
@@ -263,8 +263,8 @@ export default function AdminApiExplorerPage() {
                     variant="secondary"
                     onPress={() => setSelectedOperationId(operation.operationId)}
                     className={`h-auto w-full justify-start rounded-lg border p-3 text-left transition-colors ${selectedOperationId === operation.operationId
-                        ? "border-[var(--focus)] bg-[var(--default)]"
-                        : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--muted)]"
+                      ? "border-[var(--focus)] bg-[var(--default)]"
+                      : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--muted)]"
                       }`}
                   >
                     <div className="flex items-center justify-between gap-2">

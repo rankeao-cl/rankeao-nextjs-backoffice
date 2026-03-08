@@ -9,7 +9,7 @@ import {
 } from "@heroui/react";
 import { useAuth } from "@/lib/auth";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -22,7 +22,7 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !password) {
-            toast.error("Ingresa email y contraseña");
+            toast.danger("Ingresa email y contraseña");
             return;
         }
         setIsLoading(true);
@@ -35,7 +35,7 @@ export default function LoginPage() {
             router.push(redirect);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Error al iniciar sesión";
-            toast.error(message);
+            toast.danger(message);
         } finally {
             setIsLoading(false);
         }

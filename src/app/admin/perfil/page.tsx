@@ -33,7 +33,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type EndpointHealth = {
   ok: boolean;
@@ -250,7 +250,7 @@ export default function AdminPerfilPage() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       refreshProfileData().catch((error: unknown) => {
-        toast.error(getErrorMessage(error, "No se pudo cargar el perfil admin"));
+        toast.danger(getErrorMessage(error, "No se pudo cargar el perfil admin"));
         setLoading(false);
       });
     }, 0);

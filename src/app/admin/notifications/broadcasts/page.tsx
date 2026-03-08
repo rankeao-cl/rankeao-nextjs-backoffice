@@ -25,7 +25,7 @@ import { createBroadcast, getBroadcasts, type ListMeta } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Radio, Send } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type Broadcast = Record<string, unknown>;
 
@@ -74,7 +74,7 @@ export default function BroadcastsPage() {
       setBroadcasts((res.broadcasts as Broadcast[]) || []);
       setMeta(res.meta || EMPTY_META);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error al cargar broadcasts"));
+      toast.danger(getErrorMessage(error, "Error al cargar broadcasts"));
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,7 @@ export default function BroadcastsPage() {
 
   const handleCreate = async () => {
     if (!formData.title || !formData.body) {
-      toast.error("Titulo y body son requeridos");
+      toast.danger("Titulo y body son requeridos");
       return;
     }
 
@@ -146,7 +146,7 @@ export default function BroadcastsPage() {
         schedule_at: "",
       });
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }

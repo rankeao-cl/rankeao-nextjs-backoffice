@@ -16,7 +16,7 @@ import {
 import { batchUpdateLevels } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { Layers } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 const EXAMPLE_LEVELS = `[
   {
@@ -41,7 +41,7 @@ export default function LevelsPage() {
     try {
       parsed = JSON.parse(payloadText);
     } catch {
-      toast.error("El payload no es JSON valido");
+      toast.danger("El payload no es JSON valido");
       return;
     }
 
@@ -52,7 +52,7 @@ export default function LevelsPage() {
       await batchUpdateLevels(payload as Record<string, unknown>);
       toast.success("Niveles actualizados correctamente");
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setLoading(false);
     }

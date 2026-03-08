@@ -34,7 +34,7 @@ import {
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Bell, Edit, Eye, Send } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type Template = Record<string, unknown>;
 
@@ -135,7 +135,7 @@ export default function TemplatesPage() {
       setTemplates((res.templates as Template[]) || []);
       setMeta(res.meta || EMPTY_META);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error al cargar templates"));
+      toast.danger(getErrorMessage(error, "Error al cargar templates"));
     } finally {
       setLoading(false);
     }
@@ -224,7 +224,7 @@ export default function TemplatesPage() {
       createModal.onClose();
       fetchTemplates();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
@@ -251,7 +251,7 @@ export default function TemplatesPage() {
       );
       setPreviewData(result as Record<string, unknown>);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setPreviewLoading(false);
     }
@@ -286,7 +286,7 @@ export default function TemplatesPage() {
       toast.success("Test notification sent");
       testModal.onClose();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setTestLoading(false);
     }

@@ -17,7 +17,7 @@ import {
 import { createTitle, grantTitle, revokeTitle, updateTitle } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { Crown, Gift, Pencil, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 export default function TitlesPage() {
   const [createForm, setCreateForm] = useState({
@@ -52,7 +52,7 @@ export default function TitlesPage() {
 
   const handleCreate = async () => {
     if (!createForm.slug || !createForm.name) {
-      toast.error("Slug y nombre son requeridos");
+      toast.danger("Slug y nombre son requeridos");
       return;
     }
 
@@ -67,7 +67,7 @@ export default function TitlesPage() {
       toast.success("Titulo creado");
       setCreateForm({ slug: "", name: "", color: "#d4d4d8", season_id: "" });
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setCreateLoading(false);
     }
@@ -75,7 +75,7 @@ export default function TitlesPage() {
 
   const handleUpdate = async () => {
     if (!updateForm.title_id) {
-      toast.error("Ingresa el Title ID");
+      toast.danger("Ingresa el Title ID");
       return;
     }
 
@@ -85,7 +85,7 @@ export default function TitlesPage() {
     if (updateForm.season_id) payload.season_id = updateForm.season_id;
 
     if (Object.keys(payload).length === 0) {
-      toast.error("Ingresa al menos un campo para actualizar");
+      toast.danger("Ingresa al menos un campo para actualizar");
       return;
     }
 
@@ -94,7 +94,7 @@ export default function TitlesPage() {
       await updateTitle(updateForm.title_id, payload);
       toast.success("Titulo actualizado");
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setUpdateLoading(false);
     }
@@ -102,7 +102,7 @@ export default function TitlesPage() {
 
   const handleGrant = async () => {
     if (!grantForm.title_id || !grantForm.user_id) {
-      toast.error("Title ID y User ID son requeridos");
+      toast.danger("Title ID y User ID son requeridos");
       return;
     }
 
@@ -115,7 +115,7 @@ export default function TitlesPage() {
       toast.success("Titulo otorgado");
       setGrantForm((prev) => ({ ...prev, user_id: "", reason: "" }));
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setGrantLoading(false);
     }
@@ -123,7 +123,7 @@ export default function TitlesPage() {
 
   const handleRevoke = async () => {
     if (!revokeForm.title_id || !revokeForm.user_id) {
-      toast.error("Title ID y User ID son requeridos");
+      toast.danger("Title ID y User ID son requeridos");
       return;
     }
 
@@ -136,7 +136,7 @@ export default function TitlesPage() {
       toast.success("Titulo revocado");
       setRevokeForm((prev) => ({ ...prev, user_id: "", reason: "" }));
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setRevokeLoading(false);
     }

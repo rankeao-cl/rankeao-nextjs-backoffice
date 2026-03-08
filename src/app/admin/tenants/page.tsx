@@ -29,7 +29,7 @@ import {
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Store } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type TenantAction = "verify" | "reject" | "suspend" | "reactivate";
 
@@ -66,7 +66,7 @@ export default function TenantsPage() {
       const res = await getTenants();
       setTenants(res.tenants || []);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error al cargar tenants"));
+      toast.danger(getErrorMessage(error, "Error al cargar tenants"));
     } finally {
       setLoading(false);
     }
@@ -108,7 +108,7 @@ export default function TenantsPage() {
       onClose();
       fetchTenants();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }

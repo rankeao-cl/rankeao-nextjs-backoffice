@@ -21,7 +21,7 @@ import { getEmailTemplates, previewEmailTemplate } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Eye, Mail } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type EmailTemplate = Record<string, unknown>;
 
@@ -47,7 +47,7 @@ export default function EmailTemplatesPage() {
       const res = await getEmailTemplates();
       setTemplates((res.templates as EmailTemplate[]) || []);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error al cargar email templates"));
+      toast.danger(getErrorMessage(error, "Error al cargar email templates"));
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ export default function EmailTemplatesPage() {
 
   const handlePreview = async (templateKey: string) => {
     if (!templateKey) {
-      toast.error("Template key invalido");
+      toast.danger("Template key invalido");
       return;
     }
 
@@ -79,7 +79,7 @@ export default function EmailTemplatesPage() {
       setPreviewBody(String(data.body || ""));
       previewModal.onOpen();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     }
   };
 

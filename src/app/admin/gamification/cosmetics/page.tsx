@@ -17,7 +17,7 @@ import {
 import { createCosmetic, grantCosmetic, revokeCosmetic, updateCosmetic } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { Gift, Pencil, Sparkles, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 export default function CosmeticsPage() {
   const [createForm, setCreateForm] = useState({
@@ -55,7 +55,7 @@ export default function CosmeticsPage() {
 
   const handleCreate = async () => {
     if (!createForm.slug || !createForm.name || !createForm.type || !createForm.asset_url) {
-      toast.error("slug, name, type y asset_url son requeridos");
+      toast.danger("slug, name, type y asset_url son requeridos");
       return;
     }
 
@@ -77,7 +77,7 @@ export default function CosmeticsPage() {
         rarity: "common",
       });
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setCreateLoading(false);
     }
@@ -85,7 +85,7 @@ export default function CosmeticsPage() {
 
   const handleUpdate = async () => {
     if (!updateForm.cosmetic_id) {
-      toast.error("Ingresa el Cosmetic ID");
+      toast.danger("Ingresa el Cosmetic ID");
       return;
     }
 
@@ -97,7 +97,7 @@ export default function CosmeticsPage() {
     if (updateForm.is_active) payload.is_active = updateForm.is_active.toLowerCase() === "true";
 
     if (Object.keys(payload).length === 0) {
-      toast.error("Ingresa al menos un campo para actualizar");
+      toast.danger("Ingresa al menos un campo para actualizar");
       return;
     }
 
@@ -106,7 +106,7 @@ export default function CosmeticsPage() {
       await updateCosmetic(updateForm.cosmetic_id, payload);
       toast.success("Cosmetico actualizado");
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setUpdateLoading(false);
     }
@@ -114,7 +114,7 @@ export default function CosmeticsPage() {
 
   const handleGrant = async () => {
     if (!grantForm.cosmetic_id || !grantForm.user_id) {
-      toast.error("Cosmetic ID y User ID son requeridos");
+      toast.danger("Cosmetic ID y User ID son requeridos");
       return;
     }
 
@@ -127,7 +127,7 @@ export default function CosmeticsPage() {
       toast.success("Cosmetico otorgado");
       setGrantForm((prev) => ({ ...prev, user_id: "", reason: "" }));
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setGrantLoading(false);
     }
@@ -135,7 +135,7 @@ export default function CosmeticsPage() {
 
   const handleRevoke = async () => {
     if (!revokeForm.cosmetic_id || !revokeForm.user_id) {
-      toast.error("Cosmetic ID y User ID son requeridos");
+      toast.danger("Cosmetic ID y User ID son requeridos");
       return;
     }
 
@@ -148,7 +148,7 @@ export default function CosmeticsPage() {
       toast.success("Cosmetico revocado");
       setRevokeForm((prev) => ({ ...prev, user_id: "", reason: "" }));
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setRevokeLoading(false);
     }

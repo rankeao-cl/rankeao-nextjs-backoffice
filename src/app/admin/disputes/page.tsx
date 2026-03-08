@@ -26,7 +26,7 @@ import { assignDispute, getDisputes, resolveDispute, type ListMeta } from "@/lib
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Scale } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type Dispute = Record<string, unknown>;
 
@@ -103,7 +103,7 @@ export default function DisputesPage() {
       setDisputes(res.disputes || []);
       setMeta(res.meta || EMPTY_META);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error al cargar disputas"));
+      toast.danger(getErrorMessage(error, "Error al cargar disputas"));
     } finally {
       setLoading(false);
     }
@@ -149,7 +149,7 @@ export default function DisputesPage() {
       assignModal.onClose();
       fetchDisputes();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setAssignLoading(false);
     }
@@ -169,7 +169,7 @@ export default function DisputesPage() {
       resolveModal.onClose();
       fetchDisputes();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setResolveLoading(false);
     }

@@ -25,7 +25,7 @@ import {
 } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { KeyRound, Mail, Shield, UserPlus } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 function pretty(value: unknown): string {
   try {
@@ -57,7 +57,7 @@ export default function AuthApiPage() {
       toast.success("Operacion ejecutada");
     } catch (error: unknown) {
       setResultText(getErrorMessage(error));
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setLoadingKey(null);
     }

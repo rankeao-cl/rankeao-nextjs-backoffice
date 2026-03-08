@@ -23,7 +23,7 @@ import { createXPEvent, getXPEvents, updateXPEvent } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Edit, Zap } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 type XPEvent = Record<string, unknown>;
 
@@ -68,7 +68,7 @@ export default function XPEventsPage() {
       const res = await getXPEvents();
       setEvents((res.events as XPEvent[]) || []);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error al cargar XP events"));
+      toast.danger(getErrorMessage(error, "Error al cargar XP events"));
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export default function XPEventsPage() {
       createModal.onClose();
       fetchEvents();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }

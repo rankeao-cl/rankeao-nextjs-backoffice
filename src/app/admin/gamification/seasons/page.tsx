@@ -23,7 +23,7 @@ import { closeSeason, createSeason, previewSeasonClose } from "@/lib/api-admin";
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Eye, Lock, Trophy } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 
 export default function SeasonsPage() {
   const createModal = useDisclosure();
@@ -50,7 +50,7 @@ export default function SeasonsPage() {
 
   const handleCreate = async () => {
     if (!formData.name || !startsAtValue || !endsAtValue) {
-      toast.error("Completa todos los campos");
+      toast.danger("Completa todos los campos");
       return;
     }
 
@@ -67,7 +67,7 @@ export default function SeasonsPage() {
       setStartsAtValue(null);
       setEndsAtValue(null);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
@@ -75,7 +75,7 @@ export default function SeasonsPage() {
 
   const handlePreview = async () => {
     if (!selectedSeasonId) {
-      toast.error("Ingresa el Season ID");
+      toast.danger("Ingresa el Season ID");
       return;
     }
 
@@ -84,7 +84,7 @@ export default function SeasonsPage() {
       setPreviewData(data);
       previewModal.onOpen();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     }
   };
 
@@ -97,7 +97,7 @@ export default function SeasonsPage() {
       toast.success("Season cerrada exitosamente");
       closeModal.onClose();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setCloseLoading(false);
     }

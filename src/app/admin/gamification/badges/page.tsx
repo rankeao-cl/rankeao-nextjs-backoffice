@@ -33,7 +33,7 @@ import {
 import { getErrorMessage } from "@/lib/error-message";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { Award, Edit, Gift, Trash2, Users } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@heroui/react";
 import Image from "next/image";
 
 type Badge = Record<string, unknown>;
@@ -113,7 +113,7 @@ export default function BadgesPage() {
       setBadges((res.badges as Badge[]) || []);
     } catch (error: unknown) {
       console.error("Error al cargar badges:", error);
-      toast.error(getErrorMessage(error, "Error al cargar badges"));
+      toast.danger(getErrorMessage(error, "Error al cargar badges"));
     } finally {
       setLoading(false);
     }
@@ -179,7 +179,7 @@ export default function BadgesPage() {
       createModal.onClose();
       fetchBadges();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
@@ -206,7 +206,7 @@ export default function BadgesPage() {
           .filter(Boolean);
 
         if (!ids.length) {
-          toast.error("Ingresa al menos un User ID");
+          toast.danger("Ingresa al menos un User ID");
           return;
         }
 
@@ -214,7 +214,7 @@ export default function BadgesPage() {
         toast.success("Otorgamiento masivo ejecutado");
       } else {
         if (!grantUserId) {
-          toast.error("Ingresa el User ID");
+          toast.danger("Ingresa el User ID");
           return;
         }
 
@@ -227,7 +227,7 @@ export default function BadgesPage() {
 
       grantModal.onClose();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setGrantLoading(false);
     }
@@ -252,7 +252,7 @@ export default function BadgesPage() {
       toast.success("Badge revocado");
       revokeModal.onClose();
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setRevokeLoading(false);
     }
@@ -285,7 +285,7 @@ export default function BadgesPage() {
       setCatDesc("");
       setCatIcon("");
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error));
+      toast.danger(getErrorMessage(error));
     } finally {
       setCatLoading(false);
     }
