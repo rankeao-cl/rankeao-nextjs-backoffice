@@ -104,7 +104,7 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
         <Card className={`h-full ${st.border} border border-[var(--border)] bg-[var(--surface)]`}>
             <Card.Content className="flex flex-row items-center gap-4 p-4">
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${st.iconBg}`}>
-                    <div className={st.iconColor}>{icon}</div>
+                    <div className={st.iconColor} aria-hidden="true">{icon}</div>
                 </div>
                 <div className="min-w-0 flex-1">
                     <p className="text-[11px] text-[var(--muted)] uppercase tracking-wider font-medium">{label}</p>
@@ -113,7 +113,7 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
                     </p>
                 </div>
                 {href && (
-                    <ArrowUpRight className="h-3.5 w-3.5 text-[var(--muted)] shrink-0" />
+                    <ArrowUpRight className="h-3.5 w-3.5 text-[var(--muted)] shrink-0" aria-hidden="true" />
                 )}
             </Card.Content>
         </Card>
@@ -147,7 +147,7 @@ function QuickLink({ label, href, icon, description }: QuickLinkProps) {
     return (
         <Link href={href} className="block h-full group">
             <div className="h-full flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-colors duration-150 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-secondary)]">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--surface-secondary)] text-[var(--muted)] group-hover:text-[var(--accent)] transition-colors">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--surface-secondary)] text-[var(--muted)] group-hover:text-[var(--accent)] transition-colors" aria-hidden="true">
                     {icon}
                 </div>
                 <div className="min-w-0">
@@ -284,7 +284,7 @@ export default function DashboardPage() {
             <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
                 <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-[var(--border)] bg-[var(--surface-secondary)]">
                     <div className="flex items-center gap-2">
-                        <Bug className="h-4 w-4 text-[var(--muted)]" />
+                        <Bug className="h-4 w-4 text-[var(--muted)]" aria-hidden="true" />
                         <h2 className="text-sm font-semibold text-[var(--foreground)]">Diagnostico API</h2>
                     </div>
                     {lastApiError ? (
@@ -326,13 +326,13 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
-                            <ShieldCheck className="h-4 w-4 text-[var(--success)]" />
+                            <ShieldCheck className="h-4 w-4 text-[var(--success)]" aria-hidden="true" />
                             Sin errores API recientes.
                         </div>
                     )}
 
                     <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)] mt-3 opacity-60">
-                        <TriangleAlert className="h-3 w-3" />
+                        <TriangleAlert className="h-3 w-3" aria-hidden="true" />
                         Ultimo error capturado por el cliente admin.
                     </div>
                 </div>

@@ -333,7 +333,7 @@ export default function BadgesPage() {
               />
             ) : (
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--default)]">
-                <Award className="h-4 w-4 text-[var(--foreground)]" />
+                <Award className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
               </div>
             )}
             <div>
@@ -367,17 +367,17 @@ export default function BadgesPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(badge)}>
-              <Edit className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar badge" onPress={() => openEdit(badge)}>
+              <Edit className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openGrant(badge)}>
-              <Gift className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Otorgar badge" onPress={() => openGrant(badge)}>
+              <Gift className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openGrant(badge, true)}>
-              <Users className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Otorgamiento masivo" onPress={() => openGrant(badge, true)}>
+              <Users className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="danger" isIconOnly onPress={() => openRevoke(badge)}>
-              <Trash2 className="h-3.5 w-3.5" />
+            <Button size="sm" variant="danger" isIconOnly aria-label="Revocar badge" onPress={() => openRevoke(badge)}>
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
         );

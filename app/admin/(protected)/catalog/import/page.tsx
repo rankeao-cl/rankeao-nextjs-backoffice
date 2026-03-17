@@ -209,7 +209,7 @@ export default function BulkImportPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Layers className="h-5 w-5 text-[var(--foreground)]" />
+                  <Layers className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Importar Sets
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -244,7 +244,7 @@ export default function BulkImportPage() {
 
                 <Fieldset.Actions className="pt-1">
                   <Button type="button" onPress={handleImportSets} isPending={bulkImportSets.isPending}>
-                    <Upload className="h-4 w-4 mr-1" />
+                    <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Sets
                   </Button>
                 </Fieldset.Actions>
@@ -261,7 +261,7 @@ export default function BulkImportPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <BookOpen className="h-5 w-5 text-[var(--foreground)]" />
+                  <BookOpen className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Importar Cards
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -298,7 +298,7 @@ export default function BulkImportPage() {
 
                 <Fieldset.Actions className="pt-1">
                   <Button type="button" onPress={handleImportCards} isPending={bulkImportCards.isPending}>
-                    <Upload className="h-4 w-4 mr-1" />
+                    <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Cards
                   </Button>
                 </Fieldset.Actions>
@@ -315,7 +315,7 @@ export default function BulkImportPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Scale className="h-5 w-5 text-[var(--foreground)]" />
+                  <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Importar Legalidad
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -352,7 +352,7 @@ export default function BulkImportPage() {
 
                 <Fieldset.Actions className="pt-1">
                   <Button type="button" onPress={handleImportLegality} isPending={bulkImportLegality.isPending}>
-                    <Upload className="h-4 w-4 mr-1" />
+                    <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Legalidad
                   </Button>
                 </Fieldset.Actions>

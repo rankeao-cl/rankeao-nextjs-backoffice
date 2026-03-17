@@ -67,7 +67,7 @@ export default function TournamentRatingsPage() {
           <Form className="space-y-4">
             <Fieldset className="space-y-4">
               <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                <BarChart3 className="h-5 w-5 text-[var(--foreground)]" />
+                <BarChart3 className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                 Recalcular Ratings
               </Fieldset.Legend>
               <Description className="text-xs text-[var(--muted)]">
@@ -75,7 +75,7 @@ export default function TournamentRatingsPage() {
               </Description>
 
               <div className="flex items-start gap-2 rounded-md border border-yellow-500/30 bg-yellow-500/5 p-3">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-yellow-500" />
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-yellow-500" aria-hidden="true" />
                 <p className="text-xs text-yellow-500">
                   Esta accion recalcula los ratings Glicko-2 de todos los partidos confirmados en el torneo. Utilizar con precaucion.
                 </p>

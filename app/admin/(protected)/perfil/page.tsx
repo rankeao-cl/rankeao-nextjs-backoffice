@@ -416,7 +416,7 @@ export default function AdminPerfilPage() {
             <Card className="bg-[var(--surface)] border border-[var(--border)]">
               <Card.Content className="p-5 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
-                  <Trophy className="h-4 w-4" />
+                  <Trophy className="h-4 w-4" aria-hidden="true" />
                   <p className="text-sm font-medium">Gamificacion</p>
                 </div>
                 <p className="text-sm text-[var(--muted)]">XP total otorgado</p>
@@ -430,7 +430,7 @@ export default function AdminPerfilPage() {
             <Card className="bg-[var(--surface)] border border-[var(--border)]">
               <Card.Content className="p-5 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
-                  <Bell className="h-4 w-4" />
+                  <Bell className="h-4 w-4" aria-hidden="true" />
                   <p className="text-sm font-medium">Notificaciones</p>
                 </div>
                 <p className="text-sm text-[var(--muted)]">Enviadas (24h)</p>
@@ -443,7 +443,7 @@ export default function AdminPerfilPage() {
           <Card className="bg-[var(--surface)] border border-[var(--border)]">
             <Card.Content className="p-5 space-y-4">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
-                <Zap className="h-4 w-4" />
+                <Zap className="h-4 w-4" aria-hidden="true" />
                 <p className="text-sm font-medium">Estado de endpoints</p>
               </div>
 
@@ -464,7 +464,7 @@ export default function AdminPerfilPage() {
           </Card>
 
           <div className="text-xs text-[var(--muted)] flex items-center gap-2">
-            <Clock3 className="h-3.5 w-3.5" />
+            <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
             Ultima actualización: {lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleString("es-CL") : "-"}
           </div>
         </div>
@@ -492,7 +492,7 @@ export default function AdminPerfilPage() {
             <Card className="bg-[var(--surface-secondary)] border border-[var(--border)]">
               <Card.Content className="p-5 space-y-2">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
-                  <Shield className="h-4 w-4" />
+                  <Shield className="h-4 w-4" aria-hidden="true" />
                   <span className="text-sm font-medium">Sesion</span>
                 </div>
                 <p className="text-xs text-[var(--muted)]">Token activo</p>
@@ -509,19 +509,19 @@ export default function AdminPerfilPage() {
           <Card className="bg-[var(--surface)] border border-[var(--border)]">
             <Card.Content className="p-5 space-y-4">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
-                <ShieldCheck className="h-4 w-4" />
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 <p className="text-sm font-medium">Controles de seguridad</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-[var(--muted)]">
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 flex items-center gap-2">
-                  <User className="h-3.5 w-3.5" /> Usuario autenticado: {user?.username || "-"}
+                  <User className="h-3.5 w-3.5" aria-hidden="true" /> Usuario autenticado: {user?.username || "-"}
                 </div>
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5" /> Email verificado por auth backend
+                  <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Email verificado por auth backend
                 </div>
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 flex items-center gap-2">
-                  <Users className="h-3.5 w-3.5" /> Sesion protegida por `proxy` en `/admin/*`
+                  <Users className="h-3.5 w-3.5" aria-hidden="true" /> Sesion protegida por `proxy` en `/admin/*`
                 </div>
               </div>
 
@@ -541,7 +541,7 @@ export default function AdminPerfilPage() {
             <Card.Content className="p-5 space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
-                  <Activity className="h-4 w-4" />
+                  <Activity className="h-4 w-4" aria-hidden="true" />
                   <p className="text-sm font-medium">Ultimo error API</p>
                 </div>
                 <Button size="sm" variant="tertiary" onPress={handleClearHistory}>
@@ -571,7 +571,7 @@ export default function AdminPerfilPage() {
           <Card className="bg-[var(--surface)] border border-[var(--border)]">
             <Card.Content className="p-5 space-y-3">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
-                <Zap className="h-4 w-4" />
+                <Zap className="h-4 w-4" aria-hidden="true" />
                 <p className="text-sm font-medium">Histórico (últimos {errorHistory.length})</p>
               </div>
 

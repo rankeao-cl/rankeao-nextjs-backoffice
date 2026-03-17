@@ -256,7 +256,7 @@ export default function CosmeticsPage() {
         return (
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--default)]">
-              <Sparkles className="h-4 w-4 text-[var(--foreground)]" />
+              <Sparkles className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
             </div>
             <div>
               <p className="font-medium text-[var(--foreground)]">{String(cosmetic.name || "-")}</p>
@@ -313,14 +313,14 @@ export default function CosmeticsPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(cosmetic)}>
-              <Edit className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar cosmetico" onPress={() => openEdit(cosmetic)}>
+              <Edit className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openGrant(cosmetic)}>
-              <Gift className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Otorgar cosmetico" onPress={() => openGrant(cosmetic)}>
+              <Gift className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="danger" isIconOnly onPress={() => openRevoke(cosmetic)}>
-              <Trash2 className="h-3.5 w-3.5" />
+            <Button size="sm" variant="danger" isIconOnly aria-label="Revocar cosmetico" onPress={() => openRevoke(cosmetic)}>
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
         );
@@ -385,7 +385,7 @@ export default function CosmeticsPage() {
             </TextField>
 
             <Button type="button" variant="primary" size="sm" onPress={openCreate}>
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="h-4 w-4 mr-1" aria-hidden="true" />
               Nuevo cosmetico
             </Button>
           </div>
@@ -409,7 +409,7 @@ export default function CosmeticsPage() {
             </div>
           ) : filteredCosmetics.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-[var(--muted)]">
-              <Sparkles className="h-10 w-10 mb-3 opacity-40" />
+              <Sparkles className="h-10 w-10 mb-3 opacity-40" aria-hidden="true" />
               <p className="text-sm">No se encontraron cosmeticos</p>
             </div>
           ) : (
@@ -452,19 +452,21 @@ export default function CosmeticsPage() {
                   size="sm"
                   variant="secondary"
                   isIconOnly
+                  aria-label="Pagina anterior"
                   isDisabled={page <= 1}
                   onPress={() => setPage((p) => Math.max(1, p - 1))}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 </Button>
                 <Button
                   size="sm"
                   variant="secondary"
                   isIconOnly
+                  aria-label="Pagina siguiente"
                   isDisabled={page >= meta.total_pages}
                   onPress={() => setPage((p) => p + 1)}
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>

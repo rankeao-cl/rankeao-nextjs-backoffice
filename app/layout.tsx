@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Rajdhani } from "next/font/google";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
@@ -14,10 +14,20 @@ const rajdhani = Rajdhani({
   weight: ["400", "500", "600", "700"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
-  title: "Rankeao Admin — Backoffice",
+  title: {
+    default: "Rankeao Admin — Backoffice",
+    template: "%s | Rankeao Admin",
+  },
   description:
-    "Panel de administración de Rankeao.cl — gestión de tenants, gamificación, disputas y notificaciones.",
+    "Panel de administración de Rankeao.cl — gestión de tiendas, productos, órdenes, inventario, personal, analíticas y más.",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({

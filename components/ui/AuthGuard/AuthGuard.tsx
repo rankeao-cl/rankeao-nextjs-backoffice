@@ -24,8 +24,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!checked) {
     return (
-      <div className={s.loading}>
-        <div className={s.spinner} />
+      <div className={s.loading} role="status" aria-label="Verificando autenticación">
+        <div className={s.spinner} aria-hidden="true" />
+        <span className="sr-only">Cargando...</span>
       </div>
     );
   }

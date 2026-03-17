@@ -118,7 +118,7 @@ export default function TenantsPage() {
               className="bg-[var(--default)] text-[var(--foreground)]"
             >
               <Avatar.Fallback>
-                {tenant.name?.[0] ? tenant.name[0].toUpperCase() : <Store className="h-4 w-4" />}
+                {tenant.name?.[0] ? tenant.name[0].toUpperCase() : <Store className="h-4 w-4" aria-hidden="true" />}
               </Avatar.Fallback>
             </Avatar>
             <div>

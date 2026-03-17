@@ -269,14 +269,14 @@ export default function TitlesPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(title)}>
-              <Edit className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar titulo" onPress={() => openEdit(title)}>
+              <Edit className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openGrant(title)}>
-              <Gift className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Otorgar titulo" onPress={() => openGrant(title)}>
+              <Gift className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="danger" isIconOnly onPress={() => openRevoke(title)}>
-              <Trash2 className="h-3.5 w-3.5" />
+            <Button size="sm" variant="danger" isIconOnly aria-label="Revocar titulo" onPress={() => openRevoke(title)}>
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
         );

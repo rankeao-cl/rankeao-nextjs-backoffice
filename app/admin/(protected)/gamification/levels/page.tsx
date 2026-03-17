@@ -72,7 +72,7 @@ export default function LevelsPage() {
           <Form className="space-y-4">
             <Fieldset className="space-y-4">
               <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                <Layers className="h-5 w-5 text-[var(--foreground)]" />
+                <Layers className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                 Batch update payload
               </Fieldset.Legend>
               <Description className="text-xs text-[var(--muted)]">

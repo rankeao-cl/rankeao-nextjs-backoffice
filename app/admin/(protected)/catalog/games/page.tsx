@@ -314,11 +314,12 @@ export default function GamesPage() {
             type="button"
             className="p-1 text-[var(--muted)] hover:text-[var(--foreground)]"
             onClick={() => toggleExpand(game.slug)}
+            aria-label={expandedSlug === game.slug ? "Contraer formatos" : "Expandir formatos"}
           >
             {expandedSlug === game.slug ? (
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         );
@@ -333,7 +334,7 @@ export default function GamesPage() {
               />
             ) : (
               <div className="flex h-6 w-6 items-center justify-center rounded bg-[var(--default)]">
-                <Gamepad2 className="h-3.5 w-3.5 text-[var(--foreground)]" />
+                <Gamepad2 className="h-3.5 w-3.5 text-[var(--foreground)]" aria-hidden="true" />
               </div>
             )}
             <span className="font-medium text-[var(--foreground)]">{String(game.name || "-")}</span>
@@ -363,8 +364,8 @@ export default function GamesPage() {
         );
       case "actions":
         return (
-          <Button size="sm" variant="secondary" isIconOnly onPress={() => openEditGame(game)}>
-            <Edit className="h-3.5 w-3.5" />
+          <Button size="sm" variant="secondary" isIconOnly aria-label="Editar juego" onPress={() => openEditGame(game)}>
+            <Edit className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         );
       default:
@@ -398,8 +399,8 @@ export default function GamesPage() {
         return <span className="text-xs text-[var(--muted)]">{format.sort_order}</span>;
       case "actions":
         return (
-          <Button size="sm" variant="secondary" isIconOnly onPress={() => openEditFormat(format)}>
-            <Edit className="h-3.5 w-3.5" />
+          <Button size="sm" variant="secondary" isIconOnly aria-label="Editar formato" onPress={() => openEditFormat(format)}>
+            <Edit className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         );
       default:
@@ -419,7 +420,7 @@ export default function GamesPage() {
           </p>
         </div>
         <Button variant="primary" size="sm" onPress={openCreateGame}>
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Nuevo juego
         </Button>
       </div>
@@ -496,7 +497,7 @@ export default function GamesPage() {
                 Formatos de <code className="text-xs bg-[var(--default)] px-1.5 py-0.5 rounded ml-1">{expandedSlug}</code>
               </p>
               <Button variant="secondary" size="sm" onPress={openCreateFormat}>
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 Nuevo formato
               </Button>
             </div>

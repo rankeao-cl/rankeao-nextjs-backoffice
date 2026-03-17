@@ -208,8 +208,8 @@ export default function SetsPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(set)}>
-              <Edit className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar set" onPress={() => openEdit(set)}>
+              <Edit className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
         );
@@ -274,7 +274,7 @@ export default function SetsPage() {
               onPress={openCreate}
               isDisabled={!selectedGame}
             >
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="h-4 w-4 mr-1" aria-hidden="true" />
               Nuevo set
             </Button>
           </div>
@@ -286,7 +286,7 @@ export default function SetsPage() {
         <Card.Content className="p-0">
           {!selectedGame ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Search className="h-10 w-10 text-[var(--muted)] mb-3 opacity-40" />
+              <Search className="h-10 w-10 text-[var(--muted)] mb-3 opacity-40" aria-hidden="true" />
               <p className="text-sm text-[var(--muted)]">
                 Selecciona un juego para ver sus sets
               </p>

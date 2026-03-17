@@ -133,7 +133,7 @@ export default function XPEventsPage() {
       case "event":
         return (
           <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-[var(--foreground)]" />
+            <Zap className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
             <code className="text-xs">{event.event_key || "-"}</code>
           </div>
         );
@@ -151,8 +151,8 @@ export default function XPEventsPage() {
         );
       case "actions":
         return (
-          <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(event)}>
-            <Edit className="h-3.5 w-3.5" />
+          <Button size="sm" variant="secondary" isIconOnly aria-label="Editar evento XP" onPress={() => openEdit(event)}>
+            <Edit className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         );
       default:

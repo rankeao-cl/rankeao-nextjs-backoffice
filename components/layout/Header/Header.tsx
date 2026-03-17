@@ -73,7 +73,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         onPress={onMenuToggle}
         aria-label="Toggle menu"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5" aria-hidden="true" />
       </Button>
 
       <div className={s.breadcrumbs}>
@@ -121,7 +121,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           className="text-[var(--muted)] hover:text-[var(--foreground)]"
         >
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {theme === "dark" ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
         </Button>
 
         <Dropdown>
@@ -150,7 +150,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 onPress={() => router.push("/admin/perfil")}
               >
                 <span className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
+                  <User className="h-4 w-4" aria-hidden="true" />
                   Perfil
                 </span>
               </DropdownItem>
@@ -160,7 +160,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 onPress={handleLogout}
               >
                 <span className="flex items-center gap-2">
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
                   Cerrar sesión
                 </span>
               </DropdownItem>

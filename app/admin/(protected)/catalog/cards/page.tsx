@@ -265,7 +265,7 @@ export default function CardsPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Layers className="h-5 w-5 text-[var(--foreground)]" />
+                  <Layers className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Crear carta
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -360,7 +360,7 @@ export default function CardsPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Pencil className="h-5 w-5 text-[var(--foreground)]" />
+                  <Pencil className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Actualizar carta
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -449,7 +449,7 @@ export default function CardsPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Printer className="h-5 w-5 text-[var(--foreground)]" />
+                  <Printer className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Crear edicion (printing)
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -619,7 +619,7 @@ export default function CardsPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
-                  <Scale className="h-5 w-5 text-[var(--foreground)]" />
+                  <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Actualizar legalidad
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -673,9 +673,10 @@ export default function CardsPage() {
                           variant="danger"
                           size="sm"
                           isIconOnly
+                          aria-label="Eliminar entrada de legalidad"
                           onPress={() => removeLegalityEntry(index)}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         </Button>
                       )}
                     </div>
@@ -686,7 +687,7 @@ export default function CardsPage() {
                     size="sm"
                     onPress={addLegalityEntry}
                   >
-                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    <Plus className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                     Agregar formato
                   </Button>
                 </div>

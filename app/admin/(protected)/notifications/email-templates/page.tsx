@@ -72,7 +72,7 @@ export default function EmailTemplatesPage() {
       case "key":
         return (
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[var(--foreground)]" />
+            <Mail className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
             <code className="text-xs">{template.key || "-"}</code>
           </div>
         );
@@ -92,9 +92,10 @@ export default function EmailTemplatesPage() {
             size="sm"
             variant="secondary"
             isIconOnly
+            aria-label="Previsualizar plantilla de email"
             onPress={() => handlePreview(template.key || "")}
           >
-            <Eye className="h-3.5 w-3.5" />
+            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         );
       default:

@@ -252,7 +252,7 @@ export default function AdminApiExplorerPage() {
         <Card className="bg-[var(--surface)] border border-[var(--border)] xl:col-span-1">
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-[var(--foreground)]" />
+              <Search className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
               <p className="text-sm text-[var(--foreground)] font-medium">Operaciones</p>
             </div>
             <Input
@@ -301,7 +301,7 @@ export default function AdminApiExplorerPage() {
               <>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Code2 className="h-4 w-4 text-[var(--foreground)]" />
+                    <Code2 className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
                     <p className="text-sm font-medium text-[var(--foreground)]">{selectedOperation.operationId}</p>
                     <Chip size="sm" variant="soft" color="default">
                       {selectedOperation.method}
@@ -374,7 +374,7 @@ export default function AdminApiExplorerPage() {
                     isPending={running}
                     variant="secondary"
                   >
-                    <Play className="h-3.5 w-3.5" /> Ejecutar
+                    <Play className="h-3.5 w-3.5" aria-hidden="true" /> Ejecutar
                   </Button>
                 </div>
               </>
@@ -386,7 +386,7 @@ export default function AdminApiExplorerPage() {
       <Card className="bg-[var(--surface)] border border-[var(--border)]">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Terminal className="h-4 w-4 text-[var(--foreground)]" />
+            <Terminal className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
             <p className="text-sm font-medium text-[var(--foreground)]">Respuesta</p>
           </div>
 

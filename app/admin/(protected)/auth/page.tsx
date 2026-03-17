@@ -80,7 +80,7 @@ export default function AuthApiPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
-                  <UserPlus className="h-4 w-4 text-[var(--foreground)]" />
+                  <UserPlus className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
                   Registro
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -141,7 +141,7 @@ export default function AuthApiPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
-                  <Mail className="h-4 w-4 text-[var(--foreground)]" />
+                  <Mail className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
                   Recuperar / Verificar / Restablecer
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -205,7 +205,7 @@ export default function AuthApiPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
-                  <KeyRound className="h-4 w-4 text-[var(--foreground)]" />
+                  <KeyRound className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
                   Renovar token
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">
@@ -239,7 +239,7 @@ export default function AuthApiPage() {
             <Form className="space-y-4">
               <Fieldset className="space-y-4">
                 <Fieldset.Legend className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
-                  <Shield className="h-4 w-4 text-[var(--foreground)]" />
+                  <Shield className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
                   Callbacks OAuth
                 </Fieldset.Legend>
                 <Description className="text-xs text-[var(--muted)]">

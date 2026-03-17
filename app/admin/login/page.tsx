@@ -84,7 +84,7 @@ export default function LoginPage() {
                 <Label className="text-[var(--muted)] text-xs font-medium tracking-wide uppercase">Email</Label>
                 <InputGroup className={groupClasses}>
                   <InputGroupPrefix>
-                    <Mail className="h-4 w-4 text-[var(--muted)] pointer-events-none" />
+                    <Mail className="h-4 w-4 text-[var(--muted)] pointer-events-none" aria-hidden="true" />
                   </InputGroupPrefix>
                   <Input
                     type="email"
@@ -101,7 +101,7 @@ export default function LoginPage() {
                 <Label className="text-[var(--muted)] text-xs font-medium tracking-wide uppercase">Contraseña</Label>
                 <InputGroup className={groupClasses}>
                   <InputGroupPrefix>
-                    <Lock className="h-4 w-4 text-[var(--muted)] pointer-events-none" />
+                    <Lock className="h-4 w-4 text-[var(--muted)] pointer-events-none" aria-hidden="true" />
                   </InputGroupPrefix>
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -118,9 +118,10 @@ export default function LoginPage() {
                       size="sm"
                       variant="secondary"
                       onPress={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                       className="text-[var(--muted)] hover:text-[var(--foreground)]"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </InputGroupSuffix>
                 </InputGroup>

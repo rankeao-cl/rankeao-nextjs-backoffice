@@ -368,7 +368,7 @@ export default function DisputesPage() {
               <Modal.Header>
                 <Modal.Heading>
                   <div className="flex items-center gap-2">
-                    <Scale className="h-5 w-5 text-[var(--foreground)]" />
+                    <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                     Resolver Disputa
                   </div>
                 </Modal.Heading>

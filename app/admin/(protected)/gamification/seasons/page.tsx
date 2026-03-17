@@ -200,7 +200,7 @@ export default function SeasonsPage() {
       ) : seasons.length === 0 ? (
         <Card className="bg-[var(--surface-secondary)] border border-[var(--border)]">
           <Card.Content className="flex flex-col items-center py-12 gap-4">
-            <Trophy className="h-12 w-12 text-[var(--field-placeholder)]" />
+            <Trophy className="h-12 w-12 text-[var(--field-placeholder)]" aria-hidden="true" />
             <p className="text-[var(--muted)]">
               No hay temporadas creadas aun.
             </p>
@@ -227,13 +227,13 @@ export default function SeasonsPage() {
                   {/* Name + Status */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Trophy className="h-5 w-5 shrink-0 text-[var(--foreground)]" />
+                      <Trophy className="h-5 w-5 shrink-0 text-[var(--foreground)]" aria-hidden="true" />
                       <h3 className="font-semibold text-[var(--foreground)] truncate">
                         {season.name}
                       </h3>
                       {season.is_current_season && (
                         <Chip size="sm" color="accent" variant="soft">
-                          <Star className="h-3 w-3 mr-1 inline" />
+                          <Star className="h-3 w-3 mr-1 inline" aria-hidden="true" />
                           Actual
                         </Chip>
                       )}
@@ -250,7 +250,7 @@ export default function SeasonsPage() {
                   {/* Dates */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--muted)]">
                     <span className="flex items-center gap-1">
-                      <CalendarDays className="h-3.5 w-3.5" />
+                      <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                       {formatDate(startDate)} &mdash; {formatDate(endDate)}
                     </span>
                     {season.days_remaining != null && (
@@ -264,15 +264,15 @@ export default function SeasonsPage() {
                   {season.stats && (
                     <div className="flex flex-wrap gap-3 text-xs text-[var(--muted)]">
                       <span className="flex items-center gap-1">
-                        <Users className="h-3.5 w-3.5" />
+                        <Users className="h-3.5 w-3.5" aria-hidden="true" />
                         {season.stats.total_players} jugadores
                       </span>
                       <span className="flex items-center gap-1">
-                        <Swords className="h-3.5 w-3.5" />
+                        <Swords className="h-3.5 w-3.5" aria-hidden="true" />
                         {season.stats.total_tournaments} torneos
                       </span>
                       <span className="flex items-center gap-1">
-                        <Gamepad2 className="h-3.5 w-3.5" />
+                        <Gamepad2 className="h-3.5 w-3.5" aria-hidden="true" />
                         {season.stats.total_matches} partidas
                       </span>
                       {season.stats.games_played &&
@@ -307,7 +307,7 @@ export default function SeasonsPage() {
                           previewSeasonCloseMutation.isPending
                         }
                       >
-                        <Eye className="h-3.5 w-3.5 mr-1" />
+                        <Eye className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                         Preview Cierre
                       </Button>
                       <Button
@@ -315,7 +315,7 @@ export default function SeasonsPage() {
                         variant="danger"
                         onPress={() => openCloseConfirmation(season)}
                       >
-                        <Lock className="h-3.5 w-3.5 mr-1" />
+                        <Lock className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                         Cerrar Season
                       </Button>
                     </div>
@@ -500,7 +500,7 @@ export default function SeasonsPage() {
               </Modal.Header>
               <Modal.Body className="space-y-3">
                 <div className="flex items-center gap-2 text-[var(--danger)]">
-                  <Lock className="h-5 w-5" />
+                  <Lock className="h-5 w-5" aria-hidden="true" />
                   <p className="font-semibold">Accion irreversible</p>
                 </div>
                 <p className="text-[var(--muted)] text-sm">

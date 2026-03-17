@@ -89,7 +89,7 @@ export default function MarketplaceConfigPage() {
               onPress={handleSave}
               isPending={updateConfig.isPending}
             >
-              <Save className="h-4 w-4 mr-1" />
+              <Save className="h-4 w-4 mr-1" aria-hidden="true" />
               Guardar cambios
             </Button>
           </div>
@@ -110,7 +110,7 @@ export default function MarketplaceConfigPage() {
             </div>
           ) : entries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-[var(--muted)]">
-              <Settings className="h-10 w-10 mb-3 opacity-40" />
+              <Settings className="h-10 w-10 mb-3 opacity-40" aria-hidden="true" />
               <p className="text-sm">No hay configuraciones disponibles</p>
             </div>
           ) : (

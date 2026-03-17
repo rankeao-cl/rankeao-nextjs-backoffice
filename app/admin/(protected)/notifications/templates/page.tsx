@@ -55,8 +55,8 @@ const EMPTY_META: ListMeta = {
   total_pages: 1,
 };
 
-const CATEGORY_OPTIONS = ["system", "social", "marketplace", "gamification", "security"];
-const PRIORITY_OPTIONS = ["LOW", "NORMAL", "HIGH", "CRITICAL"];
+const CATEGORY_OPTIONS = ["system", "social", "marketplace", "tournament"];
+const PRIORITY_OPTIONS = ["LOW", "NORMAL", "HIGH", "URGENT"];
 
 function parseJsonObject(text: string, fieldName: string): Record<string, string> {
   if (!text.trim()) {
@@ -275,7 +275,11 @@ export default function TemplatesPage() {
   };
 
   const handleTest = () => {
-    if (!testTarget?.id || !testUserId) return;
+    if (!testTarget?.id) return;
+    if (!testUserId) {
+      toast.danger("User ID es requerido");
+      return;
+    }
 
     try {
       const variables = parseJsonObject(testVariablesText, "variables");
@@ -316,7 +320,7 @@ export default function TemplatesPage() {
       case "key":
         return (
           <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-[var(--foreground)]" />
+            <Bell className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
             <code className="text-xs">{String(template.key || "-")}</code>
           </div>
         );
@@ -345,14 +349,14 @@ export default function TemplatesPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openEdit(template)}>
-              <Edit className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar plantilla" onPress={() => openEdit(template)}>
+              <Edit className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openPreview(template)}>
-              <Eye className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Previsualizar plantilla" onPress={() => openPreview(template)}>
+              <Eye className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly onPress={() => openTest(template)}>
-              <Send className="h-3.5 w-3.5" />
+            <Button size="sm" variant="secondary" isIconOnly aria-label="Enviar prueba" onPress={() => openTest(template)}>
+              <Send className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
         );
@@ -425,8 +429,8 @@ export default function TemplatesPage() {
 
             <Select
               className="min-w-[120px]"
-              selectedKey={isActive}
-              onSelectionChange={(key: string | number | null) => setIsActive(String(key || "all") as ActiveFilter)}
+              value={isActive}
+              onChange={(value: string | number | null) => setIsActive(String(value || "all") as ActiveFilter)}
             >
               <Label>Estado</Label>
               <Select.Trigger>
@@ -585,9 +589,9 @@ export default function TemplatesPage() {
                       </TextField>
                       <Select
                         className="w-full"
-                        selectedKey={formData.priority}
-                        onSelectionChange={(key: string | number | null) =>
-                          setFormData((prev) => ({ ...prev, priority: String(key || "NORMAL") }))
+                        value={formData.priority}
+                        onChange={(value: string | number | null) =>
+                          setFormData((prev) => ({ ...prev, priority: String(value || "NORMAL") }))
                         }
                       >
                         <Label>Prioridad</Label>
@@ -623,8 +627,8 @@ export default function TemplatesPage() {
                 </Form>
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
-                <Button variant="primary" onPress={handleSave} isPending={formLoading}>
+                <Button type="button" variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
+                <Button type="button" variant="primary" onPress={handleSave} isPending={formLoading}>
                   {editTarget ? "Guardar" : "Crear"}
                 </Button>
               </Modal.Footer>
@@ -677,7 +681,7 @@ export default function TemplatesPage() {
                 ) : null}
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="tertiary" onPress={previewModal.onClose}>Cerrar</Button>
+                <Button type="button" variant="tertiary" onPress={previewModal.onClose}>Cerrar</Button>
               </Modal.Footer>
             </Modal.Dialog>
           </Modal.Container>
@@ -722,8 +726,8 @@ export default function TemplatesPage() {
                 </Form>
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="tertiary" onPress={testModal.onClose}>Cancelar</Button>
-                <Button variant="primary" onPress={handleTest} isPending={testMutation.isPending}>Enviar prueba</Button>
+                <Button type="button" variant="tertiary" onPress={testModal.onClose}>Cancelar</Button>
+                <Button type="button" variant="primary" onPress={handleTest} isPending={testMutation.isPending}>Enviar prueba</Button>
               </Modal.Footer>
             </Modal.Dialog>
           </Modal.Container>

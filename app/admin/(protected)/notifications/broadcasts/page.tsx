@@ -8,7 +8,9 @@ import {
   Form,
   Input,
   Label,
+  ListBox,
   Modal,
+  Select,
   Skeleton,
   Table,
   TextArea,
@@ -21,6 +23,8 @@ import { useBroadcasts, useCreateBroadcast } from "@/lib/hooks/use-notifications
 import type { Broadcast, CreateBroadcastRequest } from "@/lib/types/notification";
 import type { ListMeta } from "@/lib/types/api";
 import { Radio, Send } from "lucide-react";
+
+const TARGET_OPTIONS = ["ALL", "ACTIVE_7D", "SELLERS", "JUDGES", "TENANT_OWNERS"];
 
 const TABLE_COLUMNS = [
   { key: "title", label: "TITULO" },
@@ -134,7 +138,7 @@ export default function BroadcastsPage() {
       case "title":
         return (
           <div className="flex items-center gap-2">
-            <Radio className="h-4 w-4 text-[var(--foreground)]" />
+            <Radio className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
             <span className="font-medium">{String(broadcast.title || "-")}</span>
           </div>
         );
@@ -272,7 +276,7 @@ export default function BroadcastsPage() {
             <Modal.Dialog>
               <Modal.Header>
                 <div className="flex items-center gap-2">
-                  <Send className="h-5 w-5 text-[var(--foreground)]" />
+                  <Send className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Crear difusion
                 </div>
               </Modal.Header>
@@ -297,13 +301,29 @@ export default function BroadcastsPage() {
                     </TextField>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Target</Label>
-                        <Input
-                          value={formData.target}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, target: e.target.value }))}
-                        />
-                      </TextField>
+                      <Select
+                        className="w-full"
+                        value={formData.target}
+                        onChange={(value: string | number | null) =>
+                          setFormData((prev) => ({ ...prev, target: String(value || "ALL") }))
+                        }
+                      >
+                        <Label>Target</Label>
+                        <Select.Trigger>
+                          <Select.Value />
+                          <Select.Indicator />
+                        </Select.Trigger>
+                        <Select.Popover>
+                          <ListBox>
+                            {TARGET_OPTIONS.map((option) => (
+                              <ListBox.Item key={option} id={option} textValue={option}>
+                                {option}
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                            ))}
+                          </ListBox>
+                        </Select.Popover>
+                      </Select>
                       <TextField className="space-y-1 flex flex-col">
                         <Label className="text-xs text-[var(--muted)]">Canales</Label>
                         <Input
@@ -335,8 +355,8 @@ export default function BroadcastsPage() {
                 </Form>
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
-                <Button variant="primary" onPress={handleCreate} isPending={createMutation.isPending}>Enviar difusion</Button>
+                <Button type="button" variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
+                <Button type="button" variant="primary" onPress={handleCreate} isPending={createMutation.isPending}>Enviar difusion</Button>
               </Modal.Footer>
             </Modal.Dialog>
           </Modal.Container>
