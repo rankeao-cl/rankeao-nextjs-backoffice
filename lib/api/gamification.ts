@@ -79,7 +79,7 @@ export async function listCosmetics(params?: {
   page?: number;
   per_page?: number;
 }): Promise<{ items: Cosmetic[]; meta: { page: number; page_size: number; total: number; total_pages: number } }> {
-  const payload = await apiFetch<unknown>("/gamification/admin/cosmetics", { params });
+  const payload = await apiFetch<unknown>("/gamification/cosmetics", { params });
   const items = extractList<Cosmetic>(payload, ["cosmetics", "items", "data"]);
   const meta = (payload as Record<string, unknown>)?.meta as { page: number; page_size: number; total: number; total_pages: number } | undefined;
   return { items, meta: meta ?? { page: 1, page_size: 20, total: items.length, total_pages: 1 } };
