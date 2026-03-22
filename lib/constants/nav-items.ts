@@ -20,6 +20,7 @@ import {
   Upload,
   Settings,
   BarChart3,
+  ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
 
@@ -58,6 +59,7 @@ export const NAV_ITEMS: NavEntry[] = [
   { label: "Disputas", href: "/admin/disputes", icon: Scale },
   { label: "Configuración", href: "/admin/marketplace/config", icon: Settings },
   { type: "divider", label: "Torneos" },
+  { label: "Aprobaciones", href: "/admin/tournaments/approvals", icon: ClipboardCheck },
   { label: "Ratings", href: "/admin/tournaments/ratings", icon: BarChart3 },
   { type: "divider", label: "Notificaciones" },
   { label: "Plantillas", href: "/admin/notifications/templates", icon: Bell },
