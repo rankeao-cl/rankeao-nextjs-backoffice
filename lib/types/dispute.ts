@@ -34,3 +34,55 @@ export interface ResolveDisputeRequest {
   notes?: string;
   sanction?: string;
 }
+
+export interface DuelDispute {
+  id: string;
+  challenger_username: string;
+  challenger_avatar?: string;
+  challenged_username: string;
+  challenged_avatar?: string;
+  game_name: string;
+  status: string;
+  score_challenger: number;
+  score_challenged: number;
+  created_at: string;
+  admin_notes?: string;
+}
+
+export interface MatchDispute {
+  id: string;
+  tournament_id: string;
+  tournament_name: string;
+  tournament_slug: string;
+  round_number: number;
+  player1?: { user_id: string; username: string };
+  player2?: { user_id: string; username: string };
+  player1_wins: number;
+  player2_wins: number;
+  draws: number;
+  status: string;
+  disputed_at?: string;
+  dispute_notes?: string;
+}
+
+export interface DuelDisputeFilters {
+  page?: number;
+  per_page?: number;
+}
+
+export interface MatchDisputeFilters {
+  page?: number;
+  per_page?: number;
+}
+
+export interface AdminResolveDuelRequest {
+  winner_id: string | null;
+  admin_notes: string;
+}
+
+export interface AdminResolveMatchRequest {
+  player1_wins: number;
+  player2_wins: number;
+  draws: number;
+  notes: string;
+}
