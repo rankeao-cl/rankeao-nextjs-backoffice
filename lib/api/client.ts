@@ -318,3 +318,47 @@ export function extractRecord(payload: unknown): Record<string, unknown> {
   const root = unwrapData(payload);
   return isRecord(root) ? root : {};
 }
+
+// ---------------------------------------------------------------------------
+// Internal fetch — Gateway root (sin /api/v1) para llamadas internas
+// ---------------------------------------------------------------------------
+
+const GATEWAY_ROOT = BASE_URL.replace(/\/api\/v1$/, "");
+
+export async function internalFetch<T = unknown>(
+  path: string,
+  options: Omit<FetchOptions, "skipAuth"> = {}
+): Promise<T> {
+  let url = `${GATEWAY_ROOT}${path}`;
+  if (options.params) {
+    const sp = new URLSearchParams();
+    for (const [k, v] of Object.entries(options.params)) {
+      if (v !== undefined && v !== null) sp.set(k, String(v));
+    }
+    const qs = sp.toString();
+    if (qs) url += `?${qs}`;
+  }
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+  let body: string | undefined;
+  if (options.body !== undefined) body = JSON.stringify(options.body);
+
+  const res = await fetch(url, {
+    method: options.method ?? "GET",
+    headers,
+    body,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new ApiError(
+      extractErrorMessage(err, res.status),
+      res.status,
+      path,
+      extractErrorCode(err)
+    );
+  }
+
+  return res.json() as Promise<T>;
+}
