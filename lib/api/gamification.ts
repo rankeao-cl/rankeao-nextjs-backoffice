@@ -1,4 +1,4 @@
-import { apiFetch, extractList, extractRecord } from "./client";
+import { apiFetch, extractList, extractListMeta, extractRecord } from "./client";
 import type {
   Badge,
   CreateBadgeRequest,
@@ -14,6 +14,8 @@ import type {
   XPEvent,
   CreateXPEventRequest,
   UpdateXPEventRequest,
+  XPLog,
+  XPLogsParams,
   Season,
   CreateSeasonRequest,
   GamificationStats,
@@ -178,4 +180,24 @@ export async function closeSeason(seasonId: string, confirm: boolean = true) {
     method: "POST",
     body: { confirm },
   });
+}
+
+// ---------------------------------------------------------------------------
+// XP Logs (Admin)
+// ---------------------------------------------------------------------------
+
+export async function listXPLogs(
+  params?: XPLogsParams
+): Promise<{ logs: XPLog[]; total: number; page: number; total_pages: number }> {
+  const payload = await apiFetch<unknown>("/gamification/admin/xp-logs", {
+    params: params as Record<string, string | number | boolean | undefined>,
+  });
+  const logs = extractList<XPLog>(payload, ["logs"]);
+  const meta = extractListMeta(payload, logs.length, params?.per_page ?? 50);
+  return {
+    logs,
+    total: meta.total,
+    page: meta.page,
+    total_pages: meta.total_pages,
+  };
 }

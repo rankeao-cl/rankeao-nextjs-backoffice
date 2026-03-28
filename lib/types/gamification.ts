@@ -161,6 +161,29 @@ export interface CreateSeasonRequest {
   ends_at: string;
 }
 
+export interface XPLog {
+  id: number;
+  user_id: number;
+  username: string;
+  event_id: number;
+  event_key: string;
+  xp_earned: number;
+  xp_total: number;
+  source_type?: string;
+  source_id?: number;
+  created_at: string;
+}
+
+export interface XPLogsParams {
+  user_id?: number;
+  event_key?: string;
+  source_type?: string;
+  date_from?: string;
+  date_to?: string;
+  page?: number;
+  per_page?: number;
+}
+
 export interface GamificationStats {
   total_xp_granted?: number;
   total_badges_earned?: number;
