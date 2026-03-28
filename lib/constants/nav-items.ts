@@ -21,6 +21,7 @@ import {
   Settings,
   BarChart3,
   ClipboardCheck,
+  ScrollText,
   type LucideIcon,
 } from "lucide-react";
 
@@ -55,6 +56,7 @@ export const NAV_ITEMS: NavEntry[] = [
   { label: "Temporadas", href: "/admin/gamification/seasons", icon: Trophy },
   { label: "Eventos XP", href: "/admin/gamification/xp-events", icon: Zap },
   { label: "Niveles", href: "/admin/gamification/levels", icon: Layers },
+  { label: "Logs XP", href: "/admin/gamification/logs", icon: ScrollText },
   { type: "divider", label: "Marketplace" },
   { label: "Disputas", href: "/admin/disputes", icon: Scale },
   { label: "Configuración", href: "/admin/marketplace/config", icon: Settings },

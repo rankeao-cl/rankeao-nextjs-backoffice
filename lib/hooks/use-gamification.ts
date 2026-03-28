@@ -13,6 +13,7 @@ import type {
   UpdateTitleRequest,
   CreateXPEventRequest,
   UpdateXPEventRequest,
+  XPLogsParams,
   CreateSeasonRequest,
 } from "@/lib/types/gamification";
 
@@ -247,5 +248,14 @@ export function useCloseSeason() {
   return useMutation({
     mutationFn: (seasonId: string) => gamificationApi.closeSeason(seasonId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["seasons"] }),
+  });
+}
+
+// ── XP Logs ──
+
+export function useXPLogs(params?: XPLogsParams) {
+  return useQuery({
+    queryKey: ["xp-logs", params],
+    queryFn: () => gamificationApi.listXPLogs(params),
   });
 }
