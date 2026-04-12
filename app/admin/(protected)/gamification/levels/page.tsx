@@ -1,19 +1,10 @@
 "use client";
 
-import {
-  useState
-} from "react";
-import {
-  Card,
-  Description,
-  Fieldset,
-  Form,
-  Label,
-  TextArea,
-  TextField,
-  Button,
-} from "@heroui/react";
-import { toast } from "@heroui/react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Layers } from "lucide-react";
 import { useBatchUpdateLevels } from "@/lib/hooks/use-gamification";
 
@@ -40,7 +31,7 @@ export default function LevelsPage() {
     try {
       parsed = JSON.parse(payloadText);
     } catch {
-      toast.danger("El payload no es JSON valido");
+      toast.error("El payload no es JSON valido");
       return;
     }
 
@@ -51,7 +42,7 @@ export default function LevelsPage() {
         toast.success("Niveles actualizados correctamente");
       },
       onError: (err) => {
-        toast.danger(err instanceof Error ? err.message : "Error");
+        toast.error(err instanceof Error ? err.message : "Error");
       },
     });
   };
@@ -59,48 +50,51 @@ export default function LevelsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
           Levels
         </h1>
-        <p className="text-sm text-[var(--muted)] mt-1">
+        <p className="text-sm text-[var(--muted-foreground)] mt-1">
           Reemplaza en bloque la configuracion de niveles de gamificacion.
         </p>
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-5">
-          <Form className="space-y-4">
-            <Fieldset className="space-y-4">
-              <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-5">
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleBatchUpdate(); }}>
+            <div>
+              <div className="flex items-center gap-2 font-semibold text-[var(--foreground)] mb-1">
                 <Layers className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                 Batch update payload
-              </Fieldset.Legend>
-              <Description className="text-xs text-[var(--muted)]">
-                Puedes enviar un array de niveles (se envuelve como <code>{'{"levels": [...]}'} </code>) o un objeto JSON completo.
-              </Description>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)] mb-3">
+                Puedes enviar un array de niveles (se envuelve como <code>{'{"levels": [...]}'}</code>) o un objeto JSON completo.
+              </p>
+            </div>
 
-              <TextField className="space-y-1 flex flex-col">
-                <Label className="text-xs text-[var(--muted)]">JSON de niveles</Label>
-                <TextArea
-                  value={payloadText}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPayloadText(e.target.value)}
-                  rows={16}
-                  className="font-mono text-xs"
-                />
-              </TextField>
+            <div className="space-y-1 flex flex-col">
+              <Label className="text-xs text-[var(--muted-foreground)]">JSON de niveles</Label>
+              <Textarea
+                value={payloadText}
+                onChange={(e) => setPayloadText(e.target.value)}
+                rows={16}
+                className="font-mono text-xs"
+              />
+            </div>
 
-              <Fieldset.Actions className="flex gap-2 pt-1">
-                <Button type="button" onPress={handleBatchUpdate} isPending={batchUpdate.isPending}>
-                  Aplicar cambios
-                </Button>
-                <Button type="button" variant="secondary" onPress={() => setPayloadText(EXAMPLE_LEVELS)}>
-                  Restaurar ejemplo
-                </Button>
-              </Fieldset.Actions>
-            </Fieldset>
-          </Form>
-        </Card.Content>
-      </Card>
+            <div className="flex gap-2 pt-1">
+              <Button type="submit" disabled={batchUpdate.isPending}>
+                {batchUpdate.isPending && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                )}
+                Aplicar cambios
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setPayloadText(EXAMPLE_LEVELS)}>
+                Restaurar ejemplo
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

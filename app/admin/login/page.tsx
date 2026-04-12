@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import {
-  TextField, Label, InputGroup, InputGroupPrefix, InputGroupSuffix, Input,
-  Button, Card, Form,
-} from "@heroui/react";
+import { motion } from "framer-motion";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { login } from "@/lib/api/auth";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-import { toast } from "@heroui/react";
+import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import LoginBackground from "./LoginBackground";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.danger("Ingresa email y contraseña");
+      toast.error("Ingresa email y contraseña");
       return;
     }
     setIsLoading(true);
@@ -36,115 +36,97 @@ export default function LoginPage() {
       router.push(redirect);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al iniciar sesión";
-      toast.danger(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const groupClasses =
-    "flex items-center gap-2 border border-[var(--border)] bg-[var(--field-background)] rounded-lg px-3 py-2.5 focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)]/20 hover:border-[var(--muted)] transition-all duration-150";
-
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 bg-[var(--background)] overflow-hidden">
-      {/* Ambient background shapes */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div
-          className="absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full blur-[140px] opacity-30"
-          style={{ background: "var(--accent)" }}
-        />
-        <div
-          className="absolute -bottom-32 -right-32 h-[400px] w-[400px] rounded-full blur-[120px] opacity-20"
-          style={{ background: "var(--brand)" }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full blur-[200px] opacity-[0.07]"
-          style={{ background: "var(--accent)" }}
-        />
-      </div>
+    <div className="login-scene">
+      <LoginBackground />
 
-      <div className="relative z-10 w-full max-w-[400px]">
-        {/* Logo + branding above card */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-brand mb-5">
-            <Image src="/logo.png" alt="Rankeao" fill sizes="64px" className="object-contain p-2" priority />
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12">
+        <motion.div
+          className="w-full max-w-[400px] space-y-8"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm">
+              <Image src="/logo.png" alt="Rankeao" fill sizes="56px" className="object-contain p-2" priority />
+            </div>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-white tracking-tight">
+                Panel Administración
+              </h1>
+              <p className="text-sm text-white/50 mt-1.5">
+                Acceso exclusivo para administradores
+              </p>
+            </div>
           </div>
-          <h1 className="font-[var(--font-heading)] text-3xl font-bold text-gradient-brand tracking-tight">
-            Rankeao
-          </h1>
-          <p className="text-sm text-[var(--muted)] mt-1 tracking-wide">
-            Panel de administración
-          </p>
-        </div>
 
-        <Card className="bg-[var(--surface)]/80 border border-[var(--border)] backdrop-blur-2xl shadow-brand">
-          <Card.Content className="p-7">
-            <Form onSubmit={handleSubmit} className="space-y-5">
-              <TextField name="email" className="space-y-1.5 flex flex-col">
-                <Label className="text-[var(--muted)] text-xs font-medium tracking-wide uppercase">Email</Label>
-                <InputGroup className={groupClasses}>
-                  <InputGroupPrefix>
-                    <Mail className="h-4 w-4 text-[var(--muted)] pointer-events-none" aria-hidden="true" />
-                  </InputGroupPrefix>
+          <div className="login-card p-6 sm:p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5 flex flex-col">
+                <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
+                  Email
+                </label>
+                <div className="flex items-center gap-2.5 border border-white/8 bg-white/6 rounded-xl px-3 py-0.5 focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/10 transition-all">
+                  <Mail className="h-4 w-4 pointer-events-none shrink-0 text-white/40" />
                   <Input
                     type="email"
                     placeholder="admin@rankeao.cl"
                     value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setEmail(e.target.value)}
-                    className="w-full bg-transparent text-[var(--field-foreground)] placeholder:text-[var(--field-placeholder)] focus:outline-none"
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-transparent border-0 ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0 h-10 text-sm text-white placeholder:text-white/40"
                     required
                   />
-                </InputGroup>
-              </TextField>
+                </div>
+              </div>
 
-              <TextField name="password" className="space-y-1.5 flex flex-col">
-                <Label className="text-[var(--muted)] text-xs font-medium tracking-wide uppercase">Contraseña</Label>
-                <InputGroup className={groupClasses}>
-                  <InputGroupPrefix>
-                    <Lock className="h-4 w-4 text-[var(--muted)] pointer-events-none" aria-hidden="true" />
-                  </InputGroupPrefix>
+              <div className="space-y-1.5 flex flex-col">
+                <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
+                  Contraseña
+                </label>
+                <div className="flex items-center gap-2.5 border border-white/8 bg-white/6 rounded-xl px-3 py-0.5 focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/10 transition-all">
+                  <Lock className="h-4 w-4 pointer-events-none shrink-0 text-white/40" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPassword(e.target.value)}
-                    className="w-full bg-transparent text-[var(--field-foreground)] placeholder:text-[var(--field-placeholder)] focus:outline-none"
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-transparent border-0 ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0 h-10 text-sm text-white placeholder:text-white/40"
                     required
                   />
-                  <InputGroupSuffix>
-                    <Button
-                      type="button"
-                      isIconOnly
-                      size="sm"
-                      variant="secondary"
-                      onPress={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                      className="text-[var(--muted)] hover:text-[var(--foreground)]"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
-                    </Button>
-                  </InputGroupSuffix>
-                </InputGroup>
-              </TextField>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    className="text-white/40 hover:text-white transition-colors shrink-0"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
 
               <Button
                 type="submit"
-                className="w-full font-semibold py-2.5 rounded-lg mt-2"
-                style={{
-                  background: "linear-gradient(135deg, var(--accent), var(--brand))",
-                  color: "var(--accent-foreground)",
-                }}
-                isPending={isLoading}
+                className="w-full text-white font-semibold py-2.5 rounded-xl mt-2 text-sm transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30"
+                style={{ background: "linear-gradient(135deg, var(--c-navy-500), var(--c-indigo))" }}
+                disabled={isLoading}
               >
-                Iniciar Sesión
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                {isLoading ? "Iniciando..." : "Iniciar Sesión"}
               </Button>
-            </Form>
+            </form>
 
-            <p className="mt-6 text-center text-[11px] text-[var(--field-placeholder)] tracking-wide">
-              Panel exclusivo para administradores
+            <p className="text-center text-[11px] text-white/30 tracking-wide">
+              Panel exclusivo para administradores de Rankeao.cl
             </p>
-          </Card.Content>
-        </Card>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

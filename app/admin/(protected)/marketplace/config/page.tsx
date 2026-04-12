@@ -1,14 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Button,
-  Card,
-  Chip,
-  Input,
-  Skeleton,
-  toast,
-} from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Save, Settings } from "lucide-react";
 import {
   useMarketplaceConfig,
@@ -56,7 +52,7 @@ export default function MarketplaceConfigPage() {
           setEditedValues({});
         },
         onError: (error: unknown) => {
-          toast.danger(getErrorMessage(error));
+          toast.error(getErrorMessage(error));
         },
       }
     );
@@ -68,26 +64,26 @@ export default function MarketplaceConfigPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Configuracion Marketplace
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">
             Parametros clave-valor del marketplace
           </p>
         </div>
 
         {dirtyCount > 0 && (
           <div className="flex items-center gap-2">
-            <Chip size="sm" variant="soft" color="default">
+            <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
               {dirtyCount} {dirtyCount === 1 ? "cambio" : "cambios"}
-            </Chip>
-            <Button size="sm" variant="secondary" onPress={handleReset}>
+            </span>
+            <Button size="sm" variant="ghost" onClick={handleReset}>
               Descartar
             </Button>
             <Button
               size="sm"
-              onPress={handleSave}
-              isPending={updateConfig.isPending}
+              onClick={handleSave}
+              disabled={updateConfig.isPending}
             >
               <Save className="h-4 w-4 mr-1" aria-hidden="true" />
               Guardar cambios
@@ -96,10 +92,10 @@ export default function MarketplaceConfigPage() {
         )}
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-5">
           {isLoading ? (
-            <div className="space-y-3 p-5">
+            <div className="space-y-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <Skeleton className="h-4 w-40 rounded" />
@@ -109,20 +105,20 @@ export default function MarketplaceConfigPage() {
               ))}
             </div>
           ) : entries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-[var(--muted)]">
+            <div className="flex flex-col items-center justify-center py-16 text-[var(--muted-foreground)]">
               <Settings className="h-10 w-10 mb-3 opacity-40" aria-hidden="true" />
               <p className="text-sm">No hay configuraciones disponibles</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--muted)]">
-                    <th className="px-4 py-3 font-medium">CLAVE</th>
-                    <th className="px-4 py-3 font-medium">VALOR</th>
-                    <th className="px-4 py-3 font-medium">TIPO</th>
-                    <th className="px-4 py-3 font-medium hidden md:table-cell">DESCRIPCION</th>
-                    <th className="px-4 py-3 font-medium hidden lg:table-cell">ACTUALIZADO</th>
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">CLAVE</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">VALOR</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">TIPO</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)] hidden md:table-cell">DESCRIPCION</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)] hidden lg:table-cell">ACTUALIZADO</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -143,29 +139,23 @@ export default function MarketplaceConfigPage() {
                         <td className="px-4 py-2.5 min-w-[200px]">
                           <Input
                             value={getCurrentValue(entry)}
-                            onChange={(
-                              e: React.ChangeEvent<
-                                HTMLInputElement | HTMLTextAreaElement
-                              >
-                            ) => handleChange(entry, e.target.value)}
+                            onChange={(e) => handleChange(entry, e.target.value)}
                             className={isDirty ? "ring-1 ring-blue-500/40" : ""}
                           />
                         </td>
                         <td className="px-4 py-2.5">
-                          <Chip size="sm" variant="soft" color="default">
+                          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                             {entry.value_type}
-                          </Chip>
+                          </span>
                         </td>
                         <td className="px-4 py-2.5 hidden md:table-cell">
-                          <span className="text-xs text-[var(--muted)]">
+                          <span className="text-xs text-[var(--muted-foreground)]">
                             {entry.description || "-"}
                           </span>
                         </td>
                         <td className="px-4 py-2.5 hidden lg:table-cell">
-                          <span className="text-xs text-[var(--muted)]">
-                            {new Date(entry.updated_at).toLocaleDateString(
-                              "es-CL"
-                            )}
+                          <span className="text-xs text-[var(--muted-foreground)]">
+                            {new Date(entry.updated_at).toLocaleDateString("es-CL")}
                           </span>
                         </td>
                       </tr>
@@ -175,8 +165,8 @@ export default function MarketplaceConfigPage() {
               </table>
             </div>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

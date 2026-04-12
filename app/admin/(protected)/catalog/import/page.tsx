@@ -1,19 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  Chip,
-  Description,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  TextArea,
-  TextField,
-} from "@heroui/react";
-import { toast } from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Upload, Layers, BookOpen, Scale } from "lucide-react";
 import { useGames, useBulkImportSets, useBulkImportCards, useBulkImportLegality } from "@/lib/hooks/use-catalog";
 import type { BulkImportSetsRequest, BulkImportCardsRequest, BulkImportLegalityRequest, BulkImportResult } from "@/lib/types/catalog";
@@ -31,8 +24,8 @@ function GameSelect({
   isLoading: boolean;
 }) {
   return (
-    <TextField className="space-y-1 flex flex-col">
-      <Label className="text-xs text-[var(--muted)]">Juego</Label>
+    <div className="space-y-1 flex flex-col">
+      <Label className="text-xs text-[var(--muted-foreground)]">Juego</Label>
       <select
         className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:ring-2 focus:ring-[var(--ring)]"
         value={value}
@@ -46,23 +39,23 @@ function GameSelect({
           </option>
         ))}
       </select>
-    </TextField>
+    </div>
   );
 }
 
-function ResultChips({ result }: { result: BulkImportResult | null }) {
+function ResultBadges({ result }: { result: BulkImportResult | null }) {
   if (!result) return null;
   return (
     <div className="flex gap-2 pt-2">
-      <Chip size="sm" color="default" variant="soft">
+      <Badge variant="default">
         Creados: {result.created}
-      </Chip>
-      <Chip size="sm" color="default" variant="soft">
+      </Badge>
+      <Badge variant="default">
         Actualizados: {result.updated}
-      </Chip>
-      <Chip size="sm" color="default" variant="soft">
+      </Badge>
+      <Badge variant="default">
         Errores: {result.errors}
-      </Chip>
+      </Badge>
     </div>
   );
 }
@@ -96,7 +89,7 @@ export default function BulkImportPage() {
 
   const handleImportSets = () => {
     if (!setsGameId) {
-      toast.danger("Selecciona un juego");
+      toast.error("Selecciona un juego");
       return;
     }
     let parsed: { code: string; name: string }[];
@@ -104,7 +97,7 @@ export default function BulkImportPage() {
       parsed = JSON.parse(setsJson);
       if (!Array.isArray(parsed)) throw new Error("Debe ser un array");
     } catch (err) {
-      toast.danger("JSON invalido: " + getErrorMessage(err, "formato incorrecto"));
+      toast.error("JSON invalido: " + getErrorMessage(err, "formato incorrecto"));
       return;
     }
 
@@ -120,14 +113,14 @@ export default function BulkImportPage() {
         setSetsResult(result);
       },
       onError: (err: unknown) => {
-        toast.danger(getErrorMessage(err, "Error al importar sets"));
+        toast.error(getErrorMessage(err, "Error al importar sets"));
       },
     });
   };
 
   const handleImportCards = () => {
     if (!cardsGameId) {
-      toast.danger("Selecciona un juego");
+      toast.error("Selecciona un juego");
       return;
     }
     let parsed: BulkImportCardsRequest["cards"];
@@ -135,7 +128,7 @@ export default function BulkImportPage() {
       parsed = JSON.parse(cardsJson);
       if (!Array.isArray(parsed)) throw new Error("Debe ser un array");
     } catch (err) {
-      toast.danger("JSON invalido: " + getErrorMessage(err, "formato incorrecto"));
+      toast.error("JSON invalido: " + getErrorMessage(err, "formato incorrecto"));
       return;
     }
 
@@ -151,18 +144,18 @@ export default function BulkImportPage() {
         setCardsResult(result);
       },
       onError: (err: unknown) => {
-        toast.danger(getErrorMessage(err, "Error al importar cards"));
+        toast.error(getErrorMessage(err, "Error al importar cards"));
       },
     });
   };
 
   const handleImportLegality = () => {
     if (!legalityGameId) {
-      toast.danger("Selecciona un juego");
+      toast.error("Selecciona un juego");
       return;
     }
     if (!legalityFormatSlug) {
-      toast.danger("Ingresa el format slug");
+      toast.error("Ingresa el format slug");
       return;
     }
     let parsed: BulkImportLegalityRequest["entries"];
@@ -170,7 +163,7 @@ export default function BulkImportPage() {
       parsed = JSON.parse(legalityJson);
       if (!Array.isArray(parsed)) throw new Error("Debe ser un array");
     } catch (err) {
-      toast.danger("JSON invalido: " + getErrorMessage(err, "formato incorrecto"));
+      toast.error("JSON invalido: " + getErrorMessage(err, "formato incorrecto"));
       return;
     }
 
@@ -186,7 +179,7 @@ export default function BulkImportPage() {
         setLegalityResult(result);
       },
       onError: (err: unknown) => {
-        toast.danger(getErrorMessage(err, "Error al importar legalidad"));
+        toast.error(getErrorMessage(err, "Error al importar legalidad"));
       },
     });
   };
@@ -194,27 +187,27 @@ export default function BulkImportPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
           Importacion Masiva
         </h1>
-        <p className="text-sm text-[var(--muted)] mt-1">
+        <p className="text-sm text-[var(--muted-foreground)] mt-1">
           Importa sets, cards y legalidad en lote mediante JSON.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── Import Sets ── */}
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="p-5">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleImportSets(); }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
                   <Layers className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Importar Sets
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Importa sets masivamente. El JSON debe ser un array de objetos con code y name.
-                </Description>
+                </p>
 
                 <GameSelect
                   value={setsGameId}
@@ -223,50 +216,53 @@ export default function BulkImportPage() {
                   isLoading={gamesLoading}
                 />
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Fuente (opcional)</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Fuente (opcional)</Label>
                   <Input
                     placeholder="ej: scryfall, tcgplayer"
                     value={setsSource}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSetsSource(e.target.value)}
+                    onChange={(e) => setSetsSource(e.target.value)}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Sets JSON</Label>
-                  <TextArea
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Sets JSON</Label>
+                  <Textarea
                     placeholder={'[{"code": "SET1", "name": "Set Uno"}, {"code": "SET2", "name": "Set Dos"}]'}
                     value={setsJson}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSetsJson(e.target.value)}
+                    onChange={(e) => setSetsJson(e.target.value)}
                     rows={6}
                   />
-                </TextField>
+                </div>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleImportSets} isPending={bulkImportSets.isPending}>
+                <div className="pt-1">
+                  <Button type="submit" disabled={bulkImportSets.isPending}>
+                    {bulkImportSets.isPending && (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    )}
                     <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Sets
                   </Button>
-                </Fieldset.Actions>
+                </div>
 
-                <ResultChips result={setsResult} />
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+                <ResultBadges result={setsResult} />
+              </div>
+            </form>
+          </div>
+        </div>
 
         {/* ── Import Cards ── */}
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="p-5">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleImportCards(); }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
                   <BookOpen className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Importar Cards
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Importa cards con sus printings. Cada card debe tener al menos un printing con set_code y collector_number.
-                </Description>
+                </p>
 
                 <GameSelect
                   value={cardsGameId}
@@ -275,52 +271,55 @@ export default function BulkImportPage() {
                   isLoading={gamesLoading}
                 />
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Fuente (opcional)</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Fuente (opcional)</Label>
                   <Input
                     placeholder="ej: scryfall, tcgplayer"
                     value={cardsSource}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCardsSource(e.target.value)}
+                    onChange={(e) => setCardsSource(e.target.value)}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Cards JSON</Label>
-                  <TextArea
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Cards JSON</Label>
+                  <Textarea
                     placeholder={
                       '[{\n  "name": "Lightning Bolt",\n  "type_line": "Instant",\n  "oracle_text": "Deal 3 damage...",\n  "printings": [{\n    "set_code": "M21",\n    "collector_number": "152",\n    "rarity": "uncommon",\n    "image_url": "https://...",\n    "artist": "Christopher Moeller"\n  }]\n}]'
                     }
                     value={cardsJson}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCardsJson(e.target.value)}
+                    onChange={(e) => setCardsJson(e.target.value)}
                     rows={10}
                   />
-                </TextField>
+                </div>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleImportCards} isPending={bulkImportCards.isPending}>
+                <div className="pt-1">
+                  <Button type="submit" disabled={bulkImportCards.isPending}>
+                    {bulkImportCards.isPending && (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    )}
                     <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Cards
                   </Button>
-                </Fieldset.Actions>
+                </div>
 
-                <ResultChips result={cardsResult} />
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+                <ResultBadges result={cardsResult} />
+              </div>
+            </form>
+          </div>
+        </div>
 
         {/* ── Import Legality ── */}
-        <Card className="bg-[var(--surface)] border border-[var(--border)] lg:col-span-2">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white lg:col-span-2">
+          <div className="p-5">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleImportLegality(); }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
                   <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Importar Legalidad
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Actualiza la legalidad de cards para un formato especifico. Valores posibles: LEGAL, BANNED, RESTRICTED, NOT_LEGAL.
-                </Description>
+                </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <GameSelect
@@ -330,38 +329,41 @@ export default function BulkImportPage() {
                     isLoading={gamesLoading}
                   />
 
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Format Slug</Label>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Format Slug</Label>
                     <Input
                       placeholder="ej: standard, modern, pioneer"
                       value={legalityFormatSlug}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setLegalityFormatSlug(e.target.value)}
+                      onChange={(e) => setLegalityFormatSlug(e.target.value)}
                     />
-                  </TextField>
+                  </div>
                 </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Entries JSON</Label>
-                  <TextArea
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Entries JSON</Label>
+                  <Textarea
                     placeholder={'[{"card_name": "Lightning Bolt", "legality": "LEGAL"}, {"card_name": "Black Lotus", "legality": "BANNED"}]'}
                     value={legalityJson}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setLegalityJson(e.target.value)}
+                    onChange={(e) => setLegalityJson(e.target.value)}
                     rows={6}
                   />
-                </TextField>
+                </div>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleImportLegality} isPending={bulkImportLegality.isPending}>
+                <div className="pt-1">
+                  <Button type="submit" disabled={bulkImportLegality.isPending}>
+                    {bulkImportLegality.isPending && (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    )}
                     <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Legalidad
                   </Button>
-                </Fieldset.Actions>
+                </div>
 
-                <ResultChips result={legalityResult} />
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+                <ResultBadges result={legalityResult} />
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

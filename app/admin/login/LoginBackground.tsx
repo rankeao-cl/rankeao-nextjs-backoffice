@@ -1,0 +1,73 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useState } from "react";
+
+const BACKGROUNDS = [
+  "/login-bg-1.webp",
+  "/login-bg-2.webp",
+  "/login-bg-3.webp",
+  "/login-bg-4.webp",
+  "/login-bg-5.webp",
+];
+
+const EMBER_COUNT = 14;
+
+function generateEmbers() {
+  return Array.from({ length: EMBER_COUNT }, (_, i) => ({
+    id: i,
+    size: 2 + Math.random() * 4,
+    left: 10 + Math.random() * 80,
+    delay: Math.random() * 12,
+    duration: 5 + Math.random() * 8,
+    drift: -40 + Math.random() * 80,
+    glow: 0.4 + Math.random() * 0.6,
+  }));
+}
+
+export default function LoginBackground() {
+  const [imgError, setImgError] = useState(false);
+  const [bg, setBg] = useState<string | null>(null);
+  const [embers, setEmbers] = useState<ReturnType<typeof generateEmbers>>([]);
+
+  useEffect(() => {
+    setBg(BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]);
+    setEmbers(generateEmbers());
+  }, []);
+
+  return (
+    <div className="login-bg" aria-hidden="true">
+      <div className="login-bg__image">
+        {bg && !imgError && (
+          <Image
+            src={bg}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            quality={100}
+            unoptimized
+            className="object-cover"
+            onError={() => setImgError(true)}
+          />
+        )}
+      </div>
+      <div className="login-bg__vignette" />
+      {embers.map((e) => (
+        <span
+          key={e.id}
+          className="login-ember"
+          style={{
+            width: e.size,
+            height: e.size,
+            left: `${e.left}%`,
+            animationDelay: `${e.delay}s`,
+            animationDuration: `${e.duration}s`,
+            "--drift": `${e.drift}px`,
+            "--glow": e.glow,
+          } as React.CSSProperties}
+        />
+      ))}
+    </div>
+  );
+}

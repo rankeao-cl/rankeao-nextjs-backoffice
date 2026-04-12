@@ -1,22 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  Chip,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  Modal,
-  Skeleton,
-  Table,
-  TextArea,
-  TextField,
-} from "@heroui/react";
-import { toast } from "@heroui/react";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Edit, Gift, Trash2 } from "lucide-react";
 import type { Title, CreateTitleRequest, UpdateTitleRequest, GrantRequest } from "@/lib/types/gamification";
 import {
@@ -58,16 +49,16 @@ export default function TitlesPage() {
   const { data: titles = [], isLoading: loading } = useTitles();
   const [search, setSearch] = useState("");
 
-  const createModal = useDisclosure();
+  const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Title | null>(null);
   const [formData, setFormData] = useState<TitleForm>(INITIAL_FORM);
 
-  const grantModal = useDisclosure();
+  const [grantOpen, setGrantOpen] = useState(false);
   const [grantTarget, setGrantTarget] = useState<Title | null>(null);
   const [grantUserId, setGrantUserId] = useState("");
   const [grantReason, setGrantReason] = useState("");
 
-  const revokeModal = useDisclosure();
+  const [revokeOpen, setRevokeOpen] = useState(false);
   const [revokeTarget, setRevokeTarget] = useState<Title | null>(null);
   const [revokeUserId, setRevokeUserId] = useState("");
   const [revokeReason, setRevokeReason] = useState("");
@@ -88,7 +79,7 @@ export default function TitlesPage() {
   const openCreate = () => {
     setEditTarget(null);
     setFormData(INITIAL_FORM);
-    createModal.onOpen();
+    setCreateOpen(true);
   };
 
   const openEdit = (title: Title) => {
@@ -100,7 +91,7 @@ export default function TitlesPage() {
       season_id: String(title.season_id || ""),
       is_active: Boolean(title.is_active ?? true),
     });
-    createModal.onOpen();
+    setCreateOpen(true);
   };
 
   const handleSave = () => {
@@ -116,16 +107,16 @@ export default function TitlesPage() {
         {
           onSuccess: () => {
             toast.success("Titulo actualizado");
-            createModal.onClose();
+            setCreateOpen(false);
           },
           onError: (err) => {
-            toast.danger(getErrorMessage(err));
+            toast.error(getErrorMessage(err));
           },
         },
       );
     } else {
       if (!formData.slug || !formData.name) {
-        toast.danger("Slug y nombre son requeridos");
+        toast.error("Slug y nombre son requeridos");
         return;
       }
 
@@ -139,10 +130,10 @@ export default function TitlesPage() {
       createTitle.mutate(data, {
         onSuccess: () => {
           toast.success("Titulo creado");
-          createModal.onClose();
+          setCreateOpen(false);
         },
         onError: (err) => {
-          toast.danger(getErrorMessage(err));
+          toast.error(getErrorMessage(err));
         },
       });
     }
@@ -152,12 +143,12 @@ export default function TitlesPage() {
     setGrantTarget(title);
     setGrantUserId("");
     setGrantReason("");
-    grantModal.onOpen();
+    setGrantOpen(true);
   };
 
   const handleGrant = () => {
     if (!grantTarget?.id || !grantUserId) {
-      toast.danger("User ID es requerido");
+      toast.error("User ID es requerido");
       return;
     }
 
@@ -171,10 +162,10 @@ export default function TitlesPage() {
       {
         onSuccess: () => {
           toast.success("Titulo otorgado");
-          grantModal.onClose();
+          setGrantOpen(false);
         },
         onError: (err) => {
-          toast.danger(getErrorMessage(err));
+          toast.error(getErrorMessage(err));
         },
       },
     );
@@ -184,12 +175,12 @@ export default function TitlesPage() {
     setRevokeTarget(title);
     setRevokeUserId("");
     setRevokeReason("");
-    revokeModal.onOpen();
+    setRevokeOpen(true);
   };
 
   const handleRevoke = () => {
     if (!revokeTarget?.id || !revokeUserId) {
-      toast.danger("User ID es requerido");
+      toast.error("User ID es requerido");
       return;
     }
 
@@ -203,10 +194,10 @@ export default function TitlesPage() {
       {
         onSuccess: () => {
           toast.success("Titulo revocado");
-          revokeModal.onClose();
+          setRevokeOpen(false);
         },
         onError: (err) => {
-          toast.danger(getErrorMessage(err));
+          toast.error(getErrorMessage(err));
         },
       },
     );
@@ -216,106 +207,37 @@ export default function TitlesPage() {
   const grantLoading = grantTitle.isPending;
   const revokeLoading = revokeTitle.isPending;
 
-  const renderCell = (title: Title, columnKey: string) => {
-    switch (columnKey) {
-      case "name":
-        return (
-          <div className="flex items-center gap-3">
-            <div
-              className="h-4 w-4 shrink-0 rounded-full border border-[var(--border)]"
-              style={{ backgroundColor: title.color || "#d4d4d8" }}
-            />
-            <span className="font-medium text-[var(--foreground)]">
-              {String(title.name || "-")}
-            </span>
-          </div>
-        );
-      case "slug":
-        return (
-          <code className="text-xs text-[var(--muted)] bg-[var(--surface)] px-2 py-0.5 rounded">
-            {String(title.slug || "-")}
-          </code>
-        );
-      case "seasonal":
-        return (
-          <Chip
-            size="sm"
-            color="default"
-            variant="soft"
-          >
-            {title.is_seasonal ? "Si" : "No"}
-          </Chip>
-        );
-      case "season":
-        return (
-          <span className="text-sm text-[var(--foreground)]">
-            {title.season?.name || "-"}
-          </span>
-        );
-      case "holders":
-        return (
-          <span className="text-sm text-[var(--foreground)]">
-            {title.total_holders ?? 0}
-          </span>
-        );
-      case "created_at":
-        return (
-          <span className="text-xs text-[var(--muted)]">
-            {title.created_at
-              ? new Date(title.created_at).toLocaleDateString("es-CL")
-              : "-"}
-          </span>
-        );
-      case "actions":
-        return (
-          <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar titulo" onPress={() => openEdit(title)}>
-              <Edit className="h-3.5 w-3.5" aria-hidden="true" />
-            </Button>
-            <Button size="sm" variant="secondary" isIconOnly aria-label="Otorgar titulo" onPress={() => openGrant(title)}>
-              <Gift className="h-3.5 w-3.5" aria-hidden="true" />
-            </Button>
-            <Button size="sm" variant="danger" isIconOnly aria-label="Revocar titulo" onPress={() => openRevoke(title)}>
-              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-            </Button>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Titulos
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">Crear, editar y otorgar titulos a usuarios</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">Crear, editar y otorgar titulos a usuarios</p>
         </div>
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="px-5 py-3">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
-            <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Buscar titulo</Label>
+            <div className="space-y-1 flex flex-col min-w-[200px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Buscar titulo</Label>
               <Input
                 placeholder="Nombre o slug..."
                 value={search}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
-            </TextField>
-            <Button type="button" variant="primary" size="sm" onPress={openCreate}>
+            </div>
+            <Button type="button" size="sm" onClick={openCreate}>
               Nuevo titulo
             </Button>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {loading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -329,214 +251,248 @@ export default function TitlesPage() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Titles table">
-                  <Table.Header columns={TABLE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredTitles.map((title) => (
-                      <Table.Row key={String(title.id || title.slug || "-")}>
-                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
-                          <Table.Cell key={column.key}>
-                            {renderCell(title, column.key)}
-                          </Table.Cell>
-                        ))}
-                      </Table.Row>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border)]">
+                    {TABLE_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
+                        {col.label}
+                      </th>
                     ))}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTitles.map((title) => (
+                    <tr key={String(title.id || title.slug || "-")} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface)]">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="h-4 w-4 shrink-0 rounded-full border border-[var(--border)]"
+                            style={{ backgroundColor: title.color || "#d4d4d8" }}
+                          />
+                          <span className="font-medium text-[var(--foreground)]">
+                            {String(title.name || "-")}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <code className="text-xs text-[var(--muted-foreground)] bg-[var(--surface)] px-2 py-0.5 rounded">
+                          {String(title.slug || "-")}
+                        </code>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="default">
+                          {title.is_seasonal ? "Si" : "No"}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-[var(--foreground)]">
+                          {title.season?.name || "-"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-[var(--foreground)]">
+                          {title.total_holders ?? 0}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs text-[var(--muted-foreground)]">
+                          {title.created_at
+                            ? new Date(title.created_at).toLocaleDateString("es-CL")
+                            : "-"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1">
+                          <Button size="icon" variant="ghost" aria-label="Editar titulo" onClick={() => openEdit(title)}>
+                            <Edit className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Button>
+                          <Button size="icon" variant="ghost" aria-label="Otorgar titulo" onClick={() => openGrant(title)}>
+                            <Gift className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Button>
+                          <Button size="icon" variant="destructive" aria-label="Revocar titulo" onClick={() => openRevoke(title)}>
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
       {/* Create / Edit Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={createModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header><Modal.Heading>{editTarget ? "Editar Titulo" : "Crear Titulo"}</Modal.Heading></Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Nombre</Label>
-                        <Input
-                          value={formData.name}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Slug</Label>
-                        <Input
-                          placeholder="season-1-champion"
-                          value={formData.slug}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                          disabled={Boolean(editTarget)}
-                        />
-                      </TextField>
-                    </div>
+      {createOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+              {editTarget ? "Editar Titulo" : "Crear Titulo"}
+            </h2>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Nombre</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Slug</Label>
+                  <Input
+                    placeholder="season-1-champion"
+                    value={formData.slug}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
+                    disabled={Boolean(editTarget)}
+                  />
+                </div>
+              </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Color hex</Label>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="h-8 w-8 shrink-0 rounded border border-[var(--border)]"
-                            style={{ backgroundColor: formData.color || "#d4d4d8" }}
-                          />
-                          <Input
-                            placeholder="#d4d4d8"
-                            value={formData.color}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
-                          />
-                        </div>
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Season ID</Label>
-                        <Input
-                          placeholder="opcional"
-                          value={formData.season_id}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, season_id: e.target.value }))}
-                        />
-                      </TextField>
-                    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Color hex</Label>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-8 w-8 shrink-0 rounded border border-[var(--border)]"
+                      style={{ backgroundColor: formData.color || "#d4d4d8" }}
+                    />
+                    <Input
+                      placeholder="#d4d4d8"
+                      value={formData.color}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Season ID</Label>
+                  <Input
+                    placeholder="opcional"
+                    value={formData.season_id}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, season_id: e.target.value }))}
+                  />
+                </div>
+              </div>
 
-                    {editTarget && (
-                      <div className="flex items-center gap-3">
-                        <label className="text-xs text-[var(--muted)]">Activo</label>
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.is_active}
-                          onClick={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${formData.is_active ? "bg-[var(--primary)]" : "bg-[var(--default)]"}`}
-                        >
-                          <span
-                            className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${formData.is_active ? "translate-x-5" : "translate-x-0"}`}
-                          />
-                        </button>
-                        <span className="text-xs text-[var(--muted)]">
-                          {formData.is_active ? "Activo" : "Inactivo"}
-                        </span>
-                      </div>
-                    )}
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={createModal.onClose}>
+              {editTarget && (
+                <div className="flex items-center gap-3">
+                  <label className="text-xs text-[var(--muted-foreground)]">Activo</label>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={formData.is_active}
+                    onClick={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${formData.is_active ? "bg-[var(--primary)]" : "bg-[var(--default)]"}`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${formData.is_active ? "translate-x-5" : "translate-x-0"}`}
+                    />
+                  </button>
+                  <span className="text-xs text-[var(--muted-foreground)]">
+                    {formData.is_active ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>
                   Cancelar
                 </Button>
-                <Button
-                  onPress={handleSave}
-                  isPending={formLoading}
-                  variant="primary"
-                >
+                <Button type="submit" disabled={formLoading}>
+                  {formLoading && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                  )}
                   {editTarget ? "Guardar" : "Crear"}
                 </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Grant Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={grantModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && grantModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header><Modal.Heading>Otorgar titulo - {String(grantTarget?.name || "")}</Modal.Heading></Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">User ID</Label>
-                      <Input
-                        value={grantUserId}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setGrantUserId(e.target.value)}
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Motivo</Label>
-                      <TextArea
-                        placeholder="opcional"
-                        value={grantReason}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setGrantReason(e.target.value)}
-                      />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={grantModal.onClose}>
+      {grantOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setGrantOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+              Otorgar titulo - {String(grantTarget?.name || "")}
+            </h2>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleGrant(); }}>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">User ID</Label>
+                <Input
+                  value={grantUserId}
+                  onChange={(e) => setGrantUserId(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Motivo</Label>
+                <Textarea
+                  placeholder="opcional"
+                  value={grantReason}
+                  onChange={(e) => setGrantReason(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="ghost" onClick={() => setGrantOpen(false)}>
                   Cancelar
                 </Button>
-                <Button variant="primary" onPress={handleGrant} isPending={grantLoading}>
+                <Button type="submit" disabled={grantLoading}>
+                  {grantLoading && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                  )}
                   Otorgar
                 </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Revoke Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={revokeModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && revokeModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header><Modal.Heading>Revocar titulo - {String(revokeTarget?.name || "")}</Modal.Heading></Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">User ID</Label>
-                      <Input
-                        value={revokeUserId}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRevokeUserId(e.target.value)}
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Motivo</Label>
-                      <TextArea
-                        placeholder="opcional"
-                        value={revokeReason}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRevokeReason(e.target.value)}
-                      />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={revokeModal.onClose}>
+      {revokeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setRevokeOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+              Revocar titulo - {String(revokeTarget?.name || "")}
+            </h2>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleRevoke(); }}>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">User ID</Label>
+                <Input
+                  value={revokeUserId}
+                  onChange={(e) => setRevokeUserId(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Motivo</Label>
+                <Textarea
+                  placeholder="opcional"
+                  value={revokeReason}
+                  onChange={(e) => setRevokeReason(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="ghost" onClick={() => setRevokeOpen(false)}>
                   Cancelar
                 </Button>
-                <Button variant="danger" onPress={handleRevoke} isPending={revokeLoading}>
+                <Button type="submit" variant="destructive" disabled={revokeLoading}>
+                  {revokeLoading && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-300 border-t-white mr-2" />
+                  )}
                   Revocar
                 </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Skeleton } from "@heroui/react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useGamificationStats } from "@/lib/hooks/use-gamification";
 import { useNotificationStats } from "@/lib/hooks/use-notifications";
 import {
@@ -101,22 +102,22 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
     const st = STAT_STYLES[color];
 
     const content = (
-        <Card className={`h-full ${st.border} border border-[var(--border)] bg-[var(--surface)]`}>
-            <Card.Content className="flex flex-row items-center gap-4 p-4">
+        <div className={`h-full rounded-lg border border-[var(--border)] bg-[var(--surface)] ${st.border}`}>
+            <div className="flex flex-row items-center gap-4 p-4">
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${st.iconBg}`}>
                     <div className={st.iconColor} aria-hidden="true">{icon}</div>
                 </div>
                 <div className="min-w-0 flex-1">
-                    <p className="text-[11px] text-[var(--muted)] uppercase tracking-wider font-medium">{label}</p>
+                    <p className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium">{label}</p>
                     <p className="text-xl font-bold text-[var(--foreground)] font-[var(--font-heading)] tabular-nums">
                         {value}
                     </p>
                 </div>
                 {href && (
-                    <ArrowUpRight className="h-3.5 w-3.5 text-[var(--muted)] shrink-0" aria-hidden="true" />
+                    <ArrowUpRight className="h-3.5 w-3.5 text-[var(--muted-foreground)] shrink-0" aria-hidden="true" />
                 )}
-            </Card.Content>
-        </Card>
+            </div>
+        </div>
     );
 
     return href ? <Link href={href} className="block h-full group">{content}</Link> : content;
@@ -124,15 +125,15 @@ function StatCard({ label, value, icon, color, href }: StatCardProps) {
 
 function SkeletonCard() {
     return (
-        <Card className="h-full border border-[var(--border)] bg-[var(--surface)]">
-            <Card.Content className="flex flex-row items-center gap-4 p-4">
+        <div className="h-full rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+            <div className="flex flex-row items-center gap-4 p-4">
                 <Skeleton className="h-10 w-10 rounded-lg" />
                 <div className="space-y-2 flex-1">
                     <Skeleton className="h-2.5 w-20 rounded" />
                     <Skeleton className="h-5 w-14 rounded" />
                 </div>
-            </Card.Content>
-        </Card>
+            </div>
+        </div>
     );
 }
 
@@ -147,12 +148,12 @@ function QuickLink({ label, href, icon, description }: QuickLinkProps) {
     return (
         <Link href={href} className="block h-full group">
             <div className="h-full flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-colors duration-150 hover:border-[var(--accent)]/30 hover:bg-[var(--surface-secondary)]">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--surface-secondary)] text-[var(--muted)] group-hover:text-[var(--accent)] transition-colors" aria-hidden="true">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--surface-secondary)] text-[var(--muted-foreground)] group-hover:text-[var(--accent)] transition-colors" aria-hidden="true">
                     {icon}
                 </div>
                 <div className="min-w-0">
                     <p className="text-sm font-medium text-[var(--foreground)] truncate">{label}</p>
-                    <p className="text-[11px] text-[var(--muted)] truncate">{description}</p>
+                    <p className="text-[11px] text-[var(--muted-foreground)] truncate">{description}</p>
                 </div>
             </div>
         </Link>
@@ -201,11 +202,11 @@ export default function DashboardPage() {
                     <h1 className="text-2xl font-bold font-[var(--font-heading)] text-[var(--foreground)]">
                         Panel
                     </h1>
-                    <p className="text-sm text-[var(--muted)] mt-0.5">
+                    <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
                         Resumen general
                     </p>
                 </div>
-                <span className="text-[11px] text-[var(--muted)] tabular-nums hidden sm:block">
+                <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums hidden sm:block">
                     {new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" })}
                 </span>
             </div>
@@ -284,11 +285,11 @@ export default function DashboardPage() {
             <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
                 <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-[var(--border)] bg-[var(--surface-secondary)]">
                     <div className="flex items-center gap-2">
-                        <Bug className="h-4 w-4 text-[var(--muted)]" aria-hidden="true" />
+                        <Bug className="h-4 w-4 text-[var(--muted-foreground)]" aria-hidden="true" />
                         <h2 className="text-sm font-semibold text-[var(--foreground)]">Diagnostico API</h2>
                     </div>
                     {lastApiError ? (
-                        <Button size="sm" variant="tertiary" onPress={clearLastApiError}>
+                        <Button size="sm" variant="ghost" onClick={clearLastApiError}>
                             Limpiar
                         </Button>
                     ) : null}
@@ -298,40 +299,40 @@ export default function DashboardPage() {
                     {lastApiError ? (
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                             <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] p-3">
-                                <p className="text-[10px] text-[var(--muted)] uppercase tracking-wider font-medium mb-1">Estado</p>
+                                <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium mb-1">Estado</p>
                                 <p className="text-sm text-[var(--foreground)] font-semibold tabular-nums">{lastApiError.status}</p>
                             </div>
                             <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] p-3">
-                                <p className="text-[10px] text-[var(--muted)] uppercase tracking-wider font-medium mb-1">Codigo</p>
+                                <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium mb-1">Codigo</p>
                                 <p className="text-sm text-[var(--foreground)] font-semibold">{lastApiError.code || "N/A"}</p>
                             </div>
                             <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] p-3">
-                                <p className="text-[10px] text-[var(--muted)] uppercase tracking-wider font-medium mb-1">Metodo</p>
+                                <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium mb-1">Metodo</p>
                                 <p className="text-sm text-[var(--foreground)] font-semibold">{lastApiError.method}</p>
                             </div>
                             <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] p-3">
-                                <p className="text-[10px] text-[var(--muted)] uppercase tracking-wider font-medium mb-1">Fecha</p>
+                                <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium mb-1">Fecha</p>
                                 <p className="text-sm text-[var(--foreground)] font-semibold tabular-nums">
                                     {new Date(lastApiError.at).toLocaleString("es-CL")}
                                 </p>
                             </div>
                             <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] p-3 col-span-2 lg:col-span-4">
-                                <p className="text-[10px] text-[var(--muted)] uppercase tracking-wider font-medium mb-1">Ruta</p>
+                                <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium mb-1">Ruta</p>
                                 <code className="text-xs text-[var(--foreground)] font-mono">{lastApiError.path}</code>
                             </div>
                             <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] p-3 col-span-2 lg:col-span-4">
-                                <p className="text-[10px] text-[var(--muted)] uppercase tracking-wider font-medium mb-1">Mensaje</p>
+                                <p className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-medium mb-1">Mensaje</p>
                                 <p className="text-sm text-[var(--foreground)]">{lastApiError.message}</p>
                             </div>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
+                        <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
                             <ShieldCheck className="h-4 w-4 text-[var(--success)]" aria-hidden="true" />
                             Sin errores API recientes.
                         </div>
                     )}
 
-                    <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)] mt-3 opacity-60">
+                    <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)] mt-3 opacity-60">
                         <TriangleAlert className="h-3 w-3" aria-hidden="true" />
                         Ultimo error capturado por el cliente admin.
                     </div>

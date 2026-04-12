@@ -1,22 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Button,
-  Card,
-  Chip,
-  Modal,
-  Skeleton,
-  Table,
-  TextArea,
-  TextField,
-  Label,
-  Form,
-  Fieldset,
-  toast,
-} from "@heroui/react";
-import { ClipboardCheck, CheckCircle, XCircle, ExternalLink } from "lucide-react";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ClipboardCheck, CheckCircle, XCircle } from "lucide-react";
 import {
   usePendingTournaments,
   useApproveTournament,
@@ -40,8 +30,8 @@ export default function TournamentApprovalsPage() {
   const [page, setPage] = useState(1);
   const perPage = 20;
 
-  const approveModal = useDisclosure();
-  const rejectModal = useDisclosure();
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
 
   const [selected, setSelected] = useState<TournamentListItem | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -58,11 +48,11 @@ export default function TournamentApprovalsPage() {
     approveMutation.mutate(selected.id, {
       onSuccess: () => {
         toast.success(`Torneo "${selected.name}" aprobado`);
-        approveModal.onClose();
+        setApproveOpen(false);
         setSelected(null);
       },
       onError: (err: unknown) => {
-        toast.danger(getErrorMessage(err, "Error al aprobar torneo"));
+        toast.error(getErrorMessage(err, "Error al aprobar torneo"));
       },
     });
   };
@@ -74,12 +64,12 @@ export default function TournamentApprovalsPage() {
       {
         onSuccess: () => {
           toast.success(`Torneo "${selected.name}" rechazado`);
-          rejectModal.onClose();
+          setRejectOpen(false);
           setSelected(null);
           setRejectReason("");
         },
         onError: (err: unknown) => {
-          toast.danger(getErrorMessage(err, "Error al rechazar torneo"));
+          toast.error(getErrorMessage(err, "Error al rechazar torneo"));
         },
       }
     );
@@ -91,33 +81,33 @@ export default function TournamentApprovalsPage() {
         return (
           <div className="flex flex-col gap-0.5">
             <span className="font-medium text-sm text-[var(--foreground)]">{t.name}</span>
-            <span className="text-xs text-[var(--muted)]">{t.slug}</span>
+            <span className="text-xs text-[var(--muted-foreground)]">{t.slug}</span>
             {t.city && (
-              <span className="text-xs text-[var(--muted)]">{t.city}{t.region ? `, ${t.region}` : ""}</span>
+              <span className="text-xs text-[var(--muted-foreground)]">{t.city}{t.region ? `, ${t.region}` : ""}</span>
             )}
           </div>
         );
       case "modality":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {t.modality}
-          </Chip>
+          </span>
         );
       case "tier":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {t.tier}
-          </Chip>
+          </span>
         );
       case "players":
         return (
-          <span className="text-sm text-[var(--muted)]">
+          <span className="text-sm text-[var(--muted-foreground)]">
             {t.current_players}{t.max_players ? `/${t.max_players}` : ""}
           </span>
         );
       case "starts_at":
         return (
-          <span className="text-xs text-[var(--muted)]">
+          <span className="text-xs text-[var(--muted-foreground)]">
             {new Date(t.starts_at).toLocaleDateString("es-CL", {
               day: "2-digit",
               month: "short",
@@ -130,10 +120,10 @@ export default function TournamentApprovalsPage() {
           <div className="flex gap-1">
             <Button
               size="sm"
-              variant="secondary"
-              onPress={() => {
+              variant="ghost"
+              onClick={() => {
                 setSelected(t);
-                approveModal.onOpen();
+                setApproveOpen(true);
               }}
             >
               <CheckCircle className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
@@ -141,11 +131,11 @@ export default function TournamentApprovalsPage() {
             </Button>
             <Button
               size="sm"
-              variant="secondary"
-              onPress={() => {
+              variant="ghost"
+              onClick={() => {
                 setSelected(t);
                 setRejectReason("");
-                rejectModal.onOpen();
+                setRejectOpen(true);
               }}
             >
               <XCircle className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
@@ -164,16 +154,16 @@ export default function TournamentApprovalsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
           Aprobaciones de Torneos
         </h1>
-        <p className="text-sm text-[var(--muted)] mt-1">
+        <p className="text-sm text-[var(--muted-foreground)] mt-1">
           Torneos en estado PENDING_APPROVAL esperando revisión.
         </p>
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -187,37 +177,39 @@ export default function TournamentApprovalsPage() {
               ))}
             </div>
           ) : tournaments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3 text-[var(--muted)]">
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-[var(--muted-foreground)]">
               <ClipboardCheck className="h-10 w-10 opacity-40" aria-hidden="true" />
               <p className="text-sm">No hay torneos pendientes de aprobación.</p>
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Torneos pendientes">
-                  <Table.Header columns={TABLE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === "name"}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {tournaments.map((t: TournamentListItem) => (
-                      <Table.Row key={t.id}>
-                        {TABLE_COLUMNS.map((col) => (
-                          <Table.Cell key={col.key}>{renderCell(t, col.key)}</Table.Cell>
-                        ))}
-                      </Table.Row>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {TABLE_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">
+                        {col.label}
+                      </th>
                     ))}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tournaments.map((t: TournamentListItem) => (
+                    <tr key={t.id} className="border-b border-[var(--border)] last:border-b-0">
+                      {TABLE_COLUMNS.map((col) => (
+                        <td key={col.key} className="px-4 py-3">
+                          {renderCell(t, col.key)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
           {tournaments.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted-foreground)] px-5 py-3 border-t border-[var(--border)]">
               <span>
                 Pagina {meta.page} de {meta.total_pages} | Total: {meta.total}
               </span>
@@ -225,133 +217,108 @@ export default function TournamentApprovalsPage() {
                 <Button
                   type="button"
                   size="sm"
-                  variant="secondary"
-                  isDisabled={!canPrev}
-                  onPress={() => setPage((p) => Math.max(1, p - 1))}
+                  variant="ghost"
+                  disabled={!canPrev}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
                   Anterior
                 </Button>
                 <Button
                   type="button"
                   size="sm"
-                  variant="secondary"
-                  isDisabled={!canNext}
-                  onPress={() => setPage((p) => p + 1)}
+                  variant="ghost"
+                  disabled={!canNext}
+                  onClick={() => setPage((p) => p + 1)}
                 >
                   Siguiente
                 </Button>
               </div>
             </div>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
       {/* Modal: Aprobar */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={approveModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && approveModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
-                    Aprobar Torneo
-                  </div>
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-3">
-                <p className="text-sm text-[var(--muted)]">
-                  El torneo pasará a estado <strong className="text-[var(--foreground)]">OPEN</strong> y será visible para todos los jugadores.
-                </p>
-                {selected && (
-                  <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] px-4 py-3 space-y-1">
-                    <p className="font-semibold text-sm text-[var(--foreground)]">{selected.name}</p>
-                    <p className="text-xs text-[var(--muted)]">{selected.slug}</p>
-                    <p className="text-xs text-[var(--muted)]">
-                      {selected.modality} · {selected.tier} · {selected.city ?? "Online"}
-                    </p>
-                  </div>
-                )}
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={approveModal.onClose}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  onPress={handleApprove}
-                  isPending={approveMutation.isPending}
-                >
-                  Confirmar aprobación
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {approveOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setApproveOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Aprobar Torneo</h2>
+            </div>
+            <div className="space-y-3 mb-6">
+              <p className="text-sm text-[var(--muted-foreground)]">
+                El torneo pasará a estado <strong className="text-[var(--foreground)]">OPEN</strong> y será visible para todos los jugadores.
+              </p>
+              {selected && (
+                <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] px-4 py-3 space-y-1">
+                  <p className="font-semibold text-sm text-[var(--foreground)]">{selected.name}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">{selected.slug}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {selected.modality} · {selected.tier} · {selected.city ?? "Online"}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setApproveOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleApprove}
+                disabled={approveMutation.isPending}
+              >
+                Confirmar aprobación
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Rechazar */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={rejectModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && rejectModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>
-                  <div className="flex items-center gap-2">
-                    <XCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
-                    Rechazar Torneo
-                  </div>
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <p className="text-sm text-[var(--muted)]">
-                  El torneo pasará a estado <strong className="text-[var(--foreground)]">REJECTED</strong>. El motivo quedará registrado en los metadatos.
-                </p>
-                {selected && (
-                  <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] px-4 py-3 space-y-1">
-                    <p className="font-semibold text-sm text-[var(--foreground)]">{selected.name}</p>
-                    <p className="text-xs text-[var(--muted)]">{selected.slug}</p>
-                  </div>
-                )}
-                <Form className="w-full">
-                  <Fieldset className="space-y-2 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Motivo del rechazo <span className="text-red-400">*</span></Label>
-                      <TextArea
-                        placeholder="ej: El torneo no cumple con los requisitos mínimos de jugadores o el premio no está verificado."
-                        value={rejectReason}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                          setRejectReason(e.target.value)
-                        }
-                        rows={3}
-                      />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={rejectModal.onClose}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  onPress={handleReject}
-                  isPending={rejectMutation.isPending}
-                  isDisabled={!rejectReason.trim()}
-                >
-                  Confirmar rechazo
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {rejectOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setRejectOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <XCircle className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Rechazar Torneo</h2>
+            </div>
+            <div className="space-y-3 mb-4">
+              <p className="text-sm text-[var(--muted-foreground)]">
+                El torneo pasará a estado <strong className="text-[var(--foreground)]">REJECTED</strong>. El motivo quedará registrado en los metadatos.
+              </p>
+              {selected && (
+                <div className="rounded-md border border-[var(--border)] bg-[var(--surface-secondary)] px-4 py-3 space-y-1">
+                  <p className="font-semibold text-sm text-[var(--foreground)]">{selected.name}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">{selected.slug}</p>
+                </div>
+              )}
+              <div className="space-y-1">
+                <Label className="text-xs text-[var(--muted-foreground)]">Motivo del rechazo <span className="text-red-400">*</span></Label>
+                <Textarea
+                  placeholder="ej: El torneo no cumple con los requisitos mínimos de jugadores o el premio no está verificado."
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setRejectOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleReject}
+                disabled={rejectMutation.isPending || !rejectReason.trim()}
+              >
+                Confirmar rechazo
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

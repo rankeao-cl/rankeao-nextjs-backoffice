@@ -1,24 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Card,
-  Chip,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  ListBox,
-  Modal,
-  Select,
-  Skeleton,
-  Table,
-  TextArea,
-  TextField,
-  Button,
-  toast,
-} from "@heroui/react";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBroadcasts, useCreateBroadcast } from "@/lib/hooks/use-notifications";
 import type { Broadcast, CreateBroadcastRequest } from "@/lib/types/notification";
 import type { ListMeta } from "@/lib/types/api";
@@ -48,7 +36,7 @@ export default function BroadcastsPage() {
   const [page, setPage] = useState(1);
   const [perPageInput, setPerPageInput] = useState("20");
 
-  const createModal = useDisclosure();
+  const [createOpen, setCreateOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     body: "",
@@ -94,7 +82,7 @@ export default function BroadcastsPage() {
 
   const handleCreate = async () => {
     if (!formData.title || !formData.body) {
-      toast.danger("Titulo y body son requeridos");
+      toast.error("Titulo y body son requeridos");
       return;
     }
 
@@ -115,7 +103,7 @@ export default function BroadcastsPage() {
     createMutation.mutate(payload, {
       onSuccess: () => {
         toast.success("Broadcast creado");
-        createModal.onClose();
+        setCreateOpen(false);
         setFormData({
           title: "",
           body: "",
@@ -128,7 +116,7 @@ export default function BroadcastsPage() {
       onError: (error: unknown) => {
         const message =
           error instanceof Error ? error.message : "Error al crear broadcast";
-        toast.danger(message);
+        toast.error(message);
       },
     });
   };
@@ -144,15 +132,15 @@ export default function BroadcastsPage() {
         );
       case "target":
         return (
-          <Chip size="sm" variant="soft" color="default">
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {String(broadcast.target || "-")}
-          </Chip>
+          </span>
         );
       case "status":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {String(broadcast.status || "-")}
-          </Chip>
+          </span>
         );
       case "recipients":
         return String(broadcast.recipients ?? "-");
@@ -170,51 +158,48 @@ export default function BroadcastsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Difusiones
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">Notificaciones masivas a grupos de usuarios</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">Notificaciones masivas a grupos de usuarios</p>
         </div>
-        <Button
-          type="button"
-          onPress={createModal.onOpen}
-        >
+        <Button type="button" onClick={() => setCreateOpen(true)}>
           Nueva difusion
         </Button>
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="px-5 py-3">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
-            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Titulo</Label>
-              <Input placeholder="texto" value={queryFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setQueryFilter(e.target.value)} />
-            </TextField>
-            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Target</Label>
-              <Input placeholder="ALL, SEGMENT..." value={targetFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTargetFilter(e.target.value)} />
-            </TextField>
-            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Estado</Label>
-              <Input placeholder="PENDING, SENT..." value={statusFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setStatusFilter(e.target.value)} />
-            </TextField>
-            <TextField className="space-y-1 flex flex-col w-24">
-              <Label className="text-xs text-[var(--muted)]">Per page</Label>
+            <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Titulo</Label>
+              <Input placeholder="texto" value={queryFilter} onChange={(e) => setQueryFilter(e.target.value)} />
+            </div>
+            <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Target</Label>
+              <Input placeholder="ALL, SEGMENT..." value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)} />
+            </div>
+            <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Estado</Label>
+              <Input placeholder="PENDING, SENT..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+            </div>
+            <div className="space-y-1 flex flex-col w-24">
+              <Label className="text-xs text-[var(--muted-foreground)]">Per page</Label>
               <Input
                 type="number"
                 min={1}
                 value={perPageInput}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPerPageInput(e.target.value)}
+                onChange={(e) => setPerPageInput(e.target.value)}
               />
-            </TextField>
-            <Button type="button" size="sm" variant="primary" onPress={applyPagination}>Aplicar</Button>
-            <Button type="button" size="sm" variant="tertiary" onPress={clearFilters}>Limpiar</Button>
+            </div>
+            <Button type="button" size="sm" onClick={applyPagination}>Aplicar</Button>
+            <Button type="button" size="sm" variant="ghost" onClick={clearFilters}>Limpiar</Button>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {loading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -228,140 +213,122 @@ export default function BroadcastsPage() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Broadcasts">
-                  <Table.Header columns={TABLE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredBroadcasts.map((broadcast) => (
-                      <Table.Row key={String(broadcast.id || String(broadcast.title || "-"))}>
-                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
-                          <Table.Cell key={column.key}>
-                            {renderCell(broadcast, column.key)}
-                          </Table.Cell>
-                        ))}
-                      </Table.Row>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {TABLE_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">
+                        {col.label}
+                      </th>
                     ))}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBroadcasts.map((broadcast) => (
+                    <tr key={String(broadcast.id || String(broadcast.title || "-"))} className="border-b border-[var(--border)] last:border-b-0">
+                      {TABLE_COLUMNS.map((column) => (
+                        <td key={column.key} className="px-4 py-3">
+                          {renderCell(broadcast, column.key)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted-foreground)] px-5 py-3 border-t border-[var(--border)]">
             <span>
               Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
             </span>
             <div className="flex gap-2">
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canPrev} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
                 Anterior
               </Button>
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canNext} onClick={() => setPage((prev) => prev + 1)}>
                 Siguiente
               </Button>
             </div>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={createModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <div className="flex items-center gap-2">
-                  <Send className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
-                  Crear difusion
+      {createOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Send className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Crear difusion</h2>
+            </div>
+            <div className="space-y-4 mb-6">
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Titulo</Label>
+                <Input
+                  value={formData.title}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Mensaje</Label>
+                <Textarea
+                  value={formData.body}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Target</Label>
+                  <select
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={formData.target}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, target: e.target.value }))}
+                  >
+                    {TARGET_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
                 </div>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Titulo</Label>
-                      <Input
-                        value={formData.title}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                      />
-                    </TextField>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Canales</Label>
+                  <Input
+                    placeholder="IN_APP,EMAIL..."
+                    value={formData.channels}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
+                  />
+                </div>
+              </div>
 
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Mensaje</Label>
-                      <TextArea
-                        value={formData.body}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
-                        rows={3}
-                      />
-                    </TextField>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Select
-                        className="w-full"
-                        value={formData.target}
-                        onChange={(value: string | number | null) =>
-                          setFormData((prev) => ({ ...prev, target: String(value || "ALL") }))
-                        }
-                      >
-                        <Label>Target</Label>
-                        <Select.Trigger>
-                          <Select.Value />
-                          <Select.Indicator />
-                        </Select.Trigger>
-                        <Select.Popover>
-                          <ListBox>
-                            {TARGET_OPTIONS.map((option) => (
-                              <ListBox.Item key={option} id={option} textValue={option}>
-                                {option}
-                                <ListBox.ItemIndicator />
-                              </ListBox.Item>
-                            ))}
-                          </ListBox>
-                        </Select.Popover>
-                      </Select>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Canales</Label>
-                        <Input
-                          placeholder="IN_APP,EMAIL..."
-                          value={formData.channels}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
-                        />
-                      </TextField>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Action URL</Label>
-                        <Input
-                          value={formData.action_url}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, action_url: e.target.value }))}
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Programar para</Label>
-                        <Input
-                          type="datetime-local"
-                          value={formData.schedule_at}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, schedule_at: e.target.value }))}
-                        />
-                      </TextField>
-                    </div>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button type="button" variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
-                <Button type="button" variant="primary" onPress={handleCreate} isPending={createMutation.isPending}>Enviar difusion</Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Action URL</Label>
+                  <Input
+                    value={formData.action_url}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, action_url: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Programar para</Label>
+                  <Input
+                    type="datetime-local"
+                    value={formData.schedule_at}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, schedule_at: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancelar</Button>
+              <Button type="button" onClick={handleCreate} disabled={createMutation.isPending}>Enviar difusion</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

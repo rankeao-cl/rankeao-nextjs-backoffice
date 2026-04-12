@@ -1,19 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Avatar,
-  Card,
-  Chip,
-  Input,
-  Label,
-  Modal,
-  Skeleton,
-  Table,
-  TextField,
-  Button,
-  toast,
-} from "@heroui/react";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useTenants,
   useVerifyTenant,
@@ -23,7 +17,6 @@ import {
 } from "@/lib/hooks/use-tenants";
 import type { Tenant } from "@/lib/types/tenant";
 import { getErrorMessage } from "@/lib/utils/error-message";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
 import { Store } from "lucide-react";
 
 type TenantAction = "verify" | "reject" | "suspend" | "reactivate";
@@ -53,11 +46,11 @@ const actionLabels: Record<TenantAction, string> = {
 
 export default function TenantsPage() {
   const [search, setSearch] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const [actionTarget, setActionTarget] = useState<{
     tenant: Tenant;
     action: TenantAction;
   } | null>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { data: tenants = [], isLoading } = useTenants();
 
@@ -77,7 +70,11 @@ export default function TenantsPage() {
 
   const openAction = (tenant: Tenant, action: TenantAction) => {
     setActionTarget({ tenant, action });
-    onOpen();
+    setIsOpen(true);
+  };
+
+  const closeAction = () => {
+    setIsOpen(false);
   };
 
   const executeAction = () => {
@@ -94,10 +91,10 @@ export default function TenantsPage() {
     mutationMap[action].mutate(String(tenant.id), {
       onSuccess: () => {
         toast.success(`Tenant "${tenant.name}" actualizado`);
-        onClose();
+        closeAction();
       },
       onError: (error: unknown) => {
-        toast.danger(getErrorMessage(error));
+        toast.error(getErrorMessage(error));
       },
     });
   };
@@ -113,39 +110,37 @@ export default function TenantsPage() {
       case "tenant":
         return (
           <div className="flex items-center gap-3">
-            <Avatar
-              size="sm"
-              className="bg-[var(--default)] text-[var(--foreground)]"
-            >
-              <Avatar.Fallback>
+            <Avatar className="h-8 w-8 bg-[var(--default)] text-[var(--foreground)]">
+              <AvatarImage src={undefined} alt={tenant.name ?? ""} />
+              <AvatarFallback>
                 {tenant.name?.[0] ? tenant.name[0].toUpperCase() : <Store className="h-4 w-4" aria-hidden="true" />}
-              </Avatar.Fallback>
+              </AvatarFallback>
             </Avatar>
             <div>
               <p className="font-medium text-[var(--foreground)]">{tenant.name}</p>
-              <p className="text-xs text-[var(--muted)]">{tenant.slug}</p>
+              <p className="text-xs text-[var(--muted-foreground)]">{tenant.slug}</p>
             </div>
           </div>
         );
       case "email":
         return (
-          <span className="text-sm text-[var(--muted)]">{tenant.email}</span>
+          <span className="text-sm text-[var(--muted-foreground)]">{tenant.email}</span>
         );
       case "plan":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <Badge variant="default" className="text-xs">
             {tenant.plan}
-          </Chip>
+          </Badge>
         );
       case "status":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <Badge variant="default" className="text-xs">
             {STATUS_LABELS[tenant.status] || tenant.status}
-          </Chip>
+          </Badge>
         );
       case "created":
         return (
-          <span className="text-xs text-[var(--muted)]">
+          <span className="text-xs text-[var(--muted-foreground)]">
             {tenant.created_at ? new Date(tenant.created_at).toLocaleDateString("es-CL") : "-"}
           </span>
         );
@@ -156,15 +151,15 @@ export default function TenantsPage() {
               <>
                 <Button
                   size="sm"
-                  variant="secondary"
-                  onPress={() => openAction(tenant, "verify")}
+                  variant="default"
+                  onClick={() => openAction(tenant, "verify")}
                 >
                   Verificar
                 </Button>
                 <Button
                   size="sm"
-                  variant="danger"
-                  onPress={() => openAction(tenant, "reject")}
+                  variant="destructive"
+                  onClick={() => openAction(tenant, "reject")}
                 >
                   Rechazar
                 </Button>
@@ -173,8 +168,8 @@ export default function TenantsPage() {
             {tenant.status === "ACTIVE" && (
               <Button
                 size="sm"
-                variant="danger"
-                onPress={() => openAction(tenant, "suspend")}
+                variant="destructive"
+                onClick={() => openAction(tenant, "suspend")}
               >
                 Suspender
               </Button>
@@ -182,8 +177,8 @@ export default function TenantsPage() {
             {tenant.status === "SUSPENDED" && (
               <Button
                 size="sm"
-                variant="secondary"
-                onPress={() => openAction(tenant, "reactivate")}
+                variant="default"
+                onClick={() => openAction(tenant, "reactivate")}
               >
                 Reactivar
               </Button>
@@ -199,30 +194,32 @@ export default function TenantsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Tiendas
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">Gestion de tiendas registradas</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">Gestion de tiendas registradas</p>
         </div>
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="px-5 py-3">
+      {/* Search filter card */}
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
-            <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Busqueda</Label>
+            <div className="space-y-1 flex flex-col min-w-[200px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Busqueda</Label>
               <Input
                 placeholder="Nombre, slug o email..."
                 value={search}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
-            </TextField>
+            </div>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      {/* Table card */}
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -236,62 +233,78 @@ export default function TenantsPage() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Tenants table">
-                  <Table.Header columns={TABLE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {TABLE_COLUMNS.map((column) => (
+                      <th key={column.key} className="px-4 py-3 text-left text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
                         {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredTenants.map((tenant) => (
-                      <Table.Row key={tenant.id}>
-                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
-                          <Table.Cell key={column.key}>
-                            {renderCell(tenant, column.key)}
-                          </Table.Cell>
-                        ))}
-                      </Table.Row>
+                      </th>
                     ))}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {filteredTenants.map((tenant) => (
+                    <tr key={tenant.id} className="hover:bg-[var(--surface-secondary)] transition-colors">
+                      {TABLE_COLUMNS.map((column) => (
+                        <td key={column.key} className="px-4 py-3">
+                          {renderCell(tenant, column.key)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  {filteredTenants.length === 0 && (
+                    <tr>
+                      <td colSpan={TABLE_COLUMNS.length} className="px-4 py-8 text-center text-sm text-[var(--muted-foreground)]">
+                        No se encontraron tiendas.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Modal>
-        <Modal.Backdrop
-          isOpen={isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>{actionTarget ? `¿${actionLabels[actionTarget.action]} tenant?` : "Confirmar"}</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                <p className="text-[var(--muted)] text-sm">
-                  Esta accion cambiara el estado de
-                  <strong className="text-[var(--foreground)]"> {actionTarget?.tenant.name}</strong>.
-                </p>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={onClose}>
-                  Cancelar
-                </Button>
-                <Button variant="primary" onPress={executeAction} isPending={actionLoading}>
-                  Confirmar
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {/* Confirmation modal */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={closeAction}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-base font-semibold text-[var(--foreground)] mb-2">
+              {actionTarget ? `¿${actionLabels[actionTarget.action]} tenant?` : "Confirmar"}
+            </h2>
+            <p className="text-[var(--muted-foreground)] text-sm mb-6">
+              Esta accion cambiara el estado de{" "}
+              <strong className="text-[var(--foreground)]">{actionTarget?.tenant.name}</strong>.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={closeAction}>
+                Cancelar
+              </Button>
+              <Button
+                variant="default"
+                onClick={executeAction}
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)]" />
+                    Procesando...
+                  </span>
+                ) : (
+                  "Confirmar"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

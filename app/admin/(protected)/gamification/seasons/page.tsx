@@ -1,26 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Calendar,
-  Card,
-  Chip,
-  DateField,
-  DatePicker,
-  Description,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  Modal,
-  Skeleton,
-  TextField,
-  toast,
-  type DateValue,
-} from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getErrorMessage } from "@/lib/utils/error-message";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
 import {
   CalendarDays,
   Eye,
@@ -39,9 +26,9 @@ import {
 } from "@/lib/hooks/use-gamification";
 import type { Season, CreateSeasonRequest } from "@/lib/types/gamification";
 
-const STATUS_COLOR: Record<string, "success" | "warning" | "default"> = {
+const STATUS_BADGE_VARIANT: Record<string, "default" | "success" | "warning" | "danger" | "navy"> = {
   active: "success",
-  upcoming: "warning",
+  upcoming: "navy",
   closed: "default",
 };
 
@@ -67,13 +54,13 @@ function formatDate(dateStr?: string | null): string {
 export default function SeasonsPage() {
   const { data: seasons = [], isLoading } = useSeasons();
 
-  const createModal = useDisclosure();
-  const previewModal = useDisclosure();
-  const closeModal = useDisclosure();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [closeOpen, setCloseOpen] = useState(false);
 
   const [formData, setFormData] = useState({ name: "" });
-  const [startsAtValue, setStartsAtValue] = useState<DateValue | null>(null);
-  const [endsAtValue, setEndsAtValue] = useState<DateValue | null>(null);
+  const [startsAtStr, setStartsAtStr] = useState("");
+  const [endsAtStr, setEndsAtStr] = useState("");
   const [selectedSeasonId, setSelectedSeasonId] = useState("");
   const [selectedSeasonName, setSelectedSeasonName] = useState("");
   const [previewData, setPreviewData] = useState<unknown>(null);
@@ -82,55 +69,45 @@ export default function SeasonsPage() {
   const previewSeasonCloseMutation = usePreviewSeasonClose();
   const closeSeasonMutation = useCloseSeason();
 
-  const dateValueToIso = (
-    value: DateValue | null,
-    endOfDay = false,
-  ): string => {
-    if (!value) return "";
-    const dateString = value.toString();
-    const time = endOfDay ? "23:59:59.999" : "00:00:00.000";
-    return new Date(`${dateString}T${time}Z`).toISOString();
-  };
-
   const handleCreate = () => {
-    if (!formData.name || !startsAtValue || !endsAtValue) {
-      toast.danger("Completa todos los campos");
+    if (!formData.name || !startsAtStr || !endsAtStr) {
+      toast.error("Completa todos los campos");
       return;
     }
 
     const payload: CreateSeasonRequest = {
       name: formData.name,
-      starts_at: dateValueToIso(startsAtValue),
-      ends_at: dateValueToIso(endsAtValue, true),
+      starts_at: new Date(`${startsAtStr}T00:00:00.000Z`).toISOString(),
+      ends_at: new Date(`${endsAtStr}T23:59:59.999Z`).toISOString(),
     };
 
     createSeasonMutation.mutate(payload, {
       onSuccess: () => {
         toast.success("Season creada");
-        createModal.onClose();
+        setCreateOpen(false);
         setFormData({ name: "" });
-        setStartsAtValue(null);
-        setEndsAtValue(null);
+        setStartsAtStr("");
+        setEndsAtStr("");
       },
       onError: (error: unknown) => {
-        toast.danger(getErrorMessage(error));
+        toast.error(getErrorMessage(error));
       },
     });
   };
 
   const handlePreview = (seasonId: string) => {
     if (!seasonId) {
-      toast.danger("Season ID no disponible");
+      toast.error("Season ID no disponible");
       return;
     }
 
     previewSeasonCloseMutation.mutate(seasonId, {
       onSuccess: (data) => {
         setPreviewData(data);
-        previewModal.onOpen();
+        setPreviewOpen(true);
       },
       onError: (error: unknown) => {
-        toast.danger(getErrorMessage(error));
+        toast.error(getErrorMessage(error));
       },
     });
   };
@@ -138,7 +115,7 @@ export default function SeasonsPage() {
   const openCloseConfirmation = (season: Season) => {
     setSelectedSeasonId(season.id);
     setSelectedSeasonName(season.name);
-    closeModal.onOpen();
+    setCloseOpen(true);
   };
 
   const handleClose = () => {
@@ -147,12 +124,12 @@ export default function SeasonsPage() {
     closeSeasonMutation.mutate(selectedSeasonId, {
       onSuccess: () => {
         toast.success("Season cerrada exitosamente");
-        closeModal.onClose();
+        setCloseOpen(false);
         setSelectedSeasonId("");
         setSelectedSeasonName("");
       },
       onError: (error: unknown) => {
-        toast.danger(getErrorMessage(error));
+        toast.error(getErrorMessage(error));
       },
     });
   };
@@ -162,25 +139,25 @@ export default function SeasonsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Temporadas
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">
             Gestiona las temporadas competitivas de gamificacion
           </p>
         </div>
-        <Button onPress={createModal.onOpen}>Nueva Season</Button>
+        <Button onClick={() => setCreateOpen(true)}>Nueva Season</Button>
       </div>
 
       {/* Seasons List */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card
+            <div
               key={i}
-              className="bg-[var(--surface)] border border-[var(--border)]"
+              className="rounded-lg border border-[var(--c-gray-200)] bg-white"
             >
-              <Card.Content className="p-5 space-y-4">
+              <div className="p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <Skeleton className="h-5 w-40 rounded" />
                   <Skeleton className="h-5 w-16 rounded-full" />
@@ -193,37 +170,36 @@ export default function SeasonsPage() {
                   <Skeleton className="h-8 w-28 rounded" />
                   <Skeleton className="h-8 w-28 rounded" />
                 </div>
-              </Card.Content>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       ) : seasons.length === 0 ? (
-        <Card className="bg-[var(--surface-secondary)] border border-[var(--border)]">
-          <Card.Content className="flex flex-col items-center py-12 gap-4">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="flex flex-col items-center py-12 gap-4">
             <Trophy className="h-12 w-12 text-[var(--field-placeholder)]" aria-hidden="true" />
-            <p className="text-[var(--muted)]">
+            <p className="text-[var(--muted-foreground)]">
               No hay temporadas creadas aun.
             </p>
-            <Button variant="secondary" onPress={createModal.onOpen}>
+            <Button variant="ghost" onClick={() => setCreateOpen(true)}>
               Crear primera season
             </Button>
-          </Card.Content>
-        </Card>
+          </div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {seasons.map((season) => {
             const status = season.status?.toLowerCase() ?? "closed";
-            const startDate =
-              season.start_date || season.starts_at;
+            const startDate = season.start_date || season.starts_at;
             const endDate = season.end_date || season.ends_at;
             const isActive = status === "active";
 
             return (
-              <Card
+              <div
                 key={season.id}
-                className="bg-[var(--surface)] border border-[var(--border)]"
+                className="rounded-lg border border-[var(--c-gray-200)] bg-white"
               >
-                <Card.Content className="p-5 space-y-4">
+                <div className="p-5 space-y-4">
                   {/* Name + Status */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
@@ -232,37 +208,33 @@ export default function SeasonsPage() {
                         {season.name}
                       </h3>
                       {season.is_current_season && (
-                        <Chip size="sm" color="accent" variant="soft">
+                        <Badge variant="navy">
                           <Star className="h-3 w-3 mr-1 inline" aria-hidden="true" />
                           Actual
-                        </Chip>
+                        </Badge>
                       )}
                     </div>
-                    <Chip
-                      size="sm"
-                      color={STATUS_COLOR[status] ?? "default"}
-                      variant="soft"
-                    >
+                    <Badge variant={STATUS_BADGE_VARIANT[status] ?? "default"}>
                       {STATUS_LABEL[status] ?? status}
-                    </Chip>
+                    </Badge>
                   </div>
 
                   {/* Dates */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--muted)]">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--muted-foreground)]">
                     <span className="flex items-center gap-1">
                       <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                       {formatDate(startDate)} &mdash; {formatDate(endDate)}
                     </span>
                     {season.days_remaining != null && (
-                      <Chip size="sm" variant="soft" color="default">
+                      <Badge variant="default">
                         {season.days_remaining} dias restantes
-                      </Chip>
+                      </Badge>
                     )}
                   </div>
 
                   {/* Stats */}
                   {season.stats && (
-                    <div className="flex flex-wrap gap-3 text-xs text-[var(--muted)]">
+                    <div className="flex flex-wrap gap-3 text-xs text-[var(--muted-foreground)]">
                       <span className="flex items-center gap-1">
                         <Users className="h-3.5 w-3.5" aria-hidden="true" />
                         {season.stats.total_players} jugadores
@@ -287,7 +259,7 @@ export default function SeasonsPage() {
                   {/* Slug / ID */}
                   <div className="flex items-center gap-2">
                     {season.slug && (
-                      <code className="text-[10px] text-[var(--muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded">
+                      <code className="text-[10px] text-[var(--muted-foreground)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded">
                         {season.slug}
                       </code>
                     )}
@@ -301,233 +273,139 @@ export default function SeasonsPage() {
                     <div className="flex gap-2 pt-1">
                       <Button
                         size="sm"
-                        variant="secondary"
-                        onPress={() => handlePreview(season.id)}
-                        isPending={
-                          previewSeasonCloseMutation.isPending
-                        }
+                        variant="ghost"
+                        onClick={() => handlePreview(season.id)}
+                        disabled={previewSeasonCloseMutation.isPending}
                       >
-                        <Eye className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                        {previewSeasonCloseMutation.isPending ? (
+                          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-1" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                        )}
                         Preview Cierre
                       </Button>
                       <Button
                         size="sm"
-                        variant="danger"
-                        onPress={() => openCloseConfirmation(season)}
+                        variant="destructive"
+                        onClick={() => openCloseConfirmation(season)}
                       >
                         <Lock className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                         Cerrar Season
                       </Button>
                     </div>
                   )}
-                </Card.Content>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
       )}
 
       {/* Create Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={createModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>Crear Season</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full space-y-4">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">
-                      Nombre
-                    </Label>
-                    <Input
-                      value={formData.name}
-                      onChange={(
-                        e: React.ChangeEvent<
-                          HTMLInputElement | HTMLTextAreaElement
-                        >,
-                      ) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                    />
-                  </TextField>
+      {createOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Crear Season</h2>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreate(); }}>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Nombre</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
 
-                  <DatePicker
-                    className="w-full"
-                    name="starts-at"
-                    value={startsAtValue}
-                    onChange={setStartsAtValue}
-                  >
-                    <Label>Inicio</Label>
-                    <DateField.Group fullWidth>
-                      <DateField.Input>
-                        {(segment) => <DateField.Segment segment={segment} />}
-                      </DateField.Input>
-                      <DateField.Suffix>
-                        <DatePicker.Trigger>
-                          <DatePicker.TriggerIndicator />
-                        </DatePicker.Trigger>
-                      </DateField.Suffix>
-                    </DateField.Group>
-                    <DatePicker.Popover>
-                      <Calendar aria-label="Fecha de inicio">
-                        <Calendar.Header>
-                          <Calendar.YearPickerTrigger>
-                            <Calendar.YearPickerTriggerHeading />
-                            <Calendar.YearPickerTriggerIndicator />
-                          </Calendar.YearPickerTrigger>
-                          <Calendar.NavButton slot="previous" />
-                          <Calendar.NavButton slot="next" />
-                        </Calendar.Header>
-                        <Calendar.Grid>
-                          <Calendar.GridHeader>
-                            {(day) => (
-                              <Calendar.HeaderCell>{day}</Calendar.HeaderCell>
-                            )}
-                          </Calendar.GridHeader>
-                          <Calendar.GridBody>
-                            {(date) => <Calendar.Cell date={date} />}
-                          </Calendar.GridBody>
-                        </Calendar.Grid>
-                      </Calendar>
-                    </DatePicker.Popover>
-                  </DatePicker>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Inicio</Label>
+                <Input
+                  type="date"
+                  value={startsAtStr}
+                  onChange={(e) => setStartsAtStr(e.target.value)}
+                />
+              </div>
 
-                  <DatePicker
-                    className="w-full"
-                    name="ends-at"
-                    value={endsAtValue}
-                    onChange={setEndsAtValue}
-                  >
-                    <Label>Fin</Label>
-                    <DateField.Group fullWidth>
-                      <DateField.Input>
-                        {(segment) => <DateField.Segment segment={segment} />}
-                      </DateField.Input>
-                      <DateField.Suffix>
-                        <DatePicker.Trigger>
-                          <DatePicker.TriggerIndicator />
-                        </DatePicker.Trigger>
-                      </DateField.Suffix>
-                    </DateField.Group>
-                    <DatePicker.Popover>
-                      <Calendar aria-label="Fecha de cierre">
-                        <Calendar.Header>
-                          <Calendar.YearPickerTrigger>
-                            <Calendar.YearPickerTriggerHeading />
-                            <Calendar.YearPickerTriggerIndicator />
-                          </Calendar.YearPickerTrigger>
-                          <Calendar.NavButton slot="previous" />
-                          <Calendar.NavButton slot="next" />
-                        </Calendar.Header>
-                        <Calendar.Grid>
-                          <Calendar.GridHeader>
-                            {(day) => (
-                              <Calendar.HeaderCell>{day}</Calendar.HeaderCell>
-                            )}
-                          </Calendar.GridHeader>
-                          <Calendar.GridBody>
-                            {(date) => <Calendar.Cell date={date} />}
-                          </Calendar.GridBody>
-                        </Calendar.Grid>
-                      </Calendar>
-                    </DatePicker.Popover>
-                  </DatePicker>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={createModal.onClose}>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Fin</Label>
+                <Input
+                  type="date"
+                  value={endsAtStr}
+                  onChange={(e) => setEndsAtStr(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>
                   Cancelar
                 </Button>
-                <Button
-                  onPress={handleCreate}
-                  isPending={createSeasonMutation.isPending}
-                >
+                <Button type="submit" disabled={createSeasonMutation.isPending}>
+                  {createSeasonMutation.isPending && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                  )}
                   Crear
                 </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Preview Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={previewModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && previewModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>Preview - Cierre de Season</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                <pre className="bg-[var(--surface)] rounded-lg p-4 text-xs text-[var(--muted)] overflow-auto max-h-96">
-                  {JSON.stringify(previewData, null, 2)}
-                </pre>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={previewModal.onClose}>
-                  Cerrar
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Preview - Cierre de Season</h2>
+            <pre className="bg-[var(--surface)] rounded-lg p-4 text-xs text-[var(--muted-foreground)] overflow-auto max-h-96">
+              {JSON.stringify(previewData, null, 2)}
+            </pre>
+            <div className="flex justify-end pt-4">
+              <Button variant="ghost" onClick={() => setPreviewOpen(false)}>
+                Cerrar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Close Confirmation Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={closeModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && closeModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>Cerrar Season</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="space-y-3">
-                <div className="flex items-center gap-2 text-[var(--danger)]">
-                  <Lock className="h-5 w-5" aria-hidden="true" />
-                  <p className="font-semibold">Accion irreversible</p>
-                </div>
-                <p className="text-[var(--muted)] text-sm">
-                  Estas a punto de cerrar la season{" "}
-                  <strong className="text-[var(--foreground)]">
-                    {selectedSeasonName}
-                  </strong>
-                  . Se tomaran snapshots de rankings y se distribuiran rewards.
-                  Esta accion no se puede deshacer.
-                </p>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={closeModal.onClose}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant="danger"
-                  onPress={handleClose}
-                  isPending={closeSeasonMutation.isPending}
-                >
-                  Confirmar cierre
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {closeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCloseOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Cerrar Season</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-[var(--danger)]">
+                <Lock className="h-5 w-5" aria-hidden="true" />
+                <p className="font-semibold">Accion irreversible</p>
+              </div>
+              <p className="text-[var(--muted-foreground)] text-sm">
+                Estas a punto de cerrar la season{" "}
+                <strong className="text-[var(--foreground)]">
+                  {selectedSeasonName}
+                </strong>
+                . Se tomaran snapshots de rankings y se distribuiran rewards.
+                Esta accion no se puede deshacer.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="ghost" onClick={() => setCloseOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleClose}
+                disabled={closeSeasonMutation.isPending}
+              >
+                {closeSeasonMutation.isPending && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-300 border-t-white mr-2" />
+                )}
+                Confirmar cierre
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

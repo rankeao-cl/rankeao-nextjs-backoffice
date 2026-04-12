@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Avatar, Button, Card, Chip, Skeleton } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useGamificationStats, useBadges, useXPEvents } from "@/lib/hooks/use-gamification";
 import {
@@ -315,15 +317,15 @@ export default function AdminPerfilPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Perfil Admin
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">
             Control personal, seguridad y actividad de API para soporte.
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onPress={handleRefresh} isDisabled={loading}>
+          <Button variant="ghost" onClick={handleRefresh} disabled={loading}>
             Actualizar datos
           </Button>
         </div>
@@ -332,22 +334,22 @@ export default function AdminPerfilPage() {
       <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
-          variant={activeTab === "resumen" ? "primary" : "secondary"}
-          onPress={() => setActiveTab("resumen")}
+          variant={activeTab === "resumen" ? "default" : "ghost"}
+          onClick={() => setActiveTab("resumen")}
         >
           Resumen
         </Button>
         <Button
           size="sm"
-          variant={activeTab === "seguridad" ? "primary" : "secondary"}
-          onPress={() => setActiveTab("seguridad")}
+          variant={activeTab === "seguridad" ? "default" : "ghost"}
+          onClick={() => setActiveTab("seguridad")}
         >
           Seguridad
         </Button>
         <Button
           size="sm"
-          variant={activeTab === "actividad-api" ? "primary" : "secondary"}
-          onPress={() => setActiveTab("actividad-api")}
+          variant={activeTab === "actividad-api" ? "default" : "ghost"}
+          onClick={() => setActiveTab("actividad-api")}
         >
           Actividad API (histórico de errores)
         </Button>
@@ -373,75 +375,75 @@ export default function AdminPerfilPage() {
       {!loading && activeTab === "resumen" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-[var(--surface)] border border-[var(--border)]">
-              <Card.Content className="p-4 space-y-1">
-                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Tenants</p>
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+              <div className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Tenants</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.tenantsTotal}</p>
-                <p className="text-xs text-[var(--muted)]">
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Activos {snapshot.tenantsActive} | Pendientes {snapshot.tenantsPending}
                 </p>
-              </Card.Content>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="bg-[var(--surface)] border border-[var(--border)]">
-              <Card.Content className="p-4 space-y-1">
-                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Disputes</p>
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+              <div className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Disputes</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.disputesTotal}</p>
-                <p className="text-xs text-[var(--muted)]">
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Open {snapshot.disputesOpen} | Resueltas {snapshot.disputesResolved}
                 </p>
-              </Card.Content>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="bg-[var(--surface)] border border-[var(--border)]">
-              <Card.Content className="p-4 space-y-1">
-                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Templates</p>
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+              <div className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Templates</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.templatesTotal}</p>
-                <p className="text-xs text-[var(--muted)]">
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Activos {snapshot.templatesActive} | Inactivos {snapshot.templatesInactive}
                 </p>
-              </Card.Content>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="bg-[var(--surface)] border border-[var(--border)]">
-              <Card.Content className="p-4 space-y-1">
-                <p className="text-xs text-[var(--muted)] uppercase tracking-wide">Broadcasts</p>
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+              <div className="p-4 space-y-1">
+                <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Broadcasts</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.broadcastsTotal}</p>
-                <p className="text-xs text-[var(--muted)]">Email templates {snapshot.emailTemplatesTotal}</p>
-              </Card.Content>
-            </Card>
+                <p className="text-xs text-[var(--muted-foreground)]">Email templates {snapshot.emailTemplatesTotal}</p>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="bg-[var(--surface)] border border-[var(--border)]">
-              <Card.Content className="p-5 space-y-3">
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+              <div className="p-5 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Trophy className="h-4 w-4" aria-hidden="true" />
                   <p className="text-sm font-medium">Gamificacion</p>
                 </div>
-                <p className="text-sm text-[var(--muted)]">XP total otorgado</p>
+                <p className="text-sm text-[var(--muted-foreground)]">XP total otorgado</p>
                 <p className="text-xl font-semibold text-[var(--foreground)]">{snapshot.totalXpGranted.toLocaleString()}</p>
-                <p className="text-xs text-[var(--muted)]">Eventos XP hoy: {snapshot.xpEventsToday}</p>
-                <p className="text-xs text-[var(--muted)]">Badges: {snapshot.badgesTotal}</p>
-                <p className="text-xs text-[var(--muted)]">XP events definidos: {snapshot.xpEventsTotal}</p>
-              </Card.Content>
-            </Card>
+                <p className="text-xs text-[var(--muted-foreground)]">Eventos XP hoy: {snapshot.xpEventsToday}</p>
+                <p className="text-xs text-[var(--muted-foreground)]">Badges: {snapshot.badgesTotal}</p>
+                <p className="text-xs text-[var(--muted-foreground)]">XP events definidos: {snapshot.xpEventsTotal}</p>
+              </div>
+            </div>
 
-            <Card className="bg-[var(--surface)] border border-[var(--border)]">
-              <Card.Content className="p-5 space-y-3">
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+              <div className="p-5 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Bell className="h-4 w-4" aria-hidden="true" />
                   <p className="text-sm font-medium">Notificaciones</p>
                 </div>
-                <p className="text-sm text-[var(--muted)]">Enviadas (24h)</p>
+                <p className="text-sm text-[var(--muted-foreground)]">Enviadas (24h)</p>
                 <p className="text-xl font-semibold text-[var(--foreground)]">{snapshot.notificationsSent.toLocaleString()}</p>
-                <p className="text-xs text-[var(--muted)]">Read rate: {formatPercent(snapshot.notificationsReadRate)}</p>
-              </Card.Content>
-            </Card>
+                <p className="text-xs text-[var(--muted-foreground)]">Read rate: {formatPercent(snapshot.notificationsReadRate)}</p>
+              </div>
+            </div>
           </div>
 
-          <Card className="bg-[var(--surface)] border border-[var(--border)]">
-            <Card.Content className="p-5 space-y-4">
+          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="p-5 space-y-4">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <Zap className="h-4 w-4" aria-hidden="true" />
                 <p className="text-sm font-medium">Estado de endpoints</p>
@@ -451,19 +453,19 @@ export default function AdminPerfilPage() {
                 {Object.entries(endpointHealth).map(([key, health]) => (
                   <div key={key} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs uppercase tracking-wide text-[var(--muted)]">{key}</p>
-                      <Chip size="sm" variant="soft" color="default">
+                      <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">{key}</p>
+                      <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                         {health.ok ? "OK" : "Error"}
-                      </Chip>
+                      </span>
                     </div>
-                    <p className="text-xs text-[var(--muted)] break-words">{health.detail}</p>
+                    <p className="text-xs text-[var(--muted-foreground)] break-words">{health.detail}</p>
                   </div>
                 ))}
               </div>
-            </Card.Content>
-          </Card>
+            </div>
+          </div>
 
-          <div className="text-xs text-[var(--muted)] flex items-center gap-2">
+          <div className="text-xs text-[var(--muted-foreground)] flex items-center gap-2">
             <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
             Ultima actualización: {lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleString("es-CL") : "-"}
           </div>
@@ -473,47 +475,47 @@ export default function AdminPerfilPage() {
       {!loading && activeTab === "seguridad" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Card className="bg-[var(--surface-secondary)] border border-[var(--border)] lg:col-span-2">
-              <Card.Content className="p-5">
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white lg:col-span-2">
+              <div className="p-5">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-14 w-14 bg-[var(--default)] text-[var(--foreground)]" size="lg">
-                    {user?.avatar_url ? <Avatar.Image src={user.avatar_url} alt={user?.username || "Admin"} /> : null}
-                    <Avatar.Fallback>{user?.username?.[0]?.toUpperCase() || "A"}</Avatar.Fallback>
+                  <Avatar className="h-14 w-14">
+                    {user?.avatar_url ? <AvatarImage src={user.avatar_url} alt={user?.username || "Admin"} /> : null}
+                    <AvatarFallback>{user?.username?.[0]?.toUpperCase() || "A"}</AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
                     <p className="text-lg font-semibold text-[var(--foreground)]">{user?.username || "Admin"}</p>
-                    <p className="text-sm text-[var(--muted)]">{user?.email || "Sin email"}</p>
-                    <p className="text-xs text-[var(--muted)]">User ID: {user?.id || "-"}</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">{user?.email || "Sin email"}</p>
+                    <p className="text-xs text-[var(--muted-foreground)]">User ID: {user?.id || "-"}</p>
                   </div>
                 </div>
-              </Card.Content>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="bg-[var(--surface-secondary)] border border-[var(--border)]">
-              <Card.Content className="p-5 space-y-2">
+            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+              <div className="p-5 space-y-2">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Shield className="h-4 w-4" aria-hidden="true" />
                   <span className="text-sm font-medium">Sesion</span>
                 </div>
-                <p className="text-xs text-[var(--muted)]">Token activo</p>
+                <p className="text-xs text-[var(--muted-foreground)]">Token activo</p>
                 <p className="text-xs text-[var(--foreground)] break-all">
                   {accessToken ? `${accessToken.slice(0, 24)}...` : "No autenticado"}
                 </p>
-                <Chip size="sm" variant="soft" color="default">
+                <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                   {accessToken ? "Sesion valida" : "Sesion ausente"}
-                </Chip>
-              </Card.Content>
-            </Card>
+                </span>
+              </div>
+            </div>
           </div>
 
-          <Card className="bg-[var(--surface)] border border-[var(--border)]">
-            <Card.Content className="p-5 space-y-4">
+          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="p-5 space-y-4">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 <p className="text-sm font-medium">Controles de seguridad</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-[var(--muted)]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-[var(--muted-foreground)]">
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 flex items-center gap-2">
                   <User className="h-3.5 w-3.5" aria-hidden="true" /> Usuario autenticado: {user?.username || "-"}
                 </div>
@@ -526,75 +528,75 @@ export default function AdminPerfilPage() {
               </div>
 
               <div>
-                <Button variant="danger" onPress={handleLogout}>
+                <Button variant="destructive" onClick={handleLogout}>
                   Cerrar sesión
                 </Button>
               </div>
-            </Card.Content>
-          </Card>
+            </div>
+          </div>
         </div>
       ) : null}
 
       {!loading && activeTab === "actividad-api" ? (
         <div className="space-y-4">
-          <Card className="bg-[var(--surface)] border border-[var(--border)]">
-            <Card.Content className="p-5 space-y-3">
+          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="p-5 space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Activity className="h-4 w-4" aria-hidden="true" />
                   <p className="text-sm font-medium">Ultimo error API</p>
                 </div>
-                <Button size="sm" variant="tertiary" onPress={handleClearHistory}>
+                <Button size="sm" variant="ghost" onClick={handleClearHistory}>
                   Limpiar historial
                 </Button>
               </div>
 
               {lastApiError ? (
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 space-y-1">
-                  <p className="text-xs text-[var(--muted)]">
+                  <p className="text-xs text-[var(--muted-foreground)]">
                     {lastApiError.method} {lastApiError.path}
                   </p>
                   <p className="text-sm text-[var(--foreground)]">
                     {lastApiError.status} {lastApiError.code ? `(${lastApiError.code})` : ""}
                   </p>
-                  <p className="text-xs text-[var(--muted)]">{lastApiError.message}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">{lastApiError.message}</p>
                   <p className="text-[11px] text-[var(--field-placeholder)]">
                     {new Date(lastApiError.at).toLocaleString("es-CL")}
                   </p>
                 </div>
               ) : (
-                <p className="text-xs text-[var(--muted)]">Sin errores API recientes.</p>
+                <p className="text-xs text-[var(--muted-foreground)]">Sin errores API recientes.</p>
               )}
-            </Card.Content>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-[var(--surface)] border border-[var(--border)]">
-            <Card.Content className="p-5 space-y-3">
+          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="p-5 space-y-3">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <Zap className="h-4 w-4" aria-hidden="true" />
                 <p className="text-sm font-medium">Histórico (últimos {errorHistory.length})</p>
               </div>
 
               {errorHistory.length === 0 ? (
-                <p className="text-xs text-[var(--muted)]">No hay errores en historial.</p>
+                <p className="text-xs text-[var(--muted-foreground)]">No hay errores en historial.</p>
               ) : (
                 <div className="space-y-2">
                   {errorHistory.map((entry, index) => (
                     <div key={`${entry.at}-${entry.path}-${index}`} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">
                         <span>{entry.method}</span>
                         <span>{entry.path}</span>
-                        <span className="text-[var(--muted)]">status {entry.status}</span>
-                        {entry.code ? <span className="text-[var(--muted)]">code {entry.code}</span> : null}
+                        <span className="text-[var(--muted-foreground)]">status {entry.status}</span>
+                        {entry.code ? <span className="text-[var(--muted-foreground)]">code {entry.code}</span> : null}
                       </div>
-                      <p className="text-xs text-[var(--muted)] break-words">{entry.message}</p>
+                      <p className="text-xs text-[var(--muted-foreground)] break-words">{entry.message}</p>
                       <p className="text-[11px] text-[var(--field-placeholder)]">{new Date(entry.at).toLocaleString("es-CL")}</p>
                     </div>
                   ))}
                 </div>
               )}
-            </Card.Content>
-          </Card>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

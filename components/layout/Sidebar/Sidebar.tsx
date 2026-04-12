@@ -1,123 +1,203 @@
 "use client";
 
+import { useState, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import Image from "next/image";
-import { Button } from "@heroui/react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { NAV_ITEMS, type NavEntry } from "@/lib/constants/nav-items";
+import { usePathname, useRouter } from "next/navigation";
+import { X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { NAV_GROUPS, type NavMainGroup, type NavSection } from "@/lib/constants/nav-items";
 import s from "./styles/Sidebar.module.css";
 
 interface SidebarProps {
-  collapsed: boolean;
-  onToggle: () => void;
-  mobileOpen: boolean;
-  onMobileClose: () => void;
+  onToggle?: () => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
+export function Sidebar({ onToggle, mobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const sidebarContent = (
+  const activePathGroup = NAV_GROUPS.find((g) => {
+    if (g.href && (pathname === g.href || pathname.startsWith(g.href + "/"))) return true;
+    if (g.sections) {
+      return g.sections.some((sec) =>
+        sec.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
+      );
+    }
+    return false;
+  });
+
+  const [hoverGroup, setHoverGroup] = useState<NavMainGroup | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const displayGroup = hoverGroup || activePathGroup;
+
+  const handleGroupMouseEnter = (group: NavMainGroup) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setHoverGroup(group);
+  };
+
+  const handleMouseLeaveSidebar = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoverGroup(null);
+    }, 150);
+  };
+
+  const handleMouseEnterPanel = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+  };
+
+  const handleGroupClick = (group: NavMainGroup) => {
+    if (group.href) {
+      router.push(group.href);
+      if (onMobileClose) onMobileClose();
+    } else if (group.sections && group.sections.length > 0 && group.sections[0].items.length > 0) {
+      router.push(group.sections[0].items[0].href);
+      if (onMobileClose) onMobileClose();
+    }
+
+    if (mobileOpen && !group.href) {
+      setHoverGroup(hoverGroup?.label === group.label ? null : group);
+    }
+  };
+
+  // ── SLENDER MAIN PANEL ──
+  const mainSidebarContent = (
     <div className={s.inner}>
-      {/* Logo */}
-      <div className={s.logo}>
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
-          <Image src="/logo.png" alt="Rankeao" fill sizes="36px" className="object-contain p-1" priority />
-        </div>
-        {!collapsed && (
-          <div className="flex flex-col">
-            <span className="font-[var(--font-heading)] text-lg font-bold text-gradient-brand">
-              Rankeao
-            </span>
-            <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">
-              Panel Admin
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Nav Items */}
-      <nav className={s.nav} aria-label="Navegación principal">
-        {NAV_ITEMS.map((entry: NavEntry, i: number) => {
-          if ("type" in entry && entry.type === "divider") {
-            return (
-              <div key={`div-${i}`} className={s.divider}>
-                {!collapsed && (
-                  <span className={s.dividerLabel}>{entry.label}</span>
-                )}
-                {collapsed && <div className={s.dividerLine} />}
-              </div>
-            );
-          }
-
-          if (!("href" in entry)) return null;
-          const Icon = entry.icon;
-          const isActive = pathname === entry.href || pathname.startsWith(entry.href + "/");
+      <nav className={s.nav}>
+        {NAV_GROUPS.map((group) => {
+          const Icon = group.icon;
+          const isActive = displayGroup?.label === group.label;
 
           return (
-            <Link
-              key={entry.href}
-              href={entry.href}
-              onClick={onMobileClose}
+            <button
+              key={group.label}
+              onMouseEnter={() => handleGroupMouseEnter(group)}
+              onClick={() => handleGroupClick(group)}
               className={`${s.navItem} ${isActive ? s.active : ""}`}
-              title={collapsed ? entry.label : undefined}
-              aria-current={isActive ? "page" : undefined}
-              aria-label={collapsed ? entry.label : undefined}
             >
-              <Icon className={`${s.navIcon} ${isActive ? s.navIconActive : ""}`} aria-hidden="true" />
-              {!collapsed && <span>{entry.label}</span>}
-            </Link>
+              <div className={s.navIconWrap}>
+                <Icon className={s.navIcon} />
+              </div>
+              <span className={s.navLabel}>{group.label}</span>
+            </button>
           );
         })}
       </nav>
-
-      {/* Collapse toggle (desktop only) */}
-      <div className={s.collapseToggle}>
-        <Button
-          variant="secondary"
-          onPress={onToggle}
-          aria-label={collapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
-          className="w-full text-[var(--muted)] hover:text-[var(--foreground)]"
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
-        </Button>
-      </div>
     </div>
   );
 
+  // ── EXTRA SIDEBAR (SUB-MENU) ──
+  const renderSubMenuContent = (group: NavMainGroup) => {
+    if (!group.sections) return null;
+    return (
+      <motion.div
+        key={group.label}
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -5, transition: { duration: 0.1 } }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className={s.subInner}
+      >
+        <motion.div
+          className={s.subHeader}
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05, duration: 0.3 }}
+        >
+          <h2 className={s.subTitle}>{group.label}</h2>
+        </motion.div>
+        <div className={s.subScroll}>
+          {group.sections.map((section: NavSection, idx: number) => (
+            <motion.div
+              key={idx}
+              className={s.subSection}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 + idx * 0.05, duration: 0.3, ease: "easeOut" }}
+            >
+              {section.title && <h3 className={s.subSectionTitle}>{section.title}</h3>}
+              <ul className={s.subList}>
+                {section.items.map((item) => {
+                  const isItemActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          setHoverGroup(null);
+                          if (onMobileClose) onMobileClose();
+                        }}
+                        className={`${s.subLink} ${isItemActive ? s.subLinkActive : ""}`}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <>
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className={s.overlay}
-          onClick={onMobileClose}
-          onKeyDown={(e) => { if (e.key === "Escape") onMobileClose(); }}
-          role="button"
-          tabIndex={-1}
-          aria-label="Cerrar menú"
-        />
-      )}
+      {mobileOpen && <div className={s.overlay} onClick={onMobileClose} />}
 
-      {/* Mobile drawer */}
-      <aside className={`${s.mobile} ${mobileOpen ? s.mobileOpen : ""}`} aria-label="Menú móvil">
-        <Button
-          isIconOnly
-          size="sm"
-          variant="secondary"
-          onPress={onMobileClose}
-          aria-label="Cerrar menú"
-          className="absolute right-3 top-4 text-[var(--muted)] hover:text-[var(--foreground)]"
-        >
-          <X className="h-5 w-5" aria-hidden="true" />
-        </Button>
-        {sidebarContent}
+      {/* MOBILE DRAWER */}
+      <aside className={`${s.mobileWrapper} ${mobileOpen ? s.mobileOpen : ""}`}>
+        <div className={s.mobile}>
+          {mobileOpen && (
+            <button onClick={onMobileClose} className={s.mobileClose}>
+              <X className="h-5 w-5" />
+            </button>
+          )}
+          {mainSidebarContent}
+        </div>
+        <AnimatePresence>
+          {displayGroup?.sections && mobileOpen && (
+            <motion.div
+              key={displayGroup.label}
+              className={`${s.subSidebar} ${s.subSidebarMobile}`}
+            >
+              <AnimatePresence mode="wait">
+                {renderSubMenuContent(displayGroup)}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </aside>
 
-      {/* Desktop sidebar */}
-      <aside className={`${s.desktop} ${collapsed ? s.collapsed : ""}`} aria-label="Barra lateral">
-        {sidebarContent}
+      {/* DESKTOP FLEX WRAPPER WITH HOVER SENSING */}
+      <aside
+        className={s.desktopWrapper}
+        onMouseLeave={handleMouseLeaveSidebar}
+        onMouseEnter={handleMouseEnterPanel}
+      >
+        <div className={s.desktop}>
+          {mainSidebarContent}
+        </div>
+
+        <AnimatePresence>
+          {displayGroup?.sections && hoverGroup && (
+            <motion.div
+              key="submenu"
+              className={s.subSidebar}
+              initial={{ x: -40, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0, transition: { duration: 0.15, ease: "easeIn" } }}
+              transition={{ type: "spring", stiffness: 450, damping: 35, mass: 0.8 }}
+            >
+              <AnimatePresence mode="wait">
+                {renderSubMenuContent(displayGroup)}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </aside>
     </>
   );

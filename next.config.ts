@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
@@ -9,7 +12,7 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24,
   },
   experimental: {
-    optimizePackageImports: ["@heroui/react", "@heroui/styles", "lucide-react"],
+    optimizePackageImports: ["@base-ui/react", "lucide-react"],
   },
 };
 

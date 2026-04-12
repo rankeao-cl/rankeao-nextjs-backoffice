@@ -1,18 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  Description,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  TextArea,
-  TextField,
-} from "@heroui/react";
-import { toast } from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Layers, Pencil, Printer, Scale, Plus, Trash2 } from "lucide-react";
 import {
   useGames,
@@ -90,7 +83,7 @@ export default function CardsPage() {
 
   const handleCreateCard = () => {
     if (!createForm.game_id || !createForm.name) {
-      toast.danger("game_id y nombre son requeridos");
+      toast.error("game_id y nombre son requeridos");
       return;
     }
 
@@ -116,14 +109,14 @@ export default function CardsPage() {
         });
       },
       onError: (err) => {
-        toast.danger(getErrorMessage(err, "Error al crear carta"));
+        toast.error(getErrorMessage(err, "Error al crear carta"));
       },
     });
   };
 
   const handleUpdateCard = () => {
     if (!updateForm.card_id) {
-      toast.danger("Ingresa el Card ID");
+      toast.error("Ingresa el Card ID");
       return;
     }
 
@@ -135,7 +128,7 @@ export default function CardsPage() {
     if (updateForm.is_token) data.is_token = updateForm.is_token.toLowerCase() === "true";
 
     if (Object.keys(data).length === 0) {
-      toast.danger("Ingresa al menos un campo para actualizar");
+      toast.error("Ingresa al menos un campo para actualizar");
       return;
     }
 
@@ -146,7 +139,7 @@ export default function CardsPage() {
           toast.success("Carta actualizada");
         },
         onError: (err) => {
-          toast.danger(getErrorMessage(err, "Error al actualizar carta"));
+          toast.error(getErrorMessage(err, "Error al actualizar carta"));
         },
       },
     );
@@ -154,7 +147,7 @@ export default function CardsPage() {
 
   const handleCreatePrinting = () => {
     if (!printingForm.card_id || !printingForm.set_id) {
-      toast.danger("card_id y set_id son requeridos");
+      toast.error("card_id y set_id son requeridos");
       return;
     }
 
@@ -199,7 +192,7 @@ export default function CardsPage() {
           }));
         },
         onError: (err) => {
-          toast.danger(getErrorMessage(err, "Error al crear edicion"));
+          toast.error(getErrorMessage(err, "Error al crear edicion"));
         },
       },
     );
@@ -207,13 +200,13 @@ export default function CardsPage() {
 
   const handleBatchLegality = () => {
     if (!legalityCardId) {
-      toast.danger("Ingresa el Card ID");
+      toast.error("Ingresa el Card ID");
       return;
     }
 
     const validEntries = legalityEntries.filter((e) => e.format_id.trim());
     if (validEntries.length === 0) {
-      toast.danger("Agrega al menos una entrada con format_id");
+      toast.error("Agrega al menos una entrada con format_id");
       return;
     }
 
@@ -225,7 +218,7 @@ export default function CardsPage() {
           setLegalityEntries([{ format_id: "", legality: "LEGAL" }]);
         },
         onError: (err) => {
-          toast.danger(getErrorMessage(err, "Error al actualizar legalidad"));
+          toast.error(getErrorMessage(err, "Error al actualizar legalidad"));
         },
       },
     );
@@ -250,30 +243,30 @@ export default function CardsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
           Cartas y Ediciones
         </h1>
-        <p className="text-sm text-[var(--muted)] mt-1">
+        <p className="text-sm text-[var(--muted-foreground)] mt-1">
           Crear cartas, registrar ediciones (printings) y gestionar legalidad por formato.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* ── Create Card ── */}
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="p-5">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreateCard(); }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
                   <Layers className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Crear carta
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Registra una carta nueva asociada a un juego del catalogo.
-                </Description>
+                </p>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Juego</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Juego</Label>
                   <select
                     className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
                     value={createForm.game_id}
@@ -286,51 +279,43 @@ export default function CardsPage() {
                       </option>
                     ))}
                   </select>
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Nombre</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Nombre</Label>
                   <Input
                     placeholder="Nombre de la carta"
                     value={createForm.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setCreateForm((prev) => ({ ...prev, name: e.target.value }))
-                    }
+                    onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Linea de tipo</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Linea de tipo</Label>
                   <Input
                     placeholder="ej: Creature — Human Warrior"
                     value={createForm.type_line}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setCreateForm((prev) => ({ ...prev, type_line: e.target.value }))
-                    }
+                    onChange={(e) => setCreateForm((prev) => ({ ...prev, type_line: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Texto oracle</Label>
-                  <TextArea
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Texto oracle</Label>
+                  <Textarea
                     placeholder="Texto de reglas"
                     value={createForm.oracle_text}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setCreateForm((prev) => ({ ...prev, oracle_text: e.target.value }))
-                    }
+                    onChange={(e) => setCreateForm((prev) => ({ ...prev, oracle_text: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Texto de ambientacion</Label>
-                  <TextArea
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Texto de ambientacion</Label>
+                  <Textarea
                     placeholder="Flavor text (opcional)"
                     value={createForm.flavor_text}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setCreateForm((prev) => ({ ...prev, flavor_text: e.target.value }))
-                    }
+                    onChange={(e) => setCreateForm((prev) => ({ ...prev, flavor_text: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
                 <label className="flex items-center gap-2 text-sm text-[var(--foreground)] cursor-pointer">
                   <input
@@ -344,321 +329,286 @@ export default function CardsPage() {
                   Es token
                 </label>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleCreateCard} isPending={createCard.isPending}>
+                <div className="pt-1">
+                  <Button type="submit" disabled={createCard.isPending}>
+                    {createCard.isPending && (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    )}
                     Crear carta
                   </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
 
         {/* ── Update Card ── */}
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="p-5">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleUpdateCard(); }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
                   <Pencil className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Actualizar carta
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Modifica los atributos de una carta existente por su ID.
-                </Description>
+                </p>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Card ID</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Card ID</Label>
                   <Input
                     placeholder="card_id"
                     value={updateForm.card_id}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setUpdateForm((prev) => ({ ...prev, card_id: e.target.value }))
-                    }
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, card_id: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Nombre</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Nombre</Label>
                   <Input
                     placeholder="opcional"
                     value={updateForm.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setUpdateForm((prev) => ({ ...prev, name: e.target.value }))
-                    }
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, name: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Linea de tipo</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Linea de tipo</Label>
                   <Input
                     placeholder="opcional"
                     value={updateForm.type_line}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setUpdateForm((prev) => ({ ...prev, type_line: e.target.value }))
-                    }
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, type_line: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Texto oracle</Label>
-                  <TextArea
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Texto oracle</Label>
+                  <Textarea
                     placeholder="opcional"
                     value={updateForm.oracle_text}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setUpdateForm((prev) => ({ ...prev, oracle_text: e.target.value }))
-                    }
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, oracle_text: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Texto de ambientacion</Label>
-                  <TextArea
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Texto de ambientacion</Label>
+                  <Textarea
                     placeholder="opcional"
                     value={updateForm.flavor_text}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setUpdateForm((prev) => ({ ...prev, flavor_text: e.target.value }))
-                    }
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, flavor_text: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">is_token</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">is_token</Label>
                   <Input
                     placeholder="true | false (opcional)"
                     value={updateForm.is_token}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setUpdateForm((prev) => ({ ...prev, is_token: e.target.value }))
-                    }
+                    onChange={(e) => setUpdateForm((prev) => ({ ...prev, is_token: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleUpdateCard} isPending={updateCard.isPending}>
+                <div className="pt-1">
+                  <Button type="submit" disabled={updateCard.isPending}>
+                    {updateCard.isPending && (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    )}
                     Guardar cambios
                   </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
 
         {/* ── Create Printing ── */}
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="p-5">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreatePrinting(); }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
                   <Printer className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Crear edicion (printing)
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Asocia una edicion/impresion a una carta existente.
-                </Description>
+                </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Card ID</Label>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Card ID</Label>
                     <Input
                       placeholder="card_id"
                       value={printingForm.card_id}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, card_id: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, card_id: e.target.value }))}
                     />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Set ID</Label>
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Set ID</Label>
                     <Input
                       placeholder="set_id"
                       value={printingForm.set_id}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, set_id: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, set_id: e.target.value }))}
                     />
-                  </TextField>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Numero de coleccion</Label>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Numero de coleccion</Label>
                     <Input
                       placeholder="ej: 042"
                       value={printingForm.collector_number}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, collector_number: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, collector_number: e.target.value }))}
                     />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Rareza</Label>
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Rareza</Label>
                     <Input
                       placeholder="common | uncommon | rare | mythic"
                       value={printingForm.rarity}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, rarity: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, rarity: e.target.value }))}
                     />
-                  </TextField>
+                  </div>
                 </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">URL imagen</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">URL imagen</Label>
                   <Input
                     placeholder="imagen principal"
                     value={printingForm.image_url}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setPrintingForm((prev) => ({ ...prev, image_url: e.target.value }))
-                    }
+                    onChange={(e) => setPrintingForm((prev) => ({ ...prev, image_url: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">URL imagen small</Label>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">URL imagen small</Label>
                     <Input
                       placeholder="opcional"
                       value={printingForm.image_url_small}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, image_url_small: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, image_url_small: e.target.value }))}
                     />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">URL imagen art</Label>
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">URL imagen art</Label>
                     <Input
                       placeholder="opcional"
                       value={printingForm.image_url_art}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, image_url_art: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, image_url_art: e.target.value }))}
                     />
-                  </TextField>
+                  </div>
                 </div>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Artista</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Artista</Label>
                   <Input
                     placeholder="opcional"
                     value={printingForm.artist}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setPrintingForm((prev) => ({ ...prev, artist: e.target.value }))
-                    }
+                    onChange={(e) => setPrintingForm((prev) => ({ ...prev, artist: e.target.value }))}
                   />
-                </TextField>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Foil disponible</Label>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Foil disponible</Label>
                     <Input
                       placeholder="true | false"
                       value={printingForm.is_foil_available}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, is_foil_available: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, is_foil_available: e.target.value }))}
                     />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Non-foil disponible</Label>
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Non-foil disponible</Label>
                     <Input
                       placeholder="true | false"
                       value={printingForm.is_nonfoil_available}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, is_nonfoil_available: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, is_nonfoil_available: e.target.value }))}
                     />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Primera edicion</Label>
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Primera edicion</Label>
                     <Input
                       placeholder="true | false"
                       value={printingForm.is_first_edition}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, is_first_edition: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, is_first_edition: e.target.value }))}
                     />
-                  </TextField>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Precio USD</Label>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Precio USD</Label>
                     <Input
                       placeholder="ej: 1.50"
                       value={printingForm.price_usd}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, price_usd: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, price_usd: e.target.value }))}
                     />
-                  </TextField>
-                  <TextField className="space-y-1 flex flex-col">
-                    <Label className="text-xs text-[var(--muted)]">Precio CLP</Label>
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Precio CLP</Label>
                     <Input
                       placeholder="ej: 1200"
                       value={printingForm.price_clp}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                        setPrintingForm((prev) => ({ ...prev, price_clp: e.target.value }))
-                      }
+                      onChange={(e) => setPrintingForm((prev) => ({ ...prev, price_clp: e.target.value }))}
                     />
-                  </TextField>
+                  </div>
                 </div>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleCreatePrinting} isPending={createPrinting.isPending}>
+                <div className="pt-1">
+                  <Button type="submit" disabled={createPrinting.isPending}>
+                    {createPrinting.isPending && (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    )}
                     Crear edicion
                   </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
 
         {/* ── Batch Update Legality ── */}
-        <Card className="bg-[var(--surface)] border border-[var(--border)]">
-          <Card.Content className="p-5">
-            <Form className="space-y-4">
-              <Fieldset className="space-y-4">
-                <Fieldset.Legend className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
+        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="p-5">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleBatchLegality(); }}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
                   <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
                   Actualizar legalidad
-                </Fieldset.Legend>
-                <Description className="text-xs text-[var(--muted)]">
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Define en que formatos una carta es legal, baneada o restringida.
-                </Description>
+                </p>
 
-                <TextField className="space-y-1 flex flex-col">
-                  <Label className="text-xs text-[var(--muted)]">Card ID</Label>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Card ID</Label>
                   <Input
                     placeholder="card_id"
                     value={legalityCardId}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setLegalityCardId(e.target.value)
-                    }
+                    onChange={(e) => setLegalityCardId(e.target.value)}
                   />
-                </TextField>
+                </div>
 
                 <div className="space-y-3">
-                  <p className="text-xs font-medium text-[var(--muted)]">Entradas de legalidad</p>
+                  <p className="text-xs font-medium text-[var(--muted-foreground)]">Entradas de legalidad</p>
                   {legalityEntries.map((entry, index) => (
                     <div key={index} className="flex items-end gap-2">
-                      <TextField className="space-y-1 flex flex-col flex-1">
-                        <Label className="text-xs text-[var(--muted)]">Format ID</Label>
+                      <div className="space-y-1 flex flex-col flex-1">
+                        <Label className="text-xs text-[var(--muted-foreground)]">Format ID</Label>
                         <Input
                           placeholder="format_id"
                           value={entry.format_id}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            updateLegalityEntry(index, "format_id", e.target.value)
-                          }
+                          onChange={(e) => updateLegalityEntry(index, "format_id", e.target.value)}
                         />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col flex-1">
-                        <Label className="text-xs text-[var(--muted)]">Legalidad</Label>
+                      </div>
+                      <div className="space-y-1 flex flex-col flex-1">
+                        <Label className="text-xs text-[var(--muted-foreground)]">Legalidad</Label>
                         <select
                           className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
                           value={entry.legality}
-                          onChange={(e) =>
-                            updateLegalityEntry(index, "legality", e.target.value)
-                          }
+                          onChange={(e) => updateLegalityEntry(index, "legality", e.target.value)}
                         >
                           {LEGALITY_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>
@@ -666,15 +616,14 @@ export default function CardsPage() {
                             </option>
                           ))}
                         </select>
-                      </TextField>
+                      </div>
                       {legalityEntries.length > 1 && (
                         <Button
                           type="button"
-                          variant="danger"
-                          size="sm"
-                          isIconOnly
+                          variant="destructive"
+                          size="icon"
                           aria-label="Eliminar entrada de legalidad"
-                          onPress={() => removeLegalityEntry(index)}
+                          onClick={() => removeLegalityEntry(index)}
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         </Button>
@@ -683,24 +632,27 @@ export default function CardsPage() {
                   ))}
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
-                    onPress={addLegalityEntry}
+                    onClick={addLegalityEntry}
                   >
                     <Plus className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                     Agregar formato
                   </Button>
                 </div>
 
-                <Fieldset.Actions className="pt-1">
-                  <Button type="button" onPress={handleBatchLegality} isPending={batchLegality.isPending}>
+                <div className="pt-1">
+                  <Button type="submit" disabled={batchLegality.isPending}>
+                    {batchLegality.isPending && (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    )}
                     Guardar legalidad
                   </Button>
-                </Fieldset.Actions>
-              </Fieldset>
-            </Form>
-          </Card.Content>
-        </Card>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

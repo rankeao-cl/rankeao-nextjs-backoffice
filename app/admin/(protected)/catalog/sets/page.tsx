@@ -1,21 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  Chip,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  Modal,
-  Skeleton,
-  Table,
-  TextField,
-} from "@heroui/react";
-import { toast } from "@heroui/react";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Edit, Plus, Search } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils/error-message";
 import {
@@ -70,7 +61,7 @@ export default function SetsPage() {
   const { data: games = [], isLoading: gamesLoading } = useGames();
   const { data: sets = [], isLoading: setsLoading } = useSets(selectedGame);
 
-  const createModal = useDisclosure();
+  const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<CardSet | null>(null);
   const [formData, setFormData] = useState<SetForm>(INITIAL_FORM);
 
@@ -88,7 +79,7 @@ export default function SetsPage() {
   const openCreate = () => {
     setEditTarget(null);
     setFormData(INITIAL_FORM);
-    createModal.onOpen();
+    setModalOpen(true);
   };
 
   const openEdit = (set: CardSet) => {
@@ -103,7 +94,7 @@ export default function SetsPage() {
       icon_url: String(set.icon_url || ""),
       is_active: Boolean(set.is_active ?? true),
     });
-    createModal.onOpen();
+    setModalOpen(true);
   };
 
   const handleSave = () => {
@@ -125,10 +116,10 @@ export default function SetsPage() {
         {
           onSuccess: () => {
             toast.success("Set actualizado");
-            createModal.onClose();
+            setModalOpen(false);
           },
           onError: (err: unknown) => {
-            toast.danger(getErrorMessage(err, "Error al actualizar set"));
+            toast.error(getErrorMessage(err, "Error al actualizar set"));
           },
         },
       );
@@ -148,10 +139,10 @@ export default function SetsPage() {
         {
           onSuccess: () => {
             toast.success("Set creado");
-            createModal.onClose();
+            setModalOpen(false);
           },
           onError: (err: unknown) => {
-            toast.danger(getErrorMessage(err, "Error al crear set"));
+            toast.error(getErrorMessage(err, "Error al crear set"));
           },
         },
       );
@@ -169,7 +160,7 @@ export default function SetsPage() {
     switch (columnKey) {
       case "code":
         return (
-          <code className="text-xs text-[var(--muted)] bg-[var(--surface)] px-2 py-0.5 rounded font-medium">
+          <code className="text-xs text-[var(--muted-foreground)] bg-[var(--surface)] px-2 py-0.5 rounded font-medium">
             {String(set.code || "-")}
           </code>
         );
@@ -181,25 +172,25 @@ export default function SetsPage() {
         );
       case "set_type":
         return (
-          <span className="text-sm text-[var(--muted)]">
+          <span className="text-sm text-[var(--muted-foreground)]">
             {String(set.set_type || "-")}
           </span>
         );
       case "total_cards":
         return (
-          <span className="text-sm text-[var(--muted)]">
+          <span className="text-sm text-[var(--muted-foreground)]">
             {set.total_cards != null ? String(set.total_cards) : "-"}
           </span>
         );
       case "status":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <Badge variant="default">
             {set.is_active ? "Activo" : "Inactivo"}
-          </Chip>
+          </Badge>
         );
       case "release_date":
         return (
-          <span className="text-xs text-[var(--muted)]">
+          <span className="text-xs text-[var(--muted-foreground)]">
             {set.release_date
               ? new Date(set.release_date).toLocaleDateString("es-CL")
               : "-"}
@@ -208,7 +199,7 @@ export default function SetsPage() {
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar set" onPress={() => openEdit(set)}>
+            <Button size="icon" variant="outline" aria-label="Editar set" onClick={() => openEdit(set)}>
               <Edit className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
@@ -222,21 +213,21 @@ export default function SetsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Sets / Expansiones
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">
             Gestionar sets y expansiones del catalogo
           </p>
         </div>
       </div>
 
       {/* Game selector + search + create */}
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="px-5 py-3">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1 flex flex-col min-w-[200px]">
-              <label className="text-xs text-[var(--muted)]">Juego</label>
+              <label className="text-xs text-[var(--muted-foreground)]">Juego</label>
               <select
                 className="h-9 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:ring-1 focus:ring-[var(--primary)]"
                 value={selectedGame}
@@ -255,39 +246,37 @@ export default function SetsPage() {
               </select>
             </div>
 
-            <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Buscar set</Label>
+            <div className="space-y-1 flex flex-col min-w-[200px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Buscar set</Label>
               <Input
                 placeholder="Nombre o codigo..."
                 value={search}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                  setSearch(e.target.value)
-                }
+                onChange={(e) => setSearch(e.target.value)}
                 disabled={!selectedGame}
               />
-            </TextField>
+            </div>
 
             <Button
               type="button"
-              variant="primary"
+              variant="default"
               size="sm"
-              onPress={openCreate}
-              isDisabled={!selectedGame}
+              onClick={openCreate}
+              disabled={!selectedGame}
             >
               <Plus className="h-4 w-4 mr-1" aria-hidden="true" />
               Nuevo set
             </Button>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
       {/* Table */}
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {!selectedGame ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Search className="h-10 w-10 text-[var(--muted)] mb-3 opacity-40" aria-hidden="true" />
-              <p className="text-sm text-[var(--muted)]">
+              <Search className="h-10 w-10 text-[var(--muted-foreground)] mb-3 opacity-40" aria-hidden="true" />
+              <p className="text-sm text-[var(--muted-foreground)]">
                 Selecciona un juego para ver sus sets
               </p>
             </div>
@@ -305,171 +294,152 @@ export default function SetsPage() {
             </div>
           ) : filteredSets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-sm text-[var(--muted)]">
+              <p className="text-sm text-[var(--muted-foreground)]">
                 {search ? "No se encontraron sets con ese filtro" : "No hay sets para este juego"}
               </p>
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Sets table">
-                  <Table.Header columns={TABLE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {TABLE_COLUMNS.map((column) => (
+                      <th key={column.key} className="table-header px-4 py-3 text-left">
                         {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredSets.map((set) => (
-                      <Table.Row key={set.id}>
-                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
-                          <Table.Cell key={column.key}>
-                            {renderCell(set, column.key)}
-                          </Table.Cell>
-                        ))}
-                      </Table.Row>
+                      </th>
                     ))}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredSets.map((set) => (
+                    <tr key={set.id} className="table-row">
+                      {TABLE_COLUMNS.map((column) => (
+                        <td key={column.key} className="px-4 py-3">
+                          {renderCell(set, column.key)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
       {/* Create / Edit Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={createModal.isOpen}
-          onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}
-        >
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>
-                  {editTarget ? "Editar Set" : "Crear Set"}
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Codigo *</Label>
-                        <Input
-                          value={formData.code}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, code: e.target.value }))
-                          }
-                          placeholder="ej: SVI"
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Nombre *</Label>
-                        <Input
-                          value={formData.name}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, name: e.target.value }))
-                          }
-                          placeholder="ej: Scarlet & Violet"
-                        />
-                      </TextField>
-                    </div>
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setModalOpen(false)}
+          />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">
+              {editTarget ? "Editar Set" : "Crear Set"}
+            </h2>
+            <form className="w-full" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+              <div className="space-y-4 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Codigo *</Label>
+                    <Input
+                      value={formData.code}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
+                      placeholder="ej: SVI"
+                    />
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Nombre *</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder="ej: Scarlet & Violet"
+                    />
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Fecha de lanzamiento</Label>
-                        <Input
-                          type="date"
-                          value={formData.release_date}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, release_date: e.target.value }))
-                          }
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Tipo de set</Label>
-                        <Input
-                          value={formData.set_type}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, set_type: e.target.value }))
-                          }
-                          placeholder="ej: expansion, core, promo"
-                        />
-                      </TextField>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Fecha de lanzamiento</Label>
+                    <Input
+                      type="date"
+                      value={formData.release_date}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, release_date: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Tipo de set</Label>
+                    <Input
+                      value={formData.set_type}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, set_type: e.target.value }))}
+                      placeholder="ej: expansion, core, promo"
+                    />
+                  </div>
+                </div>
 
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Total de cartas</Label>
-                      <Input
-                        type="number"
-                        value={formData.total_cards}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                          setFormData((prev) => ({ ...prev, total_cards: e.target.value }))
-                        }
-                        placeholder="ej: 198"
-                      />
-                    </TextField>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Total de cartas</Label>
+                  <Input
+                    type="number"
+                    value={formData.total_cards}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, total_cards: e.target.value }))}
+                    placeholder="ej: 198"
+                  />
+                </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Logo URL</Label>
-                        <Input
-                          value={formData.logo_url}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, logo_url: e.target.value }))
-                          }
-                          placeholder="https://..."
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Icon URL</Label>
-                        <Input
-                          value={formData.icon_url}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, icon_url: e.target.value }))
-                          }
-                          placeholder="https://..."
-                        />
-                      </TextField>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Logo URL</Label>
+                    <Input
+                      value={formData.logo_url}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, logo_url: e.target.value }))}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="space-y-1 flex flex-col">
+                    <Label className="text-xs text-[var(--muted-foreground)]">Icon URL</Label>
+                    <Input
+                      value={formData.icon_url}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, icon_url: e.target.value }))}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
 
-                    {editTarget && (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="is_active"
-                          checked={formData.is_active}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, is_active: e.target.checked }))
-                          }
-                          className="accent-[var(--primary)]"
-                        />
-                        <label htmlFor="is_active" className="text-sm text-[var(--foreground)]">
-                          Activo
-                        </label>
-                      </div>
-                    )}
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={createModal.onClose}>
+                {editTarget && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="is_active"
+                      checked={formData.is_active}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, is_active: e.target.checked }))
+                      }
+                      className="accent-[var(--primary)]"
+                    />
+                    <label htmlFor="is_active" className="text-sm text-[var(--foreground)]">
+                      Activo
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
                   Cancelar
                 </Button>
-                <Button
-                  onPress={handleSave}
-                  isPending={formLoading}
-                  variant="primary"
-                >
+                <Button type="submit" variant="default" disabled={formLoading}>
+                  {formLoading && (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                  )}
                   {editTarget ? "Guardar" : "Crear"}
                 </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

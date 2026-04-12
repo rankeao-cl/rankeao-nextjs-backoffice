@@ -10,8 +10,6 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const collapsed = useUIStore((s) => s.sidebarCollapsed);
-  const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const mobileOpen = useUIStore((s) => s.mobileMenuOpen);
   const setMobileOpen = useUIStore((s) => s.setMobileMenuOpen);
 
@@ -19,19 +17,17 @@ export default function ProtectedLayout({
     <AuthGuard>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-[var(--c-navy-700)] focus:text-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:outline-none"
       >
         Ir al contenido principal
       </a>
-      <div className="admin-shell flex h-screen overflow-hidden bg-[var(--background)]">
-        <Sidebar
-          collapsed={collapsed}
-          onToggle={toggleSidebar}
-          mobileOpen={mobileOpen}
-          onMobileClose={() => setMobileOpen(false)}
-        />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <Header onMenuToggle={() => setMobileOpen(true)} />
+      <div className="flex flex-col h-screen overflow-hidden bg-[var(--background)]">
+        <Header onMenuToggle={() => setMobileOpen(true)} />
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar
+            mobileOpen={mobileOpen}
+            onMobileClose={() => setMobileOpen(false)}
+          />
           <main id="main-content" className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
             <div className="mx-auto w-full max-w-[1480px]">
               {children}

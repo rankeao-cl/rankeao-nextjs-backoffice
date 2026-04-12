@@ -1,17 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Rajdhani } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const rajdhani = Rajdhani({
-  variable: "--font-rajdhani",
+const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
 });
 
 export const viewport: Viewport = {
@@ -26,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s | Rankeao Admin",
   },
   description:
-    "Panel de administración de Rankeao.cl — gestión de tiendas, productos, órdenes, inventario, personal, analíticas y más.",
+    "Panel de administración de Rankeao.cl — gestión de tiendas, catálogo, gamificación, torneos y más.",
   robots: { index: false, follow: false },
 };
 
@@ -36,17 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('rankeao-theme');if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light')}}catch(e){}})()`,
-          }}
-        />
-      </head>
-      <body
-        className={`${inter.variable} ${rajdhani.variable} font-[var(--font-body)] antialiased bg-[var(--background)] text-[var(--foreground)]`}
-      >
+    <html lang="es" className={`light ${poppins.variable}`} data-theme="light" suppressHydrationWarning>
+      <body className="font-[var(--font-poppins)] antialiased bg-[var(--background)] text-[var(--foreground)]">
         <Providers>{children}</Providers>
       </body>
     </html>

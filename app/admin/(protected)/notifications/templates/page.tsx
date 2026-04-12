@@ -1,24 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  Chip,
-  ComboBox,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  ListBox,
-  Modal,
-  Select,
-  Skeleton,
-  Table,
-  TextArea,
-  TextField,
-  toast,
-} from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useTemplates,
   useCreateTemplate,
@@ -34,7 +22,6 @@ import type {
 } from "@/lib/types/notification";
 import type { ListMeta } from "@/lib/types/api";
 import { getErrorMessage } from "@/lib/utils/error-message";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
 import { Bell, Edit, Eye, Send } from "lucide-react";
 
 type ActiveFilter = "all" | "true" | "false";
@@ -110,7 +97,7 @@ export default function TemplatesPage() {
   const testMutation = useTestTemplate();
 
   // -- Create / Edit modal ---------------------------------------------------
-  const createModal = useDisclosure();
+  const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Template | null>(null);
   const [formData, setFormData] = useState({
     key: "",
@@ -123,13 +110,13 @@ export default function TemplatesPage() {
   });
 
   // -- Preview modal ---------------------------------------------------------
-  const previewModal = useDisclosure();
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [previewTarget, setPreviewTarget] = useState<Template | null>(null);
   const [previewVariablesText, setPreviewVariablesText] = useState("{}");
   const [previewData, setPreviewData] = useState<Record<string, unknown> | null>(null);
 
   // -- Test modal ------------------------------------------------------------
-  const testModal = useDisclosure();
+  const [testOpen, setTestOpen] = useState(false);
   const [testTarget, setTestTarget] = useState<Template | null>(null);
   const [testUserId, setTestUserId] = useState("");
   const [testChannels, setTestChannels] = useState("IN_APP");
@@ -162,7 +149,7 @@ export default function TemplatesPage() {
       priority: "NORMAL",
       is_active: true,
     });
-    createModal.onOpen();
+    setCreateOpen(true);
   };
 
   const openEdit = (template: Template) => {
@@ -178,7 +165,7 @@ export default function TemplatesPage() {
       priority: String(template.priority || "NORMAL"),
       is_active: Boolean(template.is_active ?? true),
     });
-    createModal.onOpen();
+    setCreateOpen(true);
   };
 
   const handleSave = () => {
@@ -201,10 +188,10 @@ export default function TemplatesPage() {
         {
           onSuccess: () => {
             toast.success("Template actualizado");
-            createModal.onClose();
+            setCreateOpen(false);
           },
           onError: (error: unknown) => {
-            toast.danger(getErrorMessage(error));
+            toast.error(getErrorMessage(error));
           },
         },
       );
@@ -221,10 +208,10 @@ export default function TemplatesPage() {
       createMutation.mutate(payload, {
         onSuccess: () => {
           toast.success("Template creado");
-          createModal.onClose();
+          setCreateOpen(false);
         },
         onError: (error: unknown) => {
-          toast.danger(getErrorMessage(error));
+          toast.error(getErrorMessage(error));
         },
       });
     }
@@ -234,7 +221,7 @@ export default function TemplatesPage() {
     setPreviewTarget(template);
     setPreviewVariablesText("{}");
     setPreviewData(null);
-    previewModal.onOpen();
+    setPreviewOpen(true);
   };
 
   const handlePreview = () => {
@@ -255,12 +242,12 @@ export default function TemplatesPage() {
             setPreviewData(result as Record<string, unknown>);
           },
           onError: (error: unknown) => {
-            toast.danger(getErrorMessage(error));
+            toast.error(getErrorMessage(error));
           },
         },
       );
     } catch (error: unknown) {
-      toast.danger(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -271,13 +258,13 @@ export default function TemplatesPage() {
       Array.isArray(template.channels) ? template.channels.join(",") : "IN_APP",
     );
     setTestVariablesText("{}");
-    testModal.onOpen();
+    setTestOpen(true);
   };
 
   const handleTest = () => {
     if (!testTarget?.id) return;
     if (!testUserId) {
-      toast.danger("User ID es requerido");
+      toast.error("User ID es requerido");
       return;
     }
 
@@ -299,15 +286,15 @@ export default function TemplatesPage() {
         {
           onSuccess: () => {
             toast.success("Test notification sent");
-            testModal.onClose();
+            setTestOpen(false);
           },
           onError: (error: unknown) => {
-            toast.danger(getErrorMessage(error));
+            toast.error(getErrorMessage(error));
           },
         },
       );
     } catch (error: unknown) {
-      toast.danger(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -325,12 +312,16 @@ export default function TemplatesPage() {
           </div>
         );
       case "category":
-        return <Chip size="sm" variant="soft">{String(template.category || "-")}</Chip>;
+        return (
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+            {String(template.category || "-")}
+          </span>
+        );
       case "priority":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {String(template.priority || "-")}
-          </Chip>
+          </span>
         );
       case "channels":
         return (
@@ -342,20 +333,20 @@ export default function TemplatesPage() {
         );
       case "status":
         return (
-          <Chip size="sm" color="default" variant="soft">
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {template.is_active ? "Activo" : "Inactivo"}
-          </Chip>
+          </span>
         );
       case "actions":
         return (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" isIconOnly aria-label="Editar plantilla" onPress={() => openEdit(template)}>
+            <Button size="icon" variant="ghost" aria-label="Editar plantilla" onClick={() => openEdit(template)}>
               <Edit className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly aria-label="Previsualizar plantilla" onPress={() => openPreview(template)}>
+            <Button size="icon" variant="ghost" aria-label="Previsualizar plantilla" onClick={() => openPreview(template)}>
               <Eye className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button size="sm" variant="secondary" isIconOnly aria-label="Enviar prueba" onPress={() => openTest(template)}>
+            <Button size="icon" variant="ghost" aria-label="Enviar prueba" onClick={() => openTest(template)}>
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
@@ -372,97 +363,69 @@ export default function TemplatesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Plantillas de Notificacion
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">CRUD completo con preview y test usando variables</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">CRUD completo con preview y test usando variables</p>
         </div>
-        <Button
-          type="button"
-          onPress={openCreate}
-
-        >
+        <Button type="button" onClick={openCreate}>
           Nueva plantilla
         </Button>
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="px-5 py-3">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
-            <TextField className="space-y-1 flex flex-col min-w-[160px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Busqueda</Label>
-              <Input placeholder="texto libre" value={query} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setQuery(e.target.value)} />
-            </TextField>
+            <div className="space-y-1 flex flex-col min-w-[160px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Busqueda</Label>
+              <Input placeholder="texto libre" value={query} onChange={(e) => setQuery(e.target.value)} />
+            </div>
 
-            <ComboBox
-              className="min-w-[160px] flex-1"
-              inputValue={category}
-              onInputChange={setCategory}
-              onSelectionChange={(key: string | number | null) => setCategory(String(key || ""))}
-            >
-              <Label>Categoria</Label>
-              <ComboBox.InputGroup>
-                <Input placeholder="system, social..." />
-                <ComboBox.Trigger />
-              </ComboBox.InputGroup>
-              <ComboBox.Popover>
-                <ListBox>
-                  {CATEGORY_OPTIONS.map((option) => (
-                    <ListBox.Item key={option} id={option} textValue={option}>
-                      {option}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  ))}
-                </ListBox>
-              </ComboBox.Popover>
-            </ComboBox>
+            <div className="space-y-1 flex flex-col min-w-[160px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Categoria</Label>
+              <select
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="">Todas</option>
+                {CATEGORY_OPTIONS.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
 
-            <TextField className="space-y-1 flex flex-col w-24">
-              <Label className="text-xs text-[var(--muted)]">Per page</Label>
+            <div className="space-y-1 flex flex-col w-24">
+              <Label className="text-xs text-[var(--muted-foreground)]">Per page</Label>
               <Input
                 type="number"
                 min={1}
                 value={perPageInput}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPerPageInput(e.target.value)}
+                onChange={(e) => setPerPageInput(e.target.value)}
               />
-            </TextField>
+            </div>
 
-            <Select
-              className="min-w-[120px]"
-              value={isActive}
-              onChange={(value: string | number | null) => setIsActive(String(value || "all") as ActiveFilter)}
-            >
-              <Label>Estado</Label>
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  <ListBox.Item id="all" textValue="Todos">
-                    Todos
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="true" textValue="Activos">
-                    Activos
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="false" textValue="Inactivos">
-                    Inactivos
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                </ListBox>
-              </Select.Popover>
-            </Select>
+            <div className="space-y-1 flex flex-col min-w-[120px]">
+              <Label className="text-xs text-[var(--muted-foreground)]">Estado</Label>
+              <select
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                value={isActive}
+                onChange={(e) => setIsActive(e.target.value as ActiveFilter)}
+              >
+                <option value="all">Todos</option>
+                <option value="true">Activos</option>
+                <option value="false">Inactivos</option>
+              </select>
+            </div>
 
-            <Button type="button" size="sm" variant="primary" onPress={applyFilters}>Aplicar filtros</Button>
-            <Button type="button" size="sm" variant="tertiary" onPress={clearFilters}>Limpiar</Button>
+            <Button type="button" size="sm" onClick={applyFilters}>Aplicar filtros</Button>
+            <Button type="button" size="sm" variant="ghost" onClick={clearFilters}>Limpiar</Button>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -476,263 +439,234 @@ export default function TemplatesPage() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Templates">
-                  <Table.Header columns={TABLE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {templates.map((template) => (
-                      <Table.Row key={String(template.id || template.key || "-")}>
-                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
-                          <Table.Cell key={column.key}>
-                            {renderCell(template, column.key)}
-                          </Table.Cell>
-                        ))}
-                      </Table.Row>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {TABLE_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">
+                        {col.label}
+                      </th>
                     ))}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+                  </tr>
+                </thead>
+                <tbody>
+                  {templates.map((template) => (
+                    <tr key={String(template.id || template.key || "-")} className="border-b border-[var(--border)] last:border-b-0">
+                      {TABLE_COLUMNS.map((column) => (
+                        <td key={column.key} className="px-4 py-3">
+                          {renderCell(template, column.key)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted-foreground)] px-5 py-3 border-t border-[var(--border)]">
             <span>
               Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
             </span>
             <div className="flex gap-2">
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canPrev} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
                 Anterior
               </Button>
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canNext} onClick={() => setPage((prev) => prev + 1)}>
                 Siguiente
               </Button>
             </div>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={createModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header><Modal.Heading>{editTarget ? "Editar plantilla" : "Crear plantilla"}</Modal.Heading></Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Key</Label>
-                        <Input
-                          value={formData.key}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, key: e.target.value }))}
-                          disabled={Boolean(editTarget)}
-                        />
-                      </TextField>
-                      <ComboBox
-                        className="w-full"
-                        inputValue={formData.category}
-                        onInputChange={(value: string) => setFormData((prev) => ({ ...prev, category: value }))}
-                        onSelectionChange={(key: string | number | null) =>
-                          setFormData((prev) => ({ ...prev, category: String(key || prev.category) }))
-                        }
-                      >
-                        <Label>Categoria</Label>
-                        <ComboBox.InputGroup>
-                          <Input placeholder="category" />
-                          <ComboBox.Trigger />
-                        </ComboBox.InputGroup>
-                        <ComboBox.Popover>
-                          <ListBox>
-                            {CATEGORY_OPTIONS.map((option) => (
-                              <ListBox.Item key={option} id={option} textValue={option}>
-                                {option}
-                                <ListBox.ItemIndicator />
-                              </ListBox.Item>
-                            ))}
-                          </ListBox>
-                        </ComboBox.Popover>
-                      </ComboBox>
-                    </div>
+      {/* Modal: Create / Edit */}
+      {createOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+              {editTarget ? "Editar plantilla" : "Crear plantilla"}
+            </h2>
+            <div className="space-y-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Key</Label>
+                  <Input
+                    value={formData.key}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, key: e.target.value }))}
+                    disabled={Boolean(editTarget)}
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Categoria</Label>
+                  <select
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={formData.category}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                  >
+                    {CATEGORY_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Titulo plantilla</Label>
-                      <Input
-                        value={formData.title_template}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, title_template: e.target.value }))}
-                      />
-                    </TextField>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Titulo plantilla</Label>
+                <Input
+                  value={formData.title_template}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, title_template: e.target.value }))}
+                />
+              </div>
 
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Cuerpo plantilla</Label>
-                      <TextArea
-                        value={formData.body_template}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, body_template: e.target.value }))}
-                        rows={3}
-                      />
-                    </TextField>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Cuerpo plantilla</Label>
+                <Textarea
+                  value={formData.body_template}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, body_template: e.target.value }))}
+                  rows={3}
+                />
+              </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Canales</Label>
-                        <Input
-                          placeholder="IN_APP,EMAIL..."
-                          value={formData.channels}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
-                        />
-                      </TextField>
-                      <Select
-                        className="w-full"
-                        value={formData.priority}
-                        onChange={(value: string | number | null) =>
-                          setFormData((prev) => ({ ...prev, priority: String(value || "NORMAL") }))
-                        }
-                      >
-                        <Label>Prioridad</Label>
-                        <Select.Trigger>
-                          <Select.Value />
-                          <Select.Indicator />
-                        </Select.Trigger>
-                        <Select.Popover>
-                          <ListBox>
-                            {PRIORITY_OPTIONS.map((option) => (
-                              <ListBox.Item key={option} id={option} textValue={option}>
-                                {option}
-                                <ListBox.ItemIndicator />
-                              </ListBox.Item>
-                            ))}
-                          </ListBox>
-                        </Select.Popover>
-                      </Select>
-                    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Canales</Label>
+                  <Input
+                    placeholder="IN_APP,EMAIL..."
+                    value={formData.channels}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, channels: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Prioridad</Label>
+                  <select
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={formData.priority}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
+                  >
+                    {PRIORITY_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-                    <Fieldset.Actions className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={formData.is_active ? "primary" : "secondary"}
-                        onPress={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
-                      >
-                        is_active: {formData.is_active ? "true" : "false"}
-                      </Button>
-                      <p className="text-xs text-[var(--muted)]">Se envía en update.</p>
-                    </Fieldset.Actions>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button type="button" variant="tertiary" onPress={createModal.onClose}>Cancelar</Button>
-                <Button type="button" variant="primary" onPress={handleSave} isPending={formLoading}>
-                  {editTarget ? "Guardar" : "Crear"}
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={formData.is_active ? "default" : "ghost"}
+                  onClick={() => setFormData((prev) => ({ ...prev, is_active: !prev.is_active }))}
+                >
+                  is_active: {formData.is_active ? "true" : "false"}
                 </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+                <p className="text-xs text-[var(--muted-foreground)]">Se envía en update.</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancelar</Button>
+              <Button type="button" onClick={handleSave} disabled={formLoading}>
+                {editTarget ? "Guardar" : "Crear"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <Modal>
-        <Modal.Backdrop isOpen={previewModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && previewModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header><Modal.Heading>Previsualizar plantilla - {String(previewTarget?.key || "")}</Modal.Heading></Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Variables (JSON)</Label>
-                      <TextArea
-                        placeholder='{"username":"demo"}'
-                        value={previewVariablesText}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPreviewVariablesText(e.target.value)}
-                        rows={4}
-                        className="font-mono text-xs"
-                      />
-                    </TextField>
-                    <Fieldset.Actions>
-                      <Button type="button" size="sm" variant="secondary" onPress={handlePreview} isPending={previewMutation.isPending}>
-                        Renderizar preview
-                      </Button>
-                    </Fieldset.Actions>
-                  </Fieldset>
-                </Form>
+      {/* Modal: Preview */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+              Previsualizar plantilla - {String(previewTarget?.key || "")}
+            </h2>
+            <div className="space-y-4 mb-6">
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Variables (JSON)</Label>
+                <Textarea
+                  placeholder='{"username":"demo"}'
+                  value={previewVariablesText}
+                  onChange={(e) => setPreviewVariablesText(e.target.value)}
+                  rows={4}
+                  className="font-mono text-xs"
+                />
+              </div>
+              <div>
+                <Button type="button" size="sm" variant="ghost" onClick={handlePreview} disabled={previewMutation.isPending}>
+                  Renderizar preview
+                </Button>
+              </div>
 
-                {previewData ? (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs text-[var(--muted)]">Titulo</label>
-                      <p className="text-[var(--foreground)] font-medium">
-                        {String((previewData.data as Record<string, unknown>)?.title || previewData.title || "")}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-xs text-[var(--muted)]">Cuerpo</label>
-                      <p className="text-[var(--foreground)] text-sm whitespace-pre-wrap">
-                        {String((previewData.data as Record<string, unknown>)?.body || previewData.body || "")}
-                      </p>
-                    </div>
+              {previewData ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Titulo</label>
+                    <p className="text-[var(--foreground)] font-medium">
+                      {String((previewData.data as Record<string, unknown>)?.title || previewData.title || "")}
+                    </p>
                   </div>
-                ) : null}
-              </Modal.Body>
-              <Modal.Footer>
-                <Button type="button" variant="tertiary" onPress={previewModal.onClose}>Cerrar</Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Cuerpo</label>
+                    <p className="text-[var(--foreground)] text-sm whitespace-pre-wrap">
+                      {String((previewData.data as Record<string, unknown>)?.body || previewData.body || "")}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div className="flex justify-end">
+              <Button type="button" variant="ghost" onClick={() => setPreviewOpen(false)}>Cerrar</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <Modal>
-        <Modal.Backdrop isOpen={testModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && testModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header><Modal.Heading>Enviar prueba - {String(testTarget?.key || "")}</Modal.Heading></Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">User ID</Label>
-                      <Input
-                        value={testUserId}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTestUserId(e.target.value)}
-                        type="number"
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Canales</Label>
-                      <Input
-                        placeholder="IN_APP,EMAIL,PUSH,SMS"
-                        value={testChannels}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTestChannels(e.target.value)}
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Variables (JSON)</Label>
-                      <TextArea
-                        placeholder='{"username":"demo"}'
-                        value={testVariablesText}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setTestVariablesText(e.target.value)}
-                        rows={4}
-                        className="font-mono text-xs"
-                      />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button type="button" variant="tertiary" onPress={testModal.onClose}>Cancelar</Button>
-                <Button type="button" variant="primary" onPress={handleTest} isPending={testMutation.isPending}>Enviar prueba</Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
-    </div >
+      {/* Modal: Test */}
+      {testOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setTestOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+              Enviar prueba - {String(testTarget?.key || "")}
+            </h2>
+            <div className="space-y-4 mb-6">
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">User ID</Label>
+                <Input
+                  value={testUserId}
+                  onChange={(e) => setTestUserId(e.target.value)}
+                  type="number"
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Canales</Label>
+                <Input
+                  placeholder="IN_APP,EMAIL,PUSH,SMS"
+                  value={testChannels}
+                  onChange={(e) => setTestChannels(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Variables (JSON)</Label>
+                <Textarea
+                  placeholder='{"username":"demo"}'
+                  value={testVariablesText}
+                  onChange={(e) => setTestVariablesText(e.target.value)}
+                  rows={4}
+                  className="font-mono text-xs"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="ghost" onClick={() => setTestOpen(false)}>Cancelar</Button>
+              <Button type="button" onClick={handleTest} disabled={testMutation.isPending}>Enviar prueba</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

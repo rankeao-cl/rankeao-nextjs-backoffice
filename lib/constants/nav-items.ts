@@ -1,68 +1,145 @@
 import {
   LayoutDashboard,
-  User,
   Store,
-  Award,
-  Sparkles,
-  Crown,
+  Gamepad2,
   Trophy,
-  Zap,
-  Layers,
   Scale,
   Bell,
-  Radio,
-  Mail,
+  Settings,
   Shield,
   Code2,
-  Gamepad2,
-  Library,
-  CreditCard,
-  Upload,
-  Settings,
-  BarChart3,
-  ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem {
   label: string;
   href: string;
-  icon: LucideIcon;
 }
 
-export interface NavDivider {
-  type: "divider";
+export interface NavSection {
+  title?: string;
+  items: NavItem[];
+}
+
+export interface NavMainGroup {
   label: string;
+  icon: LucideIcon;
+  href?: string;
+  sections?: NavSection[];
 }
 
-export type NavEntry = NavItem | NavDivider;
-
-export const NAV_ITEMS: NavEntry[] = [
-  { label: "Panel", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Explorador API", href: "/admin/api-explorer", icon: Code2 },
-  { label: "API de Auth", href: "/admin/auth", icon: Shield },
-  { label: "Perfil", href: "/admin/perfil", icon: User },
-  { label: "Tiendas", href: "/admin/tenants", icon: Store },
-  { type: "divider", label: "Catálogo" },
-  { label: "Juegos", href: "/admin/catalog/games", icon: Gamepad2 },
-  { label: "Sets", href: "/admin/catalog/sets", icon: Library },
-  { label: "Cartas", href: "/admin/catalog/cards", icon: CreditCard },
-  { label: "Importación", href: "/admin/catalog/import", icon: Upload },
-  { type: "divider", label: "Gamificación" },
-  { label: "Insignias", href: "/admin/gamification/badges", icon: Award },
-  { label: "Cosméticos", href: "/admin/gamification/cosmetics", icon: Sparkles },
-  { label: "Títulos", href: "/admin/gamification/titles", icon: Crown },
-  { label: "Temporadas", href: "/admin/gamification/seasons", icon: Trophy },
-  { label: "Eventos XP", href: "/admin/gamification/xp-events", icon: Zap },
-  { label: "Niveles", href: "/admin/gamification/levels", icon: Layers },
-  { type: "divider", label: "Marketplace" },
-  { label: "Disputas", href: "/admin/disputes", icon: Scale },
-  { label: "Configuración", href: "/admin/marketplace/config", icon: Settings },
-  { type: "divider", label: "Torneos" },
-  { label: "Aprobaciones", href: "/admin/tournaments/approvals", icon: ClipboardCheck },
-  { label: "Ratings", href: "/admin/tournaments/ratings", icon: BarChart3 },
-  { type: "divider", label: "Notificaciones" },
-  { label: "Plantillas", href: "/admin/notifications/templates", icon: Bell },
-  { label: "Plantillas Email", href: "/admin/notifications/email-templates", icon: Mail },
-  { label: "Difusiones", href: "/admin/notifications/broadcasts", icon: Radio },
+export const NAV_GROUPS: NavMainGroup[] = [
+  {
+    label: "Panel",
+    icon: LayoutDashboard,
+    href: "/admin/dashboard",
+  },
+  {
+    label: "Catálogo",
+    icon: Gamepad2,
+    sections: [
+      {
+        title: "Juegos y cartas",
+        items: [
+          { label: "Juegos", href: "/admin/catalog/games" },
+          { label: "Sets", href: "/admin/catalog/sets" },
+          { label: "Cartas", href: "/admin/catalog/cards" },
+          { label: "Importación", href: "/admin/catalog/import" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Gamificación",
+    icon: Trophy,
+    sections: [
+      {
+        title: "Recompensas",
+        items: [
+          { label: "Insignias", href: "/admin/gamification/badges" },
+          { label: "Cosméticos", href: "/admin/gamification/cosmetics" },
+          { label: "Títulos", href: "/admin/gamification/titles" },
+          { label: "Niveles", href: "/admin/gamification/levels" },
+        ],
+      },
+      {
+        title: "Temporadas",
+        items: [
+          { label: "Temporadas", href: "/admin/gamification/seasons" },
+          { label: "Eventos XP", href: "/admin/gamification/xp-events" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Tiendas",
+    icon: Store,
+    href: "/admin/tenants",
+  },
+  {
+    label: "Marketplace",
+    icon: Scale,
+    sections: [
+      {
+        title: "Gestión",
+        items: [
+          { label: "Disputas", href: "/admin/disputes" },
+          { label: "Configuración", href: "/admin/marketplace/config" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Torneos",
+    icon: Shield,
+    sections: [
+      {
+        title: "Administración",
+        items: [
+          { label: "Aprobaciones", href: "/admin/tournaments/approvals" },
+          { label: "Ratings", href: "/admin/tournaments/ratings" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Notificaciones",
+    icon: Bell,
+    sections: [
+      {
+        title: "Plantillas",
+        items: [
+          { label: "Push", href: "/admin/notifications/templates" },
+          { label: "Email", href: "/admin/notifications/email-templates" },
+        ],
+      },
+      {
+        title: "Difusión",
+        items: [
+          { label: "Difusiones", href: "/admin/notifications/broadcasts" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Sistema",
+    icon: Settings,
+    sections: [
+      {
+        title: "Admin",
+        items: [
+          { label: "Perfil", href: "/admin/perfil" },
+          { label: "API Auth", href: "/admin/auth" },
+          { label: "Explorador API", href: "/admin/api-explorer" },
+        ],
+      },
+    ],
+  },
 ];
+
+// Legacy export for backward compatibility
+export type NavEntry = NavItem | { type: "divider"; label: string };
+export const NAV_ITEMS: NavEntry[] = NAV_GROUPS.flatMap((g) => {
+  if (g.href) return [{ label: g.label, href: g.href, icon: g.icon }];
+  return g.sections?.flatMap((s) => s.items) ?? [];
+});

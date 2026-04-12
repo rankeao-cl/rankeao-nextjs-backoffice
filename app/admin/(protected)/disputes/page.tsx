@@ -1,23 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Card,
-  Chip,
-  Description,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  Modal,
-  Skeleton,
-  Table,
-  TextArea,
-  TextField,
-  Button,
-  toast,
-} from "@heroui/react";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useDisputes,
   useAssignDispute,
@@ -47,14 +36,6 @@ type ResolutionForm = {
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const STATUS_COLOR: Record<string, "default"> = {
-  OPEN: "default",
-  IN_PROGRESS: "default",
-  RESOLVED: "default",
-  CLOSED: "default",
-  ESCALATED: "default",
-};
 
 const MARKETPLACE_COLUMNS = [
   { key: "id", label: "ID" },
@@ -89,7 +70,7 @@ const EMPTY_META = {
 };
 
 // ---------------------------------------------------------------------------
-// Marketplace tab (existing logic, extracted as sub-component)
+// Marketplace tab
 // ---------------------------------------------------------------------------
 
 function MarketplaceDisputesTab() {
@@ -101,8 +82,8 @@ function MarketplaceDisputesTab() {
   const [page, setPage] = useState(1);
   const [perPageInput, setPerPageInput] = useState("20");
 
-  const assignModal = useDisclosure();
-  const resolveModal = useDisclosure();
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [resolveOpen, setResolveOpen] = useState(false);
 
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [moderatorId, setModeratorId] = useState("");
@@ -162,10 +143,10 @@ function MarketplaceDisputesTab() {
       {
         onSuccess: () => {
           toast.success("Moderador asignado");
-          assignModal.onClose();
+          setAssignOpen(false);
         },
         onError: (error: unknown) => {
-          toast.danger(getErrorMessage(error));
+          toast.error(getErrorMessage(error));
         },
       }
     );
@@ -186,10 +167,10 @@ function MarketplaceDisputesTab() {
       {
         onSuccess: () => {
           toast.success("Disputa resuelta");
-          resolveModal.onClose();
+          setResolveOpen(false);
         },
         onError: (error: unknown) => {
-          toast.danger(getErrorMessage(error));
+          toast.error(getErrorMessage(error));
         },
       }
     );
@@ -198,18 +179,18 @@ function MarketplaceDisputesTab() {
   const renderCell = (dispute: Dispute, columnKey: string) => {
     switch (columnKey) {
       case "id":
-        return <code className="text-xs text-[var(--muted)]">{String(dispute.id).slice(0, 8)}...</code>;
+        return <code className="text-xs text-[var(--muted-foreground)]">{String(dispute.id).slice(0, 8)}...</code>;
       case "reason":
         return <span className="text-sm">{String(dispute.reason || "-")}</span>;
       case "status":
         return (
-          <Chip size="sm" color={STATUS_COLOR[String(dispute.status)] || "default"} variant="soft">
+          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {String(dispute.status || "-")}
-          </Chip>
+          </span>
         );
       case "moderator":
         return (
-          <span className="text-xs text-[var(--muted)]">
+          <span className="text-xs text-[var(--muted-foreground)]">
             {dispute.moderator_id ? `${String(dispute.moderator_id).slice(0, 8)}...` : "Sin asignar"}
           </span>
         );
@@ -218,22 +199,22 @@ function MarketplaceDisputesTab() {
           <div className="flex gap-1">
             <Button
               size="sm"
-              variant="secondary"
-              onPress={() => {
+              variant="ghost"
+              onClick={() => {
                 setSelectedDispute(dispute);
                 setModeratorId("");
-                assignModal.onOpen();
+                setAssignOpen(true);
               }}
             >
               Asignar
             </Button>
             <Button
               size="sm"
-              variant="secondary"
-              onPress={() => {
+              variant="ghost"
+              onClick={() => {
                 setSelectedDispute(dispute);
                 setResolution({ outcome: "FULL_REFUND", refund_amount: 0, notes: "", sanction: "" });
-                resolveModal.onOpen();
+                setResolveOpen(true);
               }}
             >
               Resolver
@@ -250,25 +231,25 @@ function MarketplaceDisputesTab() {
 
   return (
     <>
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="px-5 py-3">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
-            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">ID (local)</Label>
-              <Input value={idSearch} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setIdSearch(e.target.value)} />
-            </TextField>
-            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Estado</Label>
-              <Input placeholder="OPEN, RESOLVED..." value={statusFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setStatusFilter(e.target.value)} />
-            </TextField>
-            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Razon</Label>
-              <Input value={reasonFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setReasonFilter(e.target.value)} />
-            </TextField>
-            <TextField className="space-y-1 flex flex-col min-w-[140px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Moderador ID</Label>
-              <Input value={assignedModeratorFilter} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setAssignedModeratorFilter(e.target.value)} />
-            </TextField>
+            <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">ID (local)</Label>
+              <Input value={idSearch} onChange={(e) => setIdSearch(e.target.value)} />
+            </div>
+            <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Estado</Label>
+              <Input placeholder="OPEN, RESOLVED..." value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+            </div>
+            <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Razon</Label>
+              <Input value={reasonFilter} onChange={(e) => setReasonFilter(e.target.value)} />
+            </div>
+            <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Moderador ID</Label>
+              <Input value={assignedModeratorFilter} onChange={(e) => setAssignedModeratorFilter(e.target.value)} />
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <Input
@@ -276,29 +257,29 @@ function MarketplaceDisputesTab() {
               type="number"
               min={1}
               value={perPageInput}
-              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setPerPageInput(e.target.value)}
+              onChange={(e) => setPerPageInput(e.target.value)}
               placeholder="per_page"
             />
             <Button
               type="button"
               size="sm"
-              variant={unassignedOnly ? "primary" : "secondary"}
-              onPress={() => setUnassignedOnly((prev) => !prev)}
+              variant={unassignedOnly ? "default" : "ghost"}
+              onClick={() => setUnassignedOnly((prev) => !prev)}
             >
               Solo sin asignar
             </Button>
-            <Button type="button" size="sm" variant="primary" onPress={applyFilters}>
+            <Button type="button" size="sm" onClick={applyFilters}>
               Aplicar filtros
             </Button>
-            <Button type="button" size="sm" variant="tertiary" onPress={clearFilters}>
+            <Button type="button" size="sm" variant="ghost" onClick={clearFilters}>
               Limpiar
             </Button>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -312,140 +293,128 @@ function MarketplaceDisputesTab() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Disputas marketplace">
-                  <Table.Header columns={MARKETPLACE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === MARKETPLACE_COLUMNS[0].key}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredDisputes.length === 0 ? (
-                      <Table.Row>
-                        <Table.Cell colSpan={MARKETPLACE_COLUMNS.length}>
-                          <p className="text-center text-sm text-[var(--muted)] py-6">
-                            No hay disputas de marketplace actualmente
-                          </p>
-                        </Table.Cell>
-                      </Table.Row>
-                    ) : (
-                      filteredDisputes.map((dispute) => (
-                        <Table.Row key={String(dispute.id)}>
-                          {MARKETPLACE_COLUMNS.map((column: { key: string; label: string }) => (
-                            <Table.Cell key={column.key}>
-                              {renderCell(dispute, column.key)}
-                            </Table.Cell>
-                          ))}
-                        </Table.Row>
-                      ))
-                    )}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {MARKETPLACE_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">
+                        {col.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDisputes.length === 0 ? (
+                    <tr>
+                      <td colSpan={MARKETPLACE_COLUMNS.length} className="px-4 py-3">
+                        <p className="text-center text-sm text-[var(--muted-foreground)] py-6">
+                          No hay disputas de marketplace actualmente
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredDisputes.map((dispute) => (
+                      <tr key={String(dispute.id)} className="border-b border-[var(--border)] last:border-b-0">
+                        {MARKETPLACE_COLUMNS.map((column) => (
+                          <td key={column.key} className="px-4 py-3">
+                            {renderCell(dispute, column.key)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted-foreground)] px-5 py-3 border-t border-[var(--border)]">
             <span>
               Pagina {meta.page} de {meta.total_pages} | Total aproximado: {meta.total}
             </span>
             <div className="flex gap-2">
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canPrev} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
                 Anterior
               </Button>
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canNext} onClick={() => setPage((prev) => prev + 1)}>
                 Siguiente
               </Button>
             </div>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={assignModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && assignModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header><Modal.Heading>Asignar Moderador</Modal.Heading></Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <Description className="text-xs text-[var(--muted)]">Disputa: {String(selectedDispute?.id || "")}</Description>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Moderador ID</Label>
-                      <Input value={moderatorId} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setModeratorId(e.target.value)} />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={assignModal.onClose}>Cancelar</Button>
-                <Button variant="primary" onPress={handleAssign} isPending={assignMutation.isPending}>Asignar</Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {/* Modal: Asignar Moderador */}
+      {assignOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setAssignOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Asignar Moderador</h2>
+            <div className="space-y-4 mb-6">
+              <p className="text-xs text-[var(--muted-foreground)]">Disputa: {String(selectedDispute?.id || "")}</p>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Moderador ID</Label>
+                <Input value={moderatorId} onChange={(e) => setModeratorId(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setAssignOpen(false)}>Cancelar</Button>
+              <Button onClick={handleAssign} disabled={assignMutation.isPending}>Asignar</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <Modal>
-        <Modal.Backdrop isOpen={resolveModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && resolveModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>
-                  <div className="flex items-center gap-2">
-                    <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
-                    Resolver Disputa
-                  </div>
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Outcome</Label>
-                      <Input
-                        value={resolution.outcome}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setResolution((prev) => ({ ...prev, outcome: e.target.value }))}
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Refund amount</Label>
-                      <Input
-                        type="number"
-                        value={String(resolution.refund_amount)}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                          setResolution((prev) => ({ ...prev, refund_amount: Number.parseFloat(e.target.value) || 0 }))
-                        }
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Notas</Label>
-                      <TextArea
-                        value={resolution.notes}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setResolution((prev) => ({ ...prev, notes: e.target.value }))}
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Sancion</Label>
-                      <Input
-                        value={resolution.sanction}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setResolution((prev) => ({ ...prev, sanction: e.target.value }))}
-                      />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={resolveModal.onClose}>Cancelar</Button>
-                <Button variant="primary" onPress={handleResolve} isPending={resolveMutation.isPending}>Resolver</Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {/* Modal: Resolver Disputa */}
+      {resolveOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setResolveOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Resolver Disputa</h2>
+            </div>
+            <div className="space-y-4 mb-6">
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Outcome</Label>
+                <Input
+                  value={resolution.outcome}
+                  onChange={(e) => setResolution((prev) => ({ ...prev, outcome: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Refund amount</Label>
+                <Input
+                  type="number"
+                  value={String(resolution.refund_amount)}
+                  onChange={(e) =>
+                    setResolution((prev) => ({ ...prev, refund_amount: Number.parseFloat(e.target.value) || 0 }))
+                  }
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Notas</Label>
+                <Textarea
+                  value={resolution.notes}
+                  onChange={(e) => setResolution((prev) => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Sancion</Label>
+                <Input
+                  value={resolution.sanction}
+                  onChange={(e) => setResolution((prev) => ({ ...prev, sanction: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setResolveOpen(false)}>Cancelar</Button>
+              <Button onClick={handleResolve} disabled={resolveMutation.isPending}>Resolver</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -456,7 +425,7 @@ function MarketplaceDisputesTab() {
 
 function DuelosDisputesTab() {
   const [page, setPage] = useState(1);
-  const resolveModal = useDisclosure();
+  const [resolveOpen, setResolveOpen] = useState(false);
   const [selectedDuel, setSelectedDuel] = useState<DuelDispute | null>(null);
   const [winnerId, setWinnerId] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
@@ -482,12 +451,12 @@ function DuelosDisputesTab() {
       {
         onSuccess: () => {
           toast.success("Duelo resuelto");
-          resolveModal.onClose();
+          setResolveOpen(false);
           setWinnerId("");
           setAdminNotes("");
         },
         onError: (error: unknown) => {
-          toast.danger(getErrorMessage(error));
+          toast.error(getErrorMessage(error));
         },
       }
     );
@@ -510,7 +479,7 @@ function DuelosDisputesTab() {
       case "duel":
         return (
           <span className="text-sm font-medium">
-            {duel.challenger_username} <span className="text-[var(--muted)]">vs</span> {duel.challenged_username}
+            {duel.challenger_username} <span className="text-[var(--muted-foreground)]">vs</span> {duel.challenged_username}
           </span>
         );
       case "game":
@@ -522,17 +491,17 @@ function DuelosDisputesTab() {
           </span>
         );
       case "created_at":
-        return <span className="text-xs text-[var(--muted)]">{formatDate(duel.created_at)}</span>;
+        return <span className="text-xs text-[var(--muted-foreground)]">{formatDate(duel.created_at)}</span>;
       case "actions":
         return (
           <Button
             size="sm"
-            variant="secondary"
-            onPress={() => {
+            variant="ghost"
+            onClick={() => {
               setSelectedDuel(duel);
               setWinnerId("");
               setAdminNotes("");
-              resolveModal.onOpen();
+              setResolveOpen(true);
             }}
           >
             Resolver
@@ -548,8 +517,8 @@ function DuelosDisputesTab() {
 
   return (
     <>
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -563,111 +532,100 @@ function DuelosDisputesTab() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Duelos disputados">
-                  <Table.Header columns={DUEL_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === DUEL_COLUMNS[0].key}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {duels.length === 0 ? (
-                      <Table.Row>
-                        <Table.Cell colSpan={DUEL_COLUMNS.length}>
-                          <p className="text-center text-sm text-[var(--muted)] py-6">
-                            No hay duelos disputados actualmente
-                          </p>
-                        </Table.Cell>
-                      </Table.Row>
-                    ) : (
-                      duels.map((duel) => (
-                        <Table.Row key={duel.id}>
-                          {DUEL_COLUMNS.map((column: { key: string; label: string }) => (
-                            <Table.Cell key={column.key}>
-                              {renderCell(duel, column.key)}
-                            </Table.Cell>
-                          ))}
-                        </Table.Row>
-                      ))
-                    )}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {DUEL_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">
+                        {col.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {duels.length === 0 ? (
+                    <tr>
+                      <td colSpan={DUEL_COLUMNS.length} className="px-4 py-3">
+                        <p className="text-center text-sm text-[var(--muted-foreground)] py-6">
+                          No hay duelos disputados actualmente
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    duels.map((duel) => (
+                      <tr key={duel.id} className="border-b border-[var(--border)] last:border-b-0">
+                        {DUEL_COLUMNS.map((column) => (
+                          <td key={column.key} className="px-4 py-3">
+                            {renderCell(duel, column.key)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted-foreground)] px-5 py-3 border-t border-[var(--border)]">
             <span>
               Pagina {meta.page} de {meta.total_pages} | Total: {meta.total}
             </span>
             <div className="flex gap-2">
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canPrev} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
                 Anterior
               </Button>
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canNext} onClick={() => setPage((prev) => prev + 1)}>
                 Siguiente
               </Button>
             </div>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={resolveModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && resolveModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>
-                  <div className="flex items-center gap-2">
-                    <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
-                    Resolver Duelo
-                  </div>
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    {selectedDuel && (
-                      <Description className="text-xs text-[var(--muted)]">
-                        {selectedDuel.challenger_username} vs {selectedDuel.challenged_username} — {selectedDuel.game_name}
-                      </Description>
-                    )}
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">UUID del ganador (dejar vacío para empate)</Label>
-                      <Input
-                        value={winnerId}
-                        placeholder="UUID del ganador, o vacío para empate"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setWinnerId(e.target.value)}
-                      />
-                    </TextField>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Notas del admin (mínimo 5 caracteres) *</Label>
-                      <TextArea
-                        value={adminNotes}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setAdminNotes(e.target.value)}
-                      />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={resolveModal.onClose}>Cancelar</Button>
-                <Button
-                  variant="primary"
-                  onPress={handleResolve}
-                  isPending={resolveMutation.isPending}
-                  isDisabled={adminNotes.trim().length < 5}
-                >
-                  Resolver
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {resolveOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setResolveOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Resolver Duelo</h2>
+            </div>
+            <div className="space-y-4 mb-6">
+              {selectedDuel && (
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  {selectedDuel.challenger_username} vs {selectedDuel.challenged_username} — {selectedDuel.game_name}
+                </p>
+              )}
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">UUID del ganador (dejar vacío para empate)</Label>
+                <Input
+                  value={winnerId}
+                  placeholder="UUID del ganador, o vacío para empate"
+                  onChange={(e) => setWinnerId(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Notas del admin (mínimo 5 caracteres) *</Label>
+                <Textarea
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setResolveOpen(false)}>Cancelar</Button>
+              <Button
+                onClick={handleResolve}
+                disabled={resolveMutation.isPending || adminNotes.trim().length < 5}
+              >
+                Resolver
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -678,7 +636,7 @@ function DuelosDisputesTab() {
 
 function MatchesDisputesTab() {
   const [page, setPage] = useState(1);
-  const resolveModal = useDisclosure();
+  const [resolveOpen, setResolveOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<MatchDispute | null>(null);
   const [p1Wins, setP1Wins] = useState("0");
   const [p2Wins, setP2Wins] = useState("0");
@@ -708,14 +666,14 @@ function MatchesDisputesTab() {
       {
         onSuccess: () => {
           toast.success("Match resuelto");
-          resolveModal.onClose();
+          setResolveOpen(false);
           setP1Wins("0");
           setP2Wins("0");
           setDraws("0");
           setNotes("");
         },
         onError: (error: unknown) => {
-          toast.danger(getErrorMessage(error));
+          toast.error(getErrorMessage(error));
         },
       }
     );
@@ -743,30 +701,30 @@ function MatchesDisputesTab() {
       case "players":
         return (
           <span className="text-sm">
-            {match.player1?.username ?? "BYE"} <span className="text-[var(--muted)]">vs</span> {match.player2?.username ?? "BYE"}
+            {match.player1?.username ?? "BYE"} <span className="text-[var(--muted-foreground)]">vs</span> {match.player2?.username ?? "BYE"}
           </span>
         );
       case "score":
         return (
           <span className="text-sm font-mono">
             {match.player1_wins} - {match.player2_wins}
-            {match.draws > 0 && <span className="text-[var(--muted)]"> ({match.draws}E)</span>}
+            {match.draws > 0 && <span className="text-[var(--muted-foreground)]"> ({match.draws}E)</span>}
           </span>
         );
       case "disputed_at":
-        return <span className="text-xs text-[var(--muted)]">{formatDate(match.disputed_at)}</span>;
+        return <span className="text-xs text-[var(--muted-foreground)]">{formatDate(match.disputed_at)}</span>;
       case "actions":
         return (
           <Button
             size="sm"
-            variant="secondary"
-            onPress={() => {
+            variant="ghost"
+            onClick={() => {
               setSelectedMatch(match);
               setP1Wins(String(match.player1_wins));
               setP2Wins(String(match.player2_wins));
               setDraws(String(match.draws));
               setNotes("");
-              resolveModal.onOpen();
+              setResolveOpen(true);
             }}
           >
             Resolver
@@ -782,8 +740,8 @@ function MatchesDisputesTab() {
 
   return (
     <>
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -797,133 +755,122 @@ function MatchesDisputesTab() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Matches disputados">
-                  <Table.Header columns={MATCH_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === MATCH_COLUMNS[0].key}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {matches.length === 0 ? (
-                      <Table.Row>
-                        <Table.Cell colSpan={MATCH_COLUMNS.length}>
-                          <p className="text-center text-sm text-[var(--muted)] py-6">
-                            No hay matches disputados actualmente
-                          </p>
-                        </Table.Cell>
-                      </Table.Row>
-                    ) : (
-                      matches.map((match) => (
-                        <Table.Row key={match.id}>
-                          {MATCH_COLUMNS.map((column: { key: string; label: string }) => (
-                            <Table.Cell key={column.key}>
-                              {renderCell(match, column.key)}
-                            </Table.Cell>
-                          ))}
-                        </Table.Row>
-                      ))
-                    )}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--c-gray-50)]">
+                  <tr>
+                    {MATCH_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">
+                        {col.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {matches.length === 0 ? (
+                    <tr>
+                      <td colSpan={MATCH_COLUMNS.length} className="px-4 py-3">
+                        <p className="text-center text-sm text-[var(--muted-foreground)] py-6">
+                          No hay matches disputados actualmente
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    matches.map((match) => (
+                      <tr key={match.id} className="border-b border-[var(--border)] last:border-b-0">
+                        {MATCH_COLUMNS.map((column) => (
+                          <td key={column.key} className="px-4 py-3">
+                            {renderCell(match, column.key)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted)] px-5 py-3 border-t border-[var(--border)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--muted-foreground)] px-5 py-3 border-t border-[var(--border)]">
             <span>
               Pagina {meta.page} de {meta.total_pages} | Total: {meta.total}
             </span>
             <div className="flex gap-2">
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canPrev} onPress={() => setPage((prev) => Math.max(1, prev - 1))}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canPrev} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
                 Anterior
               </Button>
-              <Button type="button" size="sm" variant="secondary" isDisabled={!canNext} onPress={() => setPage((prev) => prev + 1)}>
+              <Button type="button" size="sm" variant="ghost" disabled={!canNext} onClick={() => setPage((prev) => prev + 1)}>
                 Siguiente
               </Button>
             </div>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={resolveModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && resolveModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>
-                  <div className="flex items-center gap-2">
-                    <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
-                    Resolver Match
-                  </div>
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    {selectedMatch && (
-                      <Description className="text-xs text-[var(--muted)]">
-                        {selectedMatch.tournament_name} — Ronda {selectedMatch.round_number}:{" "}
-                        {selectedMatch.player1?.username ?? "BYE"} vs {selectedMatch.player2?.username ?? "BYE"}
-                      </Description>
-                    )}
-                    <div className="flex gap-3">
-                      <TextField className="space-y-1 flex flex-col flex-1">
-                        <Label className="text-xs text-[var(--muted)]">Victorias J1</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={p1Wins}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setP1Wins(e.target.value)}
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col flex-1">
-                        <Label className="text-xs text-[var(--muted)]">Victorias J2</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={p2Wins}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setP2Wins(e.target.value)}
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col flex-1">
-                        <Label className="text-xs text-[var(--muted)]">Empates</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={draws}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDraws(e.target.value)}
-                        />
-                      </TextField>
-                    </div>
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Notas (mínimo 5 caracteres) *</Label>
-                      <TextArea
-                        value={notes}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNotes(e.target.value)}
-                      />
-                    </TextField>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={resolveModal.onClose}>Cancelar</Button>
-                <Button
-                  variant="primary"
-                  onPress={handleResolve}
-                  isPending={resolveMutation.isPending}
-                  isDisabled={notes.trim().length < 5}
-                >
-                  Resolver
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {resolveOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setResolveOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Scale className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Resolver Match</h2>
+            </div>
+            <div className="space-y-4 mb-6">
+              {selectedMatch && (
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  {selectedMatch.tournament_name} — Ronda {selectedMatch.round_number}:{" "}
+                  {selectedMatch.player1?.username ?? "BYE"} vs {selectedMatch.player2?.username ?? "BYE"}
+                </p>
+              )}
+              <div className="flex gap-3">
+                <div className="space-y-1 flex flex-col flex-1">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Victorias J1</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={p1Wins}
+                    onChange={(e) => setP1Wins(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col flex-1">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Victorias J2</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={p2Wins}
+                    onChange={(e) => setP2Wins(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col flex-1">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Empates</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draws}
+                    onChange={(e) => setDraws(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Notas (mínimo 5 caracteres) *</Label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setResolveOpen(false)}>Cancelar</Button>
+              <Button
+                onClick={handleResolve}
+                disabled={resolveMutation.isPending || notes.trim().length < 5}
+              >
+                Resolver
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -944,10 +891,10 @@ export default function DisputesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+        <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
           Disputas
         </h1>
-        <p className="text-sm text-[var(--muted)] mt-1">Panel unificado de disputas</p>
+        <p className="text-sm text-[var(--muted-foreground)] mt-1">Panel unificado de disputas</p>
       </div>
 
       <div className="flex gap-2 border-b border-[var(--border)] pb-0">
@@ -959,7 +906,7 @@ export default function DisputesPage() {
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab
                 ? "border-[var(--primary)] text-[var(--foreground)]"
-                : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)]"
+                : "border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
           >
             {TAB_LABELS[tab]}

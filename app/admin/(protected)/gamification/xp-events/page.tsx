@@ -1,20 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  Chip,
-  Fieldset,
-  Form,
-  Input,
-  Label,
-  Modal,
-  Skeleton,
-  Table,
-  TextField,
-  Button,
-  toast,
-} from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useXPEvents,
   useCreateXPEvent,
@@ -26,7 +18,6 @@ import type {
   UpdateXPEventRequest,
 } from "@/lib/types/gamification";
 import { getErrorMessage } from "@/lib/utils/error-message";
-import { useDisclosure } from "@/lib/hooks/use-disclosure";
 import { Edit, Zap } from "lucide-react";
 
 type XPEventForm = {
@@ -61,7 +52,7 @@ export default function XPEventsPage() {
 
   const [search, setSearch] = useState("");
 
-  const createModal = useDisclosure();
+  const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<XPEvent | null>(null);
   const [formData, setFormData] = useState<XPEventForm>(INITIAL_FORM);
 
@@ -72,7 +63,7 @@ export default function XPEventsPage() {
   const openCreate = () => {
     setEditTarget(null);
     setFormData(INITIAL_FORM);
-    createModal.onOpen();
+    setCreateOpen(true);
   };
 
   const openEdit = (event: XPEvent) => {
@@ -84,7 +75,7 @@ export default function XPEventsPage() {
       max_per_day: event.max_per_day ?? 0,
       is_active: event.is_active,
     });
-    createModal.onOpen();
+    setCreateOpen(true);
   };
 
   const handleSave = () => {
@@ -100,10 +91,10 @@ export default function XPEventsPage() {
         {
           onSuccess: () => {
             toast.success("XP Event actualizado");
-            createModal.onClose();
+            setCreateOpen(false);
           },
           onError: (error) => {
-            toast.danger(getErrorMessage(error));
+            toast.error(getErrorMessage(error));
           },
         }
       );
@@ -117,10 +108,10 @@ export default function XPEventsPage() {
       createMutation.mutate(payload, {
         onSuccess: () => {
           toast.success("XP Event creado");
-          createModal.onClose();
+          setCreateOpen(false);
         },
         onError: (error) => {
-          toast.danger(getErrorMessage(error));
+          toast.error(getErrorMessage(error));
         },
       });
     }
@@ -128,73 +119,37 @@ export default function XPEventsPage() {
 
   const formLoading = createMutation.isPending || updateMutation.isPending;
 
-  const renderCell = (event: XPEvent, columnKey: string) => {
-    switch (columnKey) {
-      case "event":
-        return (
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
-            <code className="text-xs">{event.event_key || "-"}</code>
-          </div>
-        );
-      case "xp":
-        return <span className="font-bold text-[var(--foreground)]">+{event.xp_amount || 0}</span>;
-      case "cooldown":
-        return (event.cooldown_minutes ?? 0) > 0 ? `${event.cooldown_minutes} min` : "-";
-      case "max":
-        return (event.max_per_day ?? 0) > 0 ? String(event.max_per_day) : "∞";
-      case "status":
-        return (
-          <Chip size="sm" color="default" variant="soft">
-            {event.is_active ? "Activo" : "Inactivo"}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <Button size="sm" variant="secondary" isIconOnly aria-label="Editar evento XP" onPress={() => openEdit(event)}>
-            <Edit className="h-3.5 w-3.5" aria-hidden="true" />
-          </Button>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-purple-cyan">
+          <h1 className="text-2xl font-bold font-[var(--font-heading)] text-gradient-brand">
             Eventos XP
           </h1>
-          <p className="text-sm text-[var(--muted)] mt-1">Definiciones de eventos que otorgan XP</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">Definiciones de eventos que otorgan XP</p>
         </div>
-        <Button
-          type="button"
-          onPress={openCreate}
-
-        >
+        <Button type="button" onClick={openCreate}>
           Nuevo evento XP
         </Button>
       </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="px-5 py-3">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
-            <TextField className="space-y-1 flex flex-col min-w-[200px] flex-1">
-              <Label className="text-xs text-[var(--muted)]">Buscar</Label>
+            <div className="space-y-1 flex flex-col min-w-[200px] flex-1">
+              <Label className="text-xs text-[var(--muted-foreground)]">Buscar</Label>
               <Input
                 placeholder="event_key..."
                 value={search}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
-            </TextField>
+            </div>
           </div>
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="bg-[var(--surface)] border border-[var(--border)]">
-        <Card.Content className="p-0">
+      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -208,103 +163,121 @@ export default function XPEventsPage() {
               ))}
             </div>
           ) : (
-            <Table>
-              <Table.ScrollContainer>
-                <Table.Content aria-label="XP Events">
-                  <Table.Header columns={TABLE_COLUMNS}>
-                    {(column: { key: string; label: string }) => (
-                      <Table.Column key={column.key} isRowHeader={column.key === TABLE_COLUMNS[0].key}>
-                        {column.label}
-                      </Table.Column>
-                    )}
-                  </Table.Header>
-                  <Table.Body>
-                    {filtered.map((event) => (
-                      <Table.Row key={event.id || event.event_key || "-"}>
-                        {TABLE_COLUMNS.map((column: { key: string; label: string }) => (
-                          <Table.Cell key={column.key}>
-                            {renderCell(event, column.key)}
-                          </Table.Cell>
-                        ))}
-                      </Table.Row>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border)]">
+                    {TABLE_COLUMNS.map((col) => (
+                      <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
+                        {col.label}
+                      </th>
                     ))}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((event) => (
+                    <tr key={event.id || event.event_key || "-"} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface)]">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
+                          <code className="text-xs">{event.event_key || "-"}</code>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="font-bold text-[var(--foreground)]">+{event.xp_amount || 0}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {(event.cooldown_minutes ?? 0) > 0 ? `${event.cooldown_minutes} min` : "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {(event.max_per_day ?? 0) > 0 ? String(event.max_per_day) : "∞"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="default">
+                          {event.is_active ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button size="icon" variant="ghost" aria-label="Editar evento XP" onClick={() => openEdit(event)}>
+                          <Edit className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={createModal.isOpen} onOpenChange={(isOpen: boolean) => !isOpen && createModal.onClose()}>
-          <Modal.Container>
-            <Modal.Dialog>
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>{editTarget ? "Editar evento XP" : "Crear evento XP"}</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="gap-4">
-                <Form className="w-full">
-                  <Fieldset className="space-y-4 w-full">
-                    <TextField className="space-y-1 flex flex-col">
-                      <Label className="text-xs text-[var(--muted)]">Event key</Label>
-                      <Input
-                        value={formData.event_key}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, event_key: e.target.value }))}
-                        disabled={Boolean(editTarget)}
-                      />
-                    </TextField>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">XP amount</Label>
-                        <Input
-                          type="number"
-                          value={String(formData.xp_amount)}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, xp_amount: Number.parseInt(e.target.value, 10) || 0 }))
-                          }
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Cooldown (min)</Label>
-                        <Input
-                          type="number"
-                          value={String(formData.cooldown_minutes)}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              cooldown_minutes: Number.parseInt(e.target.value, 10) || 0,
-                            }))
-                          }
-                        />
-                      </TextField>
-                      <TextField className="space-y-1 flex flex-col">
-                        <Label className="text-xs text-[var(--muted)]">Max por dia</Label>
-                        <Input
-                          type="number"
-                          value={String(formData.max_per_day)}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                            setFormData((prev) => ({ ...prev, max_per_day: Number.parseInt(e.target.value, 10) || 0 }))
-                          }
-                        />
-                      </TextField>
-                    </div>
-                  </Fieldset>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="tertiary" onPress={createModal.onClose}>
+      {/* Create / Edit Modal */}
+      {createOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+              {editTarget ? "Editar evento XP" : "Crear evento XP"}
+            </h2>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+              <div className="space-y-1 flex flex-col">
+                <Label className="text-xs text-[var(--muted-foreground)]">Event key</Label>
+                <Input
+                  value={formData.event_key}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, event_key: e.target.value }))}
+                  disabled={Boolean(editTarget)}
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">XP amount</Label>
+                  <Input
+                    type="number"
+                    value={String(formData.xp_amount)}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, xp_amount: Number.parseInt(e.target.value, 10) || 0 }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Cooldown (min)</Label>
+                  <Input
+                    type="number"
+                    value={String(formData.cooldown_minutes)}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        cooldown_minutes: Number.parseInt(e.target.value, 10) || 0,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1 flex flex-col">
+                  <Label className="text-xs text-[var(--muted-foreground)]">Max por dia</Label>
+                  <Input
+                    type="number"
+                    value={String(formData.max_per_day)}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, max_per_day: Number.parseInt(e.target.value, 10) || 0 }))
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onPress={handleSave} isPending={formLoading}>
+                <Button type="submit" disabled={formLoading}>
+                  {formLoading && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                  )}
                   {editTarget ? "Guardar" : "Crear"}
                 </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
