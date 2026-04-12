@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { login } from "@/lib/api/auth";
@@ -10,6 +9,7 @@ import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RankeaoLogo } from "@/components/icons/RankeaoLogo";
 import LoginBackground from "./LoginBackground";
 
 export default function LoginPage() {
@@ -53,10 +53,8 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm">
-              <Image src="/logo.png" alt="Rankeao" fill sizes="56px" className="object-contain p-2" priority />
-            </div>
+          <div className="flex flex-col items-center gap-5">
+            <RankeaoLogo className="h-8 w-auto text-white drop-shadow-lg" />
             <div className="text-center">
               <h1 className="text-3xl font-bold text-white tracking-tight">
                 Panel Administración
