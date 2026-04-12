@@ -71,7 +71,7 @@ export default function LoginPage() {
                 <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
                   Email
                 </label>
-                <div className="flex items-center gap-2.5 border border-white/8 bg-white/6 rounded-xl px-3 py-0.5 focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/10 transition-all">
+                <div className="flex items-center gap-2.5 border border-white/8 bg-[var(--card)]/6 rounded-xl px-3 py-0.5 focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/10 transition-all">
                   <Mail className="h-4 w-4 pointer-events-none shrink-0 text-white/40" />
                   <Input
                     type="email"
@@ -88,7 +88,7 @@ export default function LoginPage() {
                 <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
                   Contraseña
                 </label>
-                <div className="flex items-center gap-2.5 border border-white/8 bg-white/6 rounded-xl px-3 py-0.5 focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/10 transition-all">
+                <div className="flex items-center gap-2.5 border border-white/8 bg-[var(--card)]/6 rounded-xl px-3 py-0.5 focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/10 transition-all">
                   <Lock className="h-4 w-4 pointer-events-none shrink-0 text-white/40" />
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -111,8 +111,9 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full text-white font-semibold py-2.5 rounded-xl mt-2 text-sm transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30"
-                style={{ background: "linear-gradient(135deg, var(--c-navy-500), var(--c-indigo))" }}
+                variant="default"
+                className="w-full py-2.5 rounded-xl mt-2 transition-all shadow-lg"
+                style={{ background: "linear-gradient(135deg, var(--brand), var(--c-indigo))" }}
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}

@@ -251,7 +251,7 @@ export default function AdminApiExplorerPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white xl:col-span-1">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] xl:col-span-1">
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
@@ -265,7 +265,7 @@ export default function AdminApiExplorerPage() {
 
             {loadingOperations ? (
               <div className="flex justify-center py-10">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)]" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)]" />
               </div>
             ) : (
               <div className="max-h-[34rem] overflow-auto space-y-2 pr-1">
@@ -281,7 +281,7 @@ export default function AdminApiExplorerPage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs font-semibold text-[var(--foreground)]">{operation.operationId}</p>
-                      <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                      <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                         {operation.method}
                       </span>
                     </div>
@@ -294,7 +294,7 @@ export default function AdminApiExplorerPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white xl:col-span-2">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] xl:col-span-2">
           <div className="p-4 space-y-4">
             {!selectedOperation ? (
               <p className="text-sm text-[var(--muted-foreground)]">Selecciona una operación.</p>
@@ -304,11 +304,11 @@ export default function AdminApiExplorerPage() {
                   <div className="flex items-center gap-2">
                     <Code2 className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
                     <p className="text-sm font-medium text-[var(--foreground)]">{selectedOperation.operationId}</p>
-                    <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                    <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                       {selectedOperation.method}
                     </span>
                     {selectedOperation.requiresAuth ? (
-                      <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                      <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                         BearerAuth
                       </span>
                     ) : null}
@@ -384,7 +384,7 @@ export default function AdminApiExplorerPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Terminal className="h-4 w-4 text-[var(--foreground)]" aria-hidden="true" />
@@ -394,13 +394,13 @@ export default function AdminApiExplorerPage() {
           {response ? (
             <>
               <div className="flex flex-wrap gap-2 text-xs">
-                <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                   status {response.status}
                 </span>
-                <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                   {response.ok ? "ok" : "error"}
                 </span>
-                <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                   {response.durationMs} ms
                 </span>
               </div>

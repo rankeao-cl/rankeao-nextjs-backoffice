@@ -218,7 +218,7 @@ export default function TitlesPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1 flex flex-col min-w-[200px] flex-1">
@@ -236,7 +236,7 @@ export default function TitlesPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-0">
           {loading ? (
             <div className="space-y-3 p-5">
@@ -329,7 +329,7 @@ export default function TitlesPage() {
       {createOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               {editTarget ? "Editar Titulo" : "Crear Titulo"}
             </h2>
@@ -389,7 +389,7 @@ export default function TitlesPage() {
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${formData.is_active ? "bg-[var(--primary)]" : "bg-[var(--default)]"}`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${formData.is_active ? "translate-x-5" : "translate-x-0"}`}
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-[var(--card)] shadow transition-transform ${formData.is_active ? "translate-x-5" : "translate-x-0"}`}
                     />
                   </button>
                   <span className="text-xs text-[var(--muted-foreground)]">
@@ -404,7 +404,7 @@ export default function TitlesPage() {
                 </Button>
                 <Button type="submit" disabled={formLoading}>
                   {formLoading && (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border)] border-t-white mr-2" />
                   )}
                   {editTarget ? "Guardar" : "Crear"}
                 </Button>
@@ -418,7 +418,7 @@ export default function TitlesPage() {
       {grantOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setGrantOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               Otorgar titulo - {String(grantTarget?.name || "")}
             </h2>
@@ -444,7 +444,7 @@ export default function TitlesPage() {
                 </Button>
                 <Button type="submit" disabled={grantLoading}>
                   {grantLoading && (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border)] border-t-white mr-2" />
                   )}
                   Otorgar
                 </Button>
@@ -458,7 +458,7 @@ export default function TitlesPage() {
       {revokeOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setRevokeOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               Revocar titulo - {String(revokeTarget?.name || "")}
             </h2>

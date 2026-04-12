@@ -375,7 +375,7 @@ export default function AdminPerfilPage() {
       {!loading && activeTab === "resumen" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
               <div className="p-4 space-y-1">
                 <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Tenants</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.tenantsTotal}</p>
@@ -385,7 +385,7 @@ export default function AdminPerfilPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
               <div className="p-4 space-y-1">
                 <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Disputes</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.disputesTotal}</p>
@@ -395,7 +395,7 @@ export default function AdminPerfilPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
               <div className="p-4 space-y-1">
                 <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Templates</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.templatesTotal}</p>
@@ -405,7 +405,7 @@ export default function AdminPerfilPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
               <div className="p-4 space-y-1">
                 <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide">Broadcasts</p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">{snapshot.broadcastsTotal}</p>
@@ -415,7 +415,7 @@ export default function AdminPerfilPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
               <div className="p-5 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Trophy className="h-4 w-4" aria-hidden="true" />
@@ -429,7 +429,7 @@ export default function AdminPerfilPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
               <div className="p-5 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Bell className="h-4 w-4" aria-hidden="true" />
@@ -442,7 +442,7 @@ export default function AdminPerfilPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <Zap className="h-4 w-4" aria-hidden="true" />
@@ -454,7 +454,7 @@ export default function AdminPerfilPage() {
                   <div key={key} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">{key}</p>
-                      <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                      <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                         {health.ok ? "OK" : "Error"}
                       </span>
                     </div>
@@ -475,7 +475,7 @@ export default function AdminPerfilPage() {
       {!loading && activeTab === "seguridad" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white lg:col-span-2">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] lg:col-span-2">
               <div className="p-5">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-14 w-14">
@@ -491,7 +491,7 @@ export default function AdminPerfilPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
               <div className="p-5 space-y-2">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
                   <Shield className="h-4 w-4" aria-hidden="true" />
@@ -501,14 +501,14 @@ export default function AdminPerfilPage() {
                 <p className="text-xs text-[var(--foreground)] break-all">
                   {accessToken ? `${accessToken.slice(0, 24)}...` : "No autenticado"}
                 </p>
-                <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                   {accessToken ? "Sesion valida" : "Sesion ausente"}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <ShieldCheck className="h-4 w-4" aria-hidden="true" />
@@ -539,7 +539,7 @@ export default function AdminPerfilPage() {
 
       {!loading && activeTab === "actividad-api" ? (
         <div className="space-y-4">
-          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
             <div className="p-5 space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 text-[var(--foreground)]">
@@ -570,7 +570,7 @@ export default function AdminPerfilPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
             <div className="p-5 space-y-3">
               <div className="flex items-center gap-2 text-[var(--foreground)]">
                 <Zap className="h-4 w-4" aria-hidden="true" />

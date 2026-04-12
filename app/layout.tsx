@@ -32,7 +32,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`light ${poppins.variable}`} data-theme="light" suppressHydrationWarning>
+    <html lang="es" className={poppins.variable} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=JSON.parse(localStorage.getItem("rankeao-theme")||"{}");var t=d&&d.state&&d.state.theme;if(t==="dark"||t==="light"){document.documentElement.classList.add(t);document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.classList.add("light");document.documentElement.setAttribute("data-theme","light")}}catch(e){document.documentElement.classList.add("light");document.documentElement.setAttribute("data-theme","light")}})()`,
+          }}
+        />
+      </head>
       <body className="font-[var(--font-poppins)] antialiased bg-[var(--background)] text-[var(--foreground)]">
         <Providers>{children}</Providers>
       </body>

@@ -132,13 +132,13 @@ export default function BroadcastsPage() {
         );
       case "target":
         return (
-          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+          <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {String(broadcast.target || "-")}
           </span>
         );
       case "status":
         return (
-          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+          <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
             {String(broadcast.status || "-")}
           </span>
         );
@@ -168,7 +168,7 @@ export default function BroadcastsPage() {
         </Button>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1 flex flex-col min-w-[140px] flex-1">
@@ -198,7 +198,7 @@ export default function BroadcastsPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-0">
           {loading ? (
             <div className="space-y-3 p-5">
@@ -215,7 +215,7 @@ export default function BroadcastsPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-[var(--c-gray-50)]">
+                <thead className="bg-[var(--surface)]">
                   <tr>
                     {TABLE_COLUMNS.map((col) => (
                       <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">
@@ -258,7 +258,7 @@ export default function BroadcastsPage() {
       {createOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <div className="flex items-center gap-2 mb-4">
               <Send className="h-5 w-5 text-[var(--foreground)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--foreground)]">Crear difusion</h2>

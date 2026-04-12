@@ -74,7 +74,7 @@ export default function MarketplaceConfigPage() {
 
         {dirtyCount > 0 && (
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+            <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
               {dirtyCount} {dirtyCount === 1 ? "cambio" : "cambios"}
             </span>
             <Button size="sm" variant="ghost" onClick={handleReset}>
@@ -92,7 +92,7 @@ export default function MarketplaceConfigPage() {
         )}
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-5">
           {isLoading ? (
             <div className="space-y-3">
@@ -112,7 +112,7 @@ export default function MarketplaceConfigPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-[var(--c-gray-50)]">
+                <thead className="bg-[var(--surface)]">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">CLAVE</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-foreground)]">VALOR</th>
@@ -144,7 +144,7 @@ export default function MarketplaceConfigPage() {
                           />
                         </td>
                         <td className="px-4 py-2.5">
-                          <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                          <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                             {entry.value_type}
                           </span>
                         </td>

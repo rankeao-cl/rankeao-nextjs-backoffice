@@ -67,7 +67,7 @@ export default function AuthApiPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white h-full">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] h-full">
           <div className="p-5">
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -126,7 +126,7 @@ export default function AuthApiPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white h-full">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] h-full">
           <div className="p-5">
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -188,7 +188,7 @@ export default function AuthApiPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white h-full">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] h-full">
           <div className="p-5">
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -220,7 +220,7 @@ export default function AuthApiPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white h-full">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] h-full">
           <div className="p-5">
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -264,7 +264,7 @@ export default function AuthApiPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-5 space-y-2">
           <p className="text-sm font-medium text-[var(--foreground)]">Resultado</p>
           <pre className="rounded-lg bg-[var(--surface)] border border-[var(--border)] p-3 text-xs text-[var(--muted-foreground)] overflow-auto max-h-72 whitespace-pre-wrap">

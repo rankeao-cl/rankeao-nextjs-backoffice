@@ -223,7 +223,7 @@ export default function SetsPage() {
       </div>
 
       {/* Game selector + search + create */}
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1 flex flex-col min-w-[200px]">
@@ -271,7 +271,7 @@ export default function SetsPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-0">
           {!selectedGame ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -301,7 +301,7 @@ export default function SetsPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-[var(--c-gray-50)]">
+                <thead className="bg-[var(--surface)]">
                   <tr>
                     {TABLE_COLUMNS.map((column) => (
                       <th key={column.key} className="table-header px-4 py-3 text-left">
@@ -334,7 +334,7 @@ export default function SetsPage() {
             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
           />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">
               {editTarget ? "Editar Set" : "Crear Set"}
             </h2>
@@ -431,7 +431,7 @@ export default function SetsPage() {
                 </Button>
                 <Button type="submit" variant="default" disabled={formLoading}>
                   {formLoading && (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                   )}
                   {editTarget ? "Guardar" : "Crear"}
                 </Button>

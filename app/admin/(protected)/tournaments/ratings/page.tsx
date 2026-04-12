@@ -54,7 +54,7 @@ export default function TournamentRatingsPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-5">
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-semibold text-[var(--foreground)]">
@@ -105,10 +105,10 @@ export default function TournamentRatingsPage() {
 
             {result && (
               <div className="flex gap-2 pt-2">
-                <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                   Torneo: {result.tournament_id}
                 </span>
-                <span className="inline-flex items-center rounded-full bg-[var(--c-gray-100)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
+                <span className="inline-flex items-center rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                   Estado: {result.status}
                 </span>
               </div>

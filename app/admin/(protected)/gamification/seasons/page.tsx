@@ -155,7 +155,7 @@ export default function SeasonsPage() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-lg border border-[var(--c-gray-200)] bg-white"
+              className="rounded-lg border border-[var(--border)] bg-[var(--card)]"
             >
               <div className="p-5 space-y-4">
                 <div className="flex items-center justify-between">
@@ -175,7 +175,7 @@ export default function SeasonsPage() {
           ))}
         </div>
       ) : seasons.length === 0 ? (
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="flex flex-col items-center py-12 gap-4">
             <Trophy className="h-12 w-12 text-[var(--field-placeholder)]" aria-hidden="true" />
             <p className="text-[var(--muted-foreground)]">
@@ -197,7 +197,7 @@ export default function SeasonsPage() {
             return (
               <div
                 key={season.id}
-                className="rounded-lg border border-[var(--c-gray-200)] bg-white"
+                className="rounded-lg border border-[var(--border)] bg-[var(--card)]"
               >
                 <div className="p-5 space-y-4">
                   {/* Name + Status */}
@@ -278,7 +278,7 @@ export default function SeasonsPage() {
                         disabled={previewSeasonCloseMutation.isPending}
                       >
                         {previewSeasonCloseMutation.isPending ? (
-                          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-1" />
+                          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-1" />
                         ) : (
                           <Eye className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                         )}
@@ -305,7 +305,7 @@ export default function SeasonsPage() {
       {createOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Crear Season</h2>
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreate(); }}>
               <div className="space-y-1 flex flex-col">
@@ -340,7 +340,7 @@ export default function SeasonsPage() {
                 </Button>
                 <Button type="submit" disabled={createSeasonMutation.isPending}>
                   {createSeasonMutation.isPending && (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border)] border-t-white mr-2" />
                   )}
                   Crear
                 </Button>
@@ -354,7 +354,7 @@ export default function SeasonsPage() {
       {previewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Preview - Cierre de Season</h2>
             <pre className="bg-[var(--surface)] rounded-lg p-4 text-xs text-[var(--muted-foreground)] overflow-auto max-h-96">
               {JSON.stringify(previewData, null, 2)}
@@ -372,7 +372,7 @@ export default function SeasonsPage() {
       {closeOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setCloseOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Cerrar Season</h2>
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-[var(--danger)]">

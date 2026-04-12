@@ -58,7 +58,7 @@ export default function LevelsPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-5">
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleBatchUpdate(); }}>
             <div>
@@ -84,7 +84,7 @@ export default function LevelsPage() {
             <div className="flex gap-2 pt-1">
               <Button type="submit" disabled={batchUpdate.isPending}>
                 {batchUpdate.isPending && (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-white mr-2" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border)] border-t-white mr-2" />
                 )}
                 Aplicar cambios
               </Button>

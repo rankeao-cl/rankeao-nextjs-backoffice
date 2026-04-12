@@ -197,7 +197,7 @@ export default function BulkImportPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── Import Sets ── */}
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="p-5">
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleImportSets(); }}>
               <div className="space-y-4">
@@ -238,7 +238,7 @@ export default function BulkImportPage() {
                 <div className="pt-1">
                   <Button type="submit" disabled={bulkImportSets.isPending}>
                     {bulkImportSets.isPending && (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                     )}
                     <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Sets
@@ -252,7 +252,7 @@ export default function BulkImportPage() {
         </div>
 
         {/* ── Import Cards ── */}
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="p-5">
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleImportCards(); }}>
               <div className="space-y-4">
@@ -295,7 +295,7 @@ export default function BulkImportPage() {
                 <div className="pt-1">
                   <Button type="submit" disabled={bulkImportCards.isPending}>
                     {bulkImportCards.isPending && (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                     )}
                     <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Cards
@@ -309,7 +309,7 @@ export default function BulkImportPage() {
         </div>
 
         {/* ── Import Legality ── */}
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white lg:col-span-2">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] lg:col-span-2">
           <div className="p-5">
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleImportLegality(); }}>
               <div className="space-y-4">
@@ -352,7 +352,7 @@ export default function BulkImportPage() {
                 <div className="pt-1">
                   <Button type="submit" disabled={bulkImportLegality.isPending}>
                     {bulkImportLegality.isPending && (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                     )}
                     <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Importar Legalidad

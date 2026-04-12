@@ -417,7 +417,7 @@ export default function GamesPage() {
       </div>
 
       {/* Search */}
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="px-5 py-3">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1 flex flex-col min-w-[200px] flex-1">
@@ -433,7 +433,7 @@ export default function GamesPage() {
       </div>
 
       {/* Games table */}
-      <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
         <div className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-5">
@@ -450,7 +450,7 @@ export default function GamesPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-[var(--c-gray-50)]">
+                <thead className="bg-[var(--surface)]">
                   <tr>
                     {GAME_COLUMNS.map((column) => (
                       <th key={column.key} className="table-header px-4 py-3 text-left">
@@ -481,7 +481,7 @@ export default function GamesPage() {
 
       {/* Formats section (shown when a game is expanded) */}
       {expandedSlug && (
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="p-0">
             <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
               <p className="text-sm font-semibold text-[var(--foreground)]">
@@ -511,7 +511,7 @@ export default function GamesPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-[var(--c-gray-50)]">
+                  <thead className="bg-[var(--surface)]">
                     <tr>
                       {FORMAT_COLUMNS.map((column) => (
                         <th key={column.key} className="table-header px-4 py-3 text-left">
@@ -545,7 +545,7 @@ export default function GamesPage() {
             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
             onClick={() => setGameModalOpen(false)}
           />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">
               {editGame ? "Editar juego" : "Crear juego"}
             </h2>
@@ -634,7 +634,7 @@ export default function GamesPage() {
                 </Button>
                 <Button type="submit" variant="default" disabled={gameLoading}>
                   {gameLoading && (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                   )}
                   {editGame ? "Guardar" : "Crear"}
                 </Button>
@@ -651,7 +651,7 @@ export default function GamesPage() {
             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
             onClick={() => setFormatModalOpen(false)}
           />
-          <div className="relative z-10 w-full max-w-lg rounded-xl bg-white border border-[var(--c-gray-200)] shadow-elevated p-6">
+          <div className="relative z-10 w-full max-w-lg rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-elevated p-6">
             <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">
               {editFormat ? "Editar formato" : "Crear formato"}
             </h2>
@@ -731,7 +731,7 @@ export default function GamesPage() {
                 </Button>
                 <Button type="submit" variant="default" disabled={formatLoading}>
                   {formatLoading && (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                   )}
                   {editFormat ? "Guardar" : "Crear"}
                 </Button>

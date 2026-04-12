@@ -253,7 +253,7 @@ export default function CardsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* ── Create Card ── */}
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="p-5">
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreateCard(); }}>
               <div className="space-y-4">
@@ -332,7 +332,7 @@ export default function CardsPage() {
                 <div className="pt-1">
                   <Button type="submit" disabled={createCard.isPending}>
                     {createCard.isPending && (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                     )}
                     Crear carta
                   </Button>
@@ -343,7 +343,7 @@ export default function CardsPage() {
         </div>
 
         {/* ── Update Card ── */}
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="p-5">
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleUpdateCard(); }}>
               <div className="space-y-4">
@@ -412,7 +412,7 @@ export default function CardsPage() {
                 <div className="pt-1">
                   <Button type="submit" disabled={updateCard.isPending}>
                     {updateCard.isPending && (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                     )}
                     Guardar cambios
                   </Button>
@@ -423,7 +423,7 @@ export default function CardsPage() {
         </div>
 
         {/* ── Create Printing ── */}
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="p-5">
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreatePrinting(); }}>
               <div className="space-y-4">
@@ -559,7 +559,7 @@ export default function CardsPage() {
                 <div className="pt-1">
                   <Button type="submit" disabled={createPrinting.isPending}>
                     {createPrinting.isPending && (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                     )}
                     Crear edicion
                   </Button>
@@ -570,7 +570,7 @@ export default function CardsPage() {
         </div>
 
         {/* ── Batch Update Legality ── */}
-        <div className="rounded-lg border border-[var(--c-gray-200)] bg-white">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <div className="p-5">
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleBatchLegality(); }}>
               <div className="space-y-4">
@@ -644,7 +644,7 @@ export default function CardsPage() {
                 <div className="pt-1">
                   <Button type="submit" disabled={batchLegality.isPending}>
                     {batchLegality.isPending && (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--c-gray-200)] border-t-[var(--c-navy-500)] mr-2" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--brand)] mr-2" />
                     )}
                     Guardar legalidad
                   </Button>
